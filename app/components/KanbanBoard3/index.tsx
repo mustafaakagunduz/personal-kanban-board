@@ -20,6 +20,8 @@ import TaskDetails from '../TaskDetails';
 import RewardDialog from '../Dialogs/RewardDialog';
 import { formatDate, getTodayStart } from '../../utils/dateUtils';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import CalendarDialog from '../Dialogs/CalendarDialog';
+import { Calendar } from 'lucide-react';
 import {
     Task,
     Reward,
@@ -29,6 +31,8 @@ import {
     ProgressDetails
 } from '../../types';
 import { Typography } from "@/components/ui/typography";
+import { Palette } from 'lucide-react';
+import ColorPickerDialog from "@/app/components/Dialogs/ColorPickerDialog";
 
 const KanbanBoard3: React.FC = () => {
     // Local storage hooks
@@ -45,6 +49,12 @@ const KanbanBoard3: React.FC = () => {
     ]);
 
     const [totalPoints, setTotalPoints] = useLocalStorage<number>('totalPoints', 0);
+    const [calendarDialogOpen, setCalendarDialogOpen] = useState<boolean>(false);
+
+    //colors:
+    const [showColorPicker, setShowColorPicker] = useState(false);
+    const [bgColorStart, setBgColorStart] = useLocalStorage<string>("bgColorStart", "indigo-900");
+    const [bgColorEnd, setBgColorEnd] = useLocalStorage<string>("bgColorEnd", "blue-800");
 
     // State
     const [today, setToday] = useState<Date | null>(null);
@@ -260,22 +270,53 @@ const KanbanBoard3: React.FC = () => {
     };
 
     return (
-        <div className="h-screen w-screen bg-gradient-to-br from-indigo-900 to-blue-800 overflow-hidden flex flex-col">
-
+        <div
+            className="h-screen w-screen overflow-hidden"
+            style={{
+                background: `linear-gradient(to bottom right, ${bgColorStart}, ${bgColorEnd})`
+            }}
+        >
             <div className="p-6 flex-1 flex flex-col">
                 <div className="flex justify-between mb-6">
-                    {today ? (
-                        <Typography variant="h5" className="text-white">
-                            {formatDate(today)}
-                        </Typography>
-                    ) : (
-                        <Typography variant="h5" className="text-white">
-                            Yükleniyor...
-                        </Typography>
-                    )}
-                    <Typography variant="h5" className="text-white">
-                        Puanım: {totalPoints}
-                    </Typography>
+                    <div className="flex items-center">
+                        {today ? (
+                            <Button
+                                variant="outline"
+                                className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2"
+                                onClick={() => setCalendarDialogOpen(true)}
+                            >
+                                <Calendar className="h-4 w-4 text-white"/>
+                                <Typography variant="h5" className="text-white">
+                                    Bugün: {formatDate(today)}
+                                </Typography>
+                            </Button>
+                        ) : (
+                            <Typography variant="h5" className="text-white">
+                                Yükleniyor...
+                            </Typography>
+                        )}
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        <Button
+                            variant="ghost"
+                            className="text-white flex items-center gap-2"
+                            onClick={() => setShowColorPicker(true)}
+                        >
+                            <Palette className="h-5 w-5"/>
+                            <span>Kanban Rengini Seç</span>
+                        </Button>
+                        <Button
+                            variant="outline"
+                            className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2"
+
+                        >
+
+                            <Typography variant="h5" className="text-white">
+                                Puanım: {totalPoints}
+                            </Typography>
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="flex flex-col gap-4 h-full">
@@ -285,7 +326,7 @@ const KanbanBoard3: React.FC = () => {
                             onClick={() => setOpenDialog(true)}
                             className="bg-white text-indigo-900 hover:bg-gray-100"
                         >
-                            <Plus className="mr-2 h-4 w-4" />
+                            <Plus className="mr-2 h-4 w-4"/>
                             Yeni Görev
                         </Button>
                     </div>
@@ -322,7 +363,7 @@ const KanbanBoard3: React.FC = () => {
                         if (!open) setMenuPosition(null);
                     }}>
                         <DropdownMenuTrigger asChild>
-                            <span className="hidden" />
+                            <span className="hidden"/>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                             className="z-50"
@@ -349,7 +390,7 @@ const KanbanBoard3: React.FC = () => {
                     onClose={() => setOpenDialog(false)}
                     newTask={newTask}
                     setNewTask={setNewTask}
-                    columns={Object.entries(columns).map(([id, column]) => ({ id, title: column.title }))}
+                    columns={Object.entries(columns).map(([id, column]) => ({id, title: column.title}))}
                     onAddTask={handleAddTask}
                 />
 
@@ -390,12 +431,32 @@ const KanbanBoard3: React.FC = () => {
                     isEditing={false}
                 />
 
+
+                <CalendarDialog
+                    open={calendarDialogOpen}
+                    onClose={() => setCalendarDialogOpen(false)}
+                    selectedDate={today || undefined}
+                />
+
+                <ColorPickerDialog
+                    open={showColorPicker}
+                    onClose={() => setShowColorPicker(false)}
+                    startColor={bgColorStart}
+                    endColor={bgColorEnd}
+                    onStartColorChange={setBgColorStart}
+                    onEndColorChange={setBgColorEnd}
+                    onReset={() => {
+                        setBgColorStart("#312e81");
+                        setBgColorEnd("#1e40af");
+                    }}
+                />
+
                 <RewardDialog
                     open={editRewardDialog}
                     onClose={() => {
                         setEditRewardDialog(false);
                         setEditingReward(null);
-                        setNewReward({ title: '', points: '' });
+                        setNewReward({title: '', points: ''});
                     }}
                     reward={newReward}
                     setReward={setNewReward}
@@ -408,6 +469,8 @@ const KanbanBoard3: React.FC = () => {
                     onClose={() => setTaskDetailsDialog(false)}
                     task={selectedTaskDetails}
                 />
+
+
             </div>
         </div>
     );
