@@ -4,27 +4,28 @@ import { ColumnData, Task } from '../../types';
 import TaskCardComponent from '../TaskCard';
 import { Typography } from "@/components/ui/typography";
 import { kanbanColumnClass } from "../KanbanBoard3/styles";
-import { cn } from "@/lib/utils";
 
 interface ColumnProps {
     columnId: string;
     column: ColumnData;
     onDrop: (e: React.DragEvent<HTMLDivElement>, columnId: string) => void;
     onDragStart: (e: React.DragEvent<HTMLDivElement>, taskId: string, columnId: string) => void;
-    onMenuOpen: (e: React.MouseEvent<HTMLElement>, task: Task, columnId: string) => void;
+    onEditClick: (task: Task, columnId: string) => void;
+    onDeleteClick: (task: Task, columnId: string) => void;
     onTaskClick: (task: Task, columnId: string) => void;
     today: Date | null;
 }
 
 const Column: React.FC<ColumnProps> = ({
-    columnId,
-    column,
-    onDrop,
-    onDragStart,
-    onMenuOpen,
-    onTaskClick,
-    today
-}) => {
+                                           columnId,
+                                           column,
+                                           onDrop,
+                                           onDragStart,
+                                           onEditClick,
+                                           onDeleteClick,
+                                           onTaskClick,
+                                           today
+                                       }) => {
     return (
         <div
             className={kanbanColumnClass}
@@ -40,7 +41,8 @@ const Column: React.FC<ColumnProps> = ({
                     task={task}
                     columnId={columnId}
                     onDragStart={onDragStart}
-                    onMenuOpen={onMenuOpen}
+                    onEditClick={onEditClick}
+                    onDeleteClick={onDeleteClick}
                     onClick={onTaskClick}
                     today={today}
                 />

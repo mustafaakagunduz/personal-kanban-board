@@ -45,12 +45,8 @@ const ProgressDialog: React.FC<ProgressDialogProps> = ({
                         />
                     </div>
                     <div className="grid gap-2">
-                        <Label htmlFor="reward">Ödül</Label>
-                        <Input
-                            id="reward"
-                            value={progressDetails.reward}
-                            onChange={(e) => setProgressDetails({ ...progressDetails, reward: e.target.value })}
-                        />
+
+
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="notes">Notlar</Label>

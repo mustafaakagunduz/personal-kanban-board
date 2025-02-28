@@ -3,12 +3,10 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { Plus } from 'lucide-react';
+    Plus,
+    Calendar,
+    Palette
+} from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import Column from '../Column';
 import Rewards from '../Rewards';
@@ -18,21 +16,21 @@ import TaskEditDialog from '../Dialogs/TaskEditDialog';
 import CelebrationDialog from '../Dialogs/CelebrationDialog';
 import TaskDetails from '../TaskDetails';
 import RewardDialog from '../Dialogs/RewardDialog';
+import DeleteConfirmationDialog from '../Dialogs/DeleteConfirmationDialog';
 import { formatDate, getTodayStart } from '../../utils/dateUtils';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import CalendarDialog from '../Dialogs/CalendarDialog';
-import { Calendar } from 'lucide-react';
+import ColorPickerDialog from "@/app/components/Dialogs/ColorPickerDialog";
+import { Typography } from "@/components/ui/typography";
 import {
     Task,
     Reward,
     Columns,
     SelectedTask,
     NewTaskForm,
-    ProgressDetails
+    ProgressDetails,
+    ColumnData
 } from '../../types';
-import { Typography } from "@/components/ui/typography";
-import { Palette } from 'lucide-react';
-import ColorPickerDialog from "@/app/components/Dialogs/ColorPickerDialog";
 
 const KanbanBoard3: React.FC = () => {
     // Local storage hooks
@@ -58,31 +56,35 @@ const KanbanBoard3: React.FC = () => {
 
     // State
     const [today, setToday] = useState<Date | null>(null);
-    const [newTask, setNewTask] = useState<NewTaskForm>({ title: '', description: '', column: '', points: '' });
+    const [newTask, setNewTask] = useState<NewTaskForm>({
+        title: '',
+        description: '',
+        column: 'todo',
+        points: ''
+    });
     const [newReward, setNewReward] = useState<{ title: string, points: number | '' }>({ title: '', points: '' });
     const [progressDetails, setProgressDetails] = useState<ProgressDetails>({
         duration: '', reward: '', notes: '', dueDate: ''
     });
-    // KanbanBoard3/index.tsx dosyasında
-    const [menuPosition, setMenuPosition] = useState<{ x: number, y: number } | null>(null);
     const [movingTask, setMovingTask] = useState<Task | null>(null);
     const [selectedTask, setSelectedTask] = useState<SelectedTask | null>(null);
     const [selectedTaskDetails, setSelectedTaskDetails] = useState<SelectedTask | null>(null);
     const [editingReward, setEditingReward] = useState<Reward | null>(null);
     const [currentReward, setCurrentReward] = useState<string>('');
+    const [completedTaskPoints, setCompletedTaskPoints] = useState<number>(0);
+
     const [editTitle, setEditTitle] = useState<string>('');
     const [editDescription, setEditDescription] = useState<string>('');
-    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
     // Dialog states
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [editDialog, setEditDialog] = useState<boolean>(false);
+    const [deleteConfirmDialog, setDeleteConfirmDialog] = useState<boolean>(false);
     const [newRewardDialog, setNewRewardDialog] = useState<boolean>(false);
     const [editRewardDialog, setEditRewardDialog] = useState<boolean>(false);
     const [openProgressDialog, setOpenProgressDialog] = useState<boolean>(false);
     const [rewardDialog, setRewardDialog] = useState<boolean>(false);
     const [taskDetailsDialog, setTaskDetailsDialog] = useState<boolean>(false);
-    const [menuOpen, setMenuOpen] = useState(false);
 
     // Initialize today's date
     useEffect(() => {
@@ -90,16 +92,21 @@ const KanbanBoard3: React.FC = () => {
     }, []);
 
     // Handler functions
-    const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, task: Task, columnId: string): void => {
-        event.stopPropagation();
-        setSelectedTask({ ...task, columnId });
-        setMenuPosition({ x: event.clientX, y: event.clientY });
-        setMenuOpen(true);
-    };
-
     const handleTaskClick = (task: Task, columnId: string): void => {
         setSelectedTaskDetails({ ...task, columnStatus: columns[columnId].title, columnId });
         setTaskDetailsDialog(true);
+    };
+
+    const handleEditTask = (task: Task, columnId: string): void => {
+        setSelectedTask({ ...task, columnId });
+        setEditTitle(task.title);
+        setEditDescription(task.description || '');
+        setEditDialog(true);
+    };
+
+    const handleDeleteClick = (task: Task, columnId: string): void => {
+        setSelectedTask({ ...task, columnId });
+        setDeleteConfirmDialog(true);
     };
 
     const handleEditReward = (reward: Reward) => {
@@ -112,7 +119,7 @@ const KanbanBoard3: React.FC = () => {
         setRewards(prev => prev.filter(reward => reward.id !== id));
     };
 
-    const handleDeleteTask = (): void => {
+    const handleConfirmDeleteTask = (): void => {
         if (!selectedTask) return;
         setColumns(prev => ({
             ...prev,
@@ -121,16 +128,7 @@ const KanbanBoard3: React.FC = () => {
                 items: prev[selectedTask.columnId].items.filter(item => item.id !== selectedTask.id)
             }
         }));
-        setMenuOpen(false);
-    };
-
-    const handleEditClick = (): void => {
-        if (!selectedTask) return;
-
-        setEditTitle(selectedTask.title);
-        setEditDescription(selectedTask.description || '');
-        setEditDialog(true);
-        setMenuOpen(false);
+        setDeleteConfirmDialog(false);
     };
 
     const handleEditSave = (): void => {
@@ -185,16 +183,18 @@ const KanbanBoard3: React.FC = () => {
     };
 
     const handleTaskCompletion = (task: Task, sourceColumn: string, targetColumn: string) => {
-        if (task.points) {
-            setTotalPoints(prev => prev + task.points!);
+        const taskPoints = task.points || 0;
+        if (taskPoints) {
+            setTotalPoints(prev => prev + taskPoints);
         }
         setCurrentReward(task.reward || '');
+        setCompletedTaskPoints(taskPoints);
         setRewardDialog(true);
         moveTask(sourceColumn, targetColumn, task.id, { reward: task.reward });
     };
 
     const handleAddTask = (): void => {
-        if (!newTask.title || !newTask.column) return;
+        if (!newTask.title) return;
 
         const task: Task = {
             id: Math.random().toString(36).slice(2, 11),
@@ -205,13 +205,13 @@ const KanbanBoard3: React.FC = () => {
 
         setColumns(prev => ({
             ...prev,
-            [newTask.column]: {
-                ...prev[newTask.column],
-                items: [...prev[newTask.column].items, task]
+            todo: {
+                ...prev.todo,
+                items: [...prev.todo.items, task]
             }
         }));
 
-        setNewTask({ title: '', description: '', column: '', points: '' });
+        setNewTask({ title: '', description: '', column: 'todo', points: '' });
         setOpenDialog(false);
     };
 
@@ -309,9 +309,7 @@ const KanbanBoard3: React.FC = () => {
                         <Button
                             variant="outline"
                             className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2"
-
                         >
-
                             <Typography variant="h5" className="text-white">
                                 Puanım: {totalPoints}
                             </Typography>
@@ -336,10 +334,11 @@ const KanbanBoard3: React.FC = () => {
                             <Column
                                 key={columnId}
                                 columnId={columnId}
-                                column={column}
+                                column={column as ColumnData}
                                 onDrop={handleDrop}
                                 onDragStart={handleDragStart}
-                                onMenuOpen={handleMenuOpen}
+                                onEditClick={handleEditTask}
+                                onDeleteClick={handleDeleteClick}
                                 onTaskClick={handleTaskClick}
                                 today={today}
                             />
@@ -356,41 +355,12 @@ const KanbanBoard3: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Dropdown Menu for task actions */}
-                {selectedTask && menuPosition && (
-                    <DropdownMenu open={menuOpen} onOpenChange={(open) => {
-                        setMenuOpen(open);
-                        if (!open) setMenuPosition(null);
-                    }}>
-                        <DropdownMenuTrigger asChild>
-                            <span className="hidden"/>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                            className="z-50"
-                            align="start"
-                            style={{
-                                position: 'fixed',
-                                top: `${menuPosition.y}px`,
-                                left: `${menuPosition.x}px`
-                            }}
-                        >
-                            <DropdownMenuItem onClick={handleEditClick}>
-                                Düzenle
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={handleDeleteTask}>
-                                Sil
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                )}
-
                 {/* Dialogs */}
                 <TaskDialog
                     open={openDialog}
                     onClose={() => setOpenDialog(false)}
                     newTask={newTask}
                     setNewTask={setNewTask}
-                    columns={Object.entries(columns).map(([id, column]) => ({id, title: column.title}))}
                     onAddTask={handleAddTask}
                 />
 
@@ -416,10 +386,17 @@ const KanbanBoard3: React.FC = () => {
                     onSave={handleEditSave}
                 />
 
+                <DeleteConfirmationDialog
+                    open={deleteConfirmDialog}
+                    onClose={() => setDeleteConfirmDialog(false)}
+                    onConfirm={handleConfirmDeleteTask}
+                />
+
                 <CelebrationDialog
                     open={rewardDialog}
                     onClose={() => setRewardDialog(false)}
                     rewardTitle={currentReward}
+                    points={completedTaskPoints}
                 />
 
                 <RewardDialog
@@ -430,7 +407,6 @@ const KanbanBoard3: React.FC = () => {
                     onSave={handleAddReward}
                     isEditing={false}
                 />
-
 
                 <CalendarDialog
                     open={calendarDialogOpen}
@@ -469,8 +445,6 @@ const KanbanBoard3: React.FC = () => {
                     onClose={() => setTaskDetailsDialog(false)}
                     task={selectedTaskDetails}
                 />
-
-
             </div>
         </div>
     );

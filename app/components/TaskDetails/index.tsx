@@ -26,17 +26,19 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({
                 </DialogHeader>
                 <div className="space-y-4 my-2">
                     <Typography variant="h4">{task?.title}</Typography>
-                    <Typography variant="muted" className="text-muted-foreground">
-                        Durum: {task?.columnStatus}
-                    </Typography>
+
                     <Separator />
                     <div>
-                        <Typography variant="h5" className="mb-1">Açıklama:</Typography>
-                        <Typography>{task?.description}</Typography>
+                        <Typography variant="h5" className="mb-1">{task?.description}</Typography>
+
+
                     </div>
+                    <Separator />
                     <div>
-                        <Typography>Puan: {task?.points || 0}</Typography>
+                        <Typography>{task?.points || 0} Puan </Typography>
                     </div>
+                    <Separator />
+
                     {task?.dueDate && (
                         <div>
                             <Typography>
@@ -53,10 +55,13 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({
                     )}
                     {task?.notes && (
                         <div>
-                            <Typography variant="h5" className="mb-1">Notlar:</Typography>
-                            <Typography>{task.notes}</Typography>
+                            <Typography variant="h5" className="mb-1">Notlar: {task.notes}</Typography>
+
                         </div>
                     )}
+
+
+
                 </div>
                 <DialogFooter>
                     <Button onClick={onClose}>Kapat</Button>
