@@ -20,7 +20,7 @@ import DeleteConfirmationDialog from '../Dialogs/DeleteConfirmationDialog';
 import { formatDate, getTodayStart } from '../../utils/dateUtils';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import CalendarDialog from '../Dialogs/CalendarDialog';
-import ColorPickerDialog from "@/app/components/Dialogs/ColorPickerDialog";
+import ColorPickerDialog from "@/src/app/components/Dialogs/ColorPickerDialog";
 import { Typography } from "@/components/ui/typography";
 import {
     Task,
