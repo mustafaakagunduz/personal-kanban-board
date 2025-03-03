@@ -51,9 +51,8 @@ const KanbanBoard3: React.FC = () => {
 
     //colors:
     const [showColorPicker, setShowColorPicker] = useState(false);
-    const [bgColorStart, setBgColorStart] = useLocalStorage<string>("bgColorStart", "indigo-900");
-    const [bgColorEnd, setBgColorEnd] = useLocalStorage<string>("bgColorEnd", "blue-800");
-
+    const [bgColorStart, setBgColorStart] = useLocalStorage<string>("bgColorStart", "#2D9596"); // Güzel bir yeşil-turkuaz
+    const [bgColorEnd, setBgColorEnd] = useLocalStorage<string>("bgColorEnd", "#265073"); // Koyu mavi
     // State
     const [today, setToday] = useState<Date | null>(null);
     const [newTask, setNewTask] = useState<NewTaskForm>({
