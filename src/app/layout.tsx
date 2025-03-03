@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "Kişisel görev yönetimi uygulaması",
 };
 
+//deneme
+
 export default function RootLayout({
   children,
 }: Readonly<{
