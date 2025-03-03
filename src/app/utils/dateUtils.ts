@@ -8,7 +8,7 @@ export const formatDate = (date: Date): string => {
 export const getDaysLeft = (dueDate: string, today: Date | null): number | null => {
     if (!dueDate || !today) return null;
     return dateFns.differenceInDays(new Date(dueDate), today);
-};
+}; //deneme
 
 export const getTodayStart = (): Date => {
     return dateFns.startOfDay(new Date());
