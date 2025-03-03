@@ -85,8 +85,9 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
     }, [startColor, endColor, open]);
 
     const handleReset = () => {
-        const defaultStartColor = "#312e81"; // indigo-900
-        const defaultEndColor = "#1e40af"; // blue-800
+        // Yeni varsayılan renkler
+        const defaultStartColor = "#2D9596"; // Turkuaz-yeşil
+        const defaultEndColor = "#265073"; // Koyu mavi
 
         onStartColorChange(defaultStartColor);
         onEndColorChange(defaultEndColor);
