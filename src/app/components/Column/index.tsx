@@ -1,9 +1,8 @@
-// /src/components/Column/index.tsx
 import React from 'react';
 import { ColumnData, Task } from '../../types';
 import TaskCardComponent from '../TaskCard';
 import { Typography } from "@/components/ui/typography";
-import { kanbanColumnClass } from "../KanbanBoard3/styles";
+import { kanbanColumnClass, columnHeaderClass } from "../KanbanBoard3/styles";
 
 interface ColumnProps {
     columnId: string;
@@ -32,7 +31,7 @@ const Column: React.FC<ColumnProps> = ({
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => onDrop(e, columnId)}
         >
-            <Typography variant="h4" className="mb-4 text-indigo-900 font-bold">
+            <Typography variant="h4" className={columnHeaderClass}>
                 {column.title}
             </Typography>
             {column.items.map(task => (

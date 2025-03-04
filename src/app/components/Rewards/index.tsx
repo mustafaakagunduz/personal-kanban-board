@@ -1,11 +1,10 @@
-// /src/components/Rewards/index.tsx
 import React from 'react';
 import { Reward } from '../../types';
 import { Typography } from "@/components/ui/typography";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from 'lucide-react';
-import { kanbanColumnClass } from "../KanbanBoard3/styles";
+import { kanbanColumnClass, taskCardClass, columnHeaderClass } from "../KanbanBoard3/styles";
 import { cn } from "@/lib/utils";
 
 interface RewardsProps {
@@ -18,35 +17,29 @@ interface RewardsProps {
 }
 
 const Rewards: React.FC<RewardsProps> = ({
-    rewards,
-    totalPoints,
-    onAddClick,
-    onUseReward,
-    onEditReward,
-    onDeleteReward
-}) => {
+                                             rewards,
+                                             totalPoints,
+                                             onAddClick,
+                                             onUseReward,
+                                             onEditReward,
+                                             onDeleteReward
+                                         }) => {
     return (
         <div className={kanbanColumnClass}>
             <div className="flex justify-between items-center mb-4">
-                <Typography variant="h4" className="text-primary-800 font-bold">
+                <Typography variant="h4" className={columnHeaderClass}>
                     Ödüller
                 </Typography>
-                <Button
-                    variant="default"
-                    size="sm"
-                    onClick={onAddClick}
-                >
-                    Yeni Ödül
-                </Button>
+                {/* Buton KanbanBoard3'e taşındığı için burada kaldırıldı */}
             </div>
             <div className="flex flex-col gap-2">
                 {rewards.map(reward => (
-                    <Card key={reward.id} className="bg-primary">
-                        <CardContent className="py-2">
+                    <Card key={reward.id} className={cn("border-0", taskCardClass)}>
+                        <CardContent className="py-2 px-3 relative">
                             <div className="flex justify-between items-center">
                                 <div>
                                     <Typography className="text-white font-medium">{reward.title}</Typography>
-                                    <Typography className="text-white">{reward.points} Puan</Typography>
+                                    <Typography className="text-white text-xs">{reward.points} Puan</Typography>
                                 </div>
                                 <div className="flex gap-1">
                                     <Button
@@ -54,24 +47,25 @@ const Rewards: React.FC<RewardsProps> = ({
                                         variant="secondary"
                                         disabled={totalPoints < reward.points}
                                         onClick={() => onUseReward(reward.points)}
+                                        className="h-7 px-2 text-xs"
                                     >
                                         Kullan
                                     </Button>
                                     <Button
                                         size="icon"
                                         variant="ghost"
-                                        className="text-white h-8 w-8"
+                                        className="text-white h-6 w-6 p-0 hover:bg-white/10"
                                         onClick={() => onEditReward(reward)}
                                     >
-                                        <Edit className="h-4 w-4" />
+                                        <Edit className="h-3 w-3" />
                                     </Button>
                                     <Button
                                         size="icon"
                                         variant="ghost"
-                                        className="text-white h-8 w-8"
+                                        className="text-white h-6 w-6 p-0 hover:bg-white/10"
                                         onClick={() => onDeleteReward(reward.id)}
                                     >
-                                        <Trash2 className="h-4 w-4" />
+                                        <Trash2 className="h-3 w-3" />
                                     </Button>
                                 </div>
                             </div>

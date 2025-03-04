@@ -5,7 +5,8 @@ import React, { useState, useEffect } from 'react';
 import {
     Plus,
     Calendar,
-    Palette
+    Palette,
+    Gift, ClipboardList
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import Column from '../Column';
@@ -41,9 +42,9 @@ const KanbanBoard3: React.FC = () => {
     });
 
     const [rewards, setRewards] = useLocalStorage<Reward[]>('rewards', [
-        { id: '1', title: 'Netflix Premium (1 Ay)', points: 100 },
-        { id: '2', title: '2 Saat Extra Mola', points: 50 },
-        { id: '3', title: 'Erken Çıkış Hakkı', points: 75 },
+        { id: '1', title: 'Latte', points: 35 },
+        { id: '2', title: 'Sinema', points: 100 },
+        { id: '3', title: 'Pizza', points: 75 },
     ]);
 
     const [totalPoints, setTotalPoints] = useLocalStorage<number>('totalPoints', 0);
@@ -298,8 +299,8 @@ const KanbanBoard3: React.FC = () => {
 
                     <div className="flex items-center gap-4">
                         <Button
-                            variant="ghost"
-                            className="text-white flex items-center gap-2"
+                            variant="outline" // "ghost" yerine "outline" kullanılacak
+                            className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2 text-white"
                             onClick={() => setShowColorPicker(true)}
                         >
                             <Palette className="h-5 w-5"/>
@@ -317,14 +318,23 @@ const KanbanBoard3: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col gap-4 h-full">
-                    <div className="mb-4">
+                    <div className="mb-4 flex gap-2">
                         <Button
-                            variant="secondary"
+                            variant="outline"
                             onClick={() => setOpenDialog(true)}
-                            className="bg-white text-indigo-900 hover:bg-gray-100"
+                            className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2 text-white"
                         >
-                            <Plus className="mr-2 h-4 w-4"/>
+                            <ClipboardList className="mr-2 h-4 w-4"/>
                             Yeni Görev
+                        </Button>
+
+                        <Button
+                            variant="outline"
+                            onClick={() => setNewRewardDialog(true)}
+                            className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2 text-white"
+                        >
+                            <Gift className="mr-2 h-4 w-4"/>
+                            Yeni Ödül
                         </Button>
                     </div>
 
