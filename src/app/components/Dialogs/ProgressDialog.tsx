@@ -35,7 +35,7 @@ const ProgressDialog: React.FC<ProgressDialogProps> = ({
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="dueDate">Bitiş tarihini seçiniz</Label>
+                        <Label htmlFor="dueDate">Bitiş tarihini (takvime tıklayarak) seçiniz</Label>
                         <Input
                             id="dueDate"
                             type="date"

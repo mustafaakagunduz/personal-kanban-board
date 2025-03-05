@@ -24,6 +24,9 @@ const Rewards: React.FC<RewardsProps> = ({
                                              onEditReward,
                                              onDeleteReward
                                          }) => {
+    // Varsayılan renk değeri (indigo-900)
+    const defaultColor = "#4c1d95";
+
     return (
         <div className={kanbanColumnClass}>
             <div className="flex justify-between items-center mb-4">
@@ -34,7 +37,11 @@ const Rewards: React.FC<RewardsProps> = ({
             </div>
             <div className="flex flex-col gap-2">
                 {rewards.map(reward => (
-                    <Card key={reward.id} className={cn("border-0", taskCardClass)}>
+                    <Card
+                        key={reward.id}
+                        className={cn("border-0", taskCardClass)}
+                        style={{ backgroundColor: reward.color || defaultColor }}
+                    >
                         <CardContent className="py-2 px-3 relative">
                             <div className="flex justify-between items-center">
                                 <div>

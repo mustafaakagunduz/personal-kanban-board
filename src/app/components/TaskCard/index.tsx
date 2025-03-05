@@ -4,7 +4,7 @@ import { getDaysLeft, formatDate } from '../../utils/dateUtils';
 import { Card, CardContent } from "@/components/ui/card";
 import { Typography } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Calendar, Gift, FileText } from 'lucide-react';
+import { Edit, Trash2, Calendar, Gift, FileText, Clock } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { taskCardClass } from "../KanbanBoard3/styles";
 
@@ -60,7 +60,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
 
     // Koşullu render işlevi
     const renderContent = () => {
-        // Yapılacaklar kolonunda - başlık, açıklama ve puan göster
+        // Yapılacaklar kolonunda - minimal bilgi
         if (columnId === 'todo') {
             return (
                 <>
@@ -68,56 +68,12 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                         <Typography variant="h5" className="pr-8 text-white">{task.title}</Typography>
                         {renderActionButtons()}
                     </div>
-                    <Typography className="text-white text-sm">{task.description}</Typography>
-                    <div className="mt-1">
-                        <Typography className="text-white text-xs">
-                            Puan: {task.points || 0}
-                        </Typography>
-                    </div>
-                </>
-            );
-        }
 
-        // Devam edenler kolonunda - başlık, notlar, bitiş tarihi ve ödül göster
-        else if (columnId === 'inProgress') {
-            return (
-                <>
                     <div className="flex justify-between items-start mb-1">
-                        <Typography variant="h5" className="pr-8 text-white">{task.title}</Typography>
+                        <Typography variant="h5" className="pr-8 text-white">{task.description}</Typography>
                         {renderActionButtons()}
                     </div>
 
-                    {/* Notlar */}
-                    {task.notes && (
-                        <div className="flex items-center mt-1">
-                            <FileText className="h-3 w-3 text-white mr-1" />
-                            <Typography className="text-white text-xs line-clamp-1">{task.notes}</Typography>
-                        </div>
-                    )}
-
-                    {/* Bitiş Tarihi - formatDate hatası olsa bile tarihi göster */}
-                    {task.dueDate && (
-                        <div className="flex items-center mt-1">
-                            <Calendar className="h-3 w-3 text-white mr-1" />
-                            <Typography className="text-white text-xs">
-                                {validDueDate ? `Bitiş: ${formattedDate}` : `Bitiş: ${task.dueDate}`}
-                                {daysLeft !== null && (
-                                    <span className={daysLeft < 0 ? "text-destructive" : ""}>
-                                        {" "}({daysLeft < 0 ? 'Gecikme: ' : 'Kalan: '}
-                                        {Math.abs(daysLeft)} gün)
-                                    </span>
-                                )}
-                            </Typography>
-                        </div>
-                    )}
-
-                    {/* Ödül */}
-                    {task.reward && (
-                        <div className="flex items-center mt-1">
-                            <Gift className="h-3 w-3 text-white mr-1" />
-                            <Typography className="text-white text-xs line-clamp-1">{task.reward}</Typography>
-                        </div>
-                    )}
 
                     {/* Puanlar */}
                     <div className="mt-1">
@@ -129,7 +85,61 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
             );
         }
 
-        // Tamamlananlar kolonunda - başlık, açıklama, puanlar ve ödül göster
+        // Devam edenler kolonunda - kompakt görünüm
+        else if (columnId === 'inProgress') {
+            return (
+                <>
+                    <div className="flex justify-between items-start mb-1">
+                        <Typography variant="h5" className="pr-8 text-white">{task.title}</Typography>
+                        {renderActionButtons()}
+                    </div>
+
+                    {/* Notlar */}
+                    {task.notes && (
+                        <div className="flex items-center mb-1">
+                            <FileText className="h-3 w-3 text-white mr-1" />
+                            <Typography className="text-white text-xs truncate">{task.notes}</Typography>
+                        </div>
+                    )}
+
+                    {/* Bitiş Tarihi ve kalan gün tek satırda */}
+                    {task.dueDate && (
+                        <div className="flex items-center justify-between mb-1">
+                            <span className="flex items-center text-white text-xs">
+                                <Calendar className="h-3 w-3 mr-1" />
+                                {formattedDate}
+                            </span>
+
+                            {daysLeft !== null && (
+                                <span className={cn(
+                                    "text-xs px-1 py-0.5 rounded-sm font-medium",
+                                    daysLeft < 0 ? "bg-red-900/50" :
+                                        daysLeft <= 2 ? "bg-yellow-900/50" : "bg-green-900/50"
+                                )}>
+                                    {daysLeft < 0 ? `${Math.abs(daysLeft)}g gecikme` : `${daysLeft}g kaldı`}
+                                </span>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Puan ve Ödül tek satırda */}
+                    <div className="flex items-center justify-between mt-1">
+                        <Typography className="text-white text-xs font-medium">
+                            {task.points || 0} Puan
+                        </Typography>
+
+                        {task.reward && (
+                            <div className="flex items-center">
+                                <Gift className="h-3 w-3 text-white mr-1" />
+                                <Typography className="text-white text-xs truncate max-w-[100px]">{task.reward}</Typography>
+                            </div>
+                        )}
+                    </div>
+                </>
+            );
+        }
+
+        // Tamamlananlar kolonunda - minimal görünüm
         else if (columnId === 'done') {
             return (
                 <>
@@ -137,18 +147,19 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                         <Typography variant="h5" className="pr-8 text-white">{task.title}</Typography>
                         {renderActionButtons()}
                     </div>
-                    <Typography className="text-white text-sm">{task.description}</Typography>
-                    <div className="mt-1">
+
+                    {/* Puan ve ödül */}
+                    <div className="flex items-center justify-between mt-1">
                         <Typography className="text-white text-xs">
                             Kazanılan: {task.points || 0} Puan
                         </Typography>
 
-                        {task.reward && (
-                            <div className="flex items-center mt-1">
-                                <Gift className="h-3 w-3 text-white mr-1" />
-                                <Typography className="text-white text-xs">{task.reward}</Typography>
-                            </div>
-                        )}
+
+                    </div>
+
+                    <div className="flex justify-between items-start mb-1">
+                        <Typography variant="h5" className="pr-8 text-white">{task.description}</Typography>
+                        {renderActionButtons()}
                     </div>
                 </>
             );
@@ -161,17 +172,22 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                     <Typography variant="h5" className="pr-8 text-white">{task.title}</Typography>
                     {renderActionButtons()}
                 </div>
-                <Typography className="text-white text-sm">{task.description}</Typography>
-                <div className="mt-1">
-                    <Typography className="text-white text-xs">
-                        Puan: {task.points || 0}
-                    </Typography>
-                    {daysLeft !== null && (
-                        <Typography className={cn(daysLeft < 0 ? "text-destructive" : "text-white", "text-xs")}>
-                            {daysLeft < 0 ? 'Gecikme: ' : 'Kalan: '}
-                            {Math.abs(daysLeft)} gün
-                        </Typography>
+
+                {/* Tarih, kalan gün ve puan tek satırda */}
+                <div className="flex items-center justify-between text-white text-xs mt-1">
+                    {task.dueDate && (
+                        <span className="flex items-center">
+                            <Calendar className="h-3 w-3 mr-1" />
+                            {daysLeft !== null ?
+                                <span className={daysLeft < 0 ? "text-red-400" : ""}>
+                                    {daysLeft < 0 ? `${Math.abs(daysLeft)}g gecikme` : `${daysLeft}g kaldı`}
+                                </span> :
+                                formattedDate
+                            }
+                        </span>
                     )}
+
+                    <span>Puan: {task.points || 0}</span>
                 </div>
             </>
         );
@@ -207,11 +223,15 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
         );
     };
 
+    // Varsayılan renk değeri (indigo-900)
+    const defaultColor = "#4c1d95";
+
     return (
         <Card
             className={taskCardClass}
             draggable
             onDragStart={(e) => onDragStart(e, task.id, columnId)}
+            style={{ backgroundColor: task.color || defaultColor }}
         >
             <CardContent
                 onClick={() => onClick(task, columnId)}

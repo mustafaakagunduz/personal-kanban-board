@@ -62,7 +62,12 @@ const KanbanBoard3: React.FC = () => {
         column: 'todo',
         points: ''
     });
-    const [newReward, setNewReward] = useState<{ title: string, points: number | '' }>({ title: '', points: '' });
+    const [newReward, setNewReward] = useState<{ title: string, points: number | '', color?: string }>({
+        title: '',
+        points: '',
+        color: '#4c1d95' // Varsayılan renk
+    });
+
     const [progressDetails, setProgressDetails] = useState<ProgressDetails>({
         duration: '', reward: '', notes: '', dueDate: ''
     });
@@ -111,7 +116,11 @@ const KanbanBoard3: React.FC = () => {
 
     const handleEditReward = (reward: Reward) => {
         setEditingReward(reward);
-        setNewReward({ title: reward.title, points: reward.points });
+        setNewReward({
+            title: reward.title,
+            points: reward.points,
+            color: reward.color // Renk özelliğini ekliyoruz
+        });
         setEditRewardDialog(true);
     };
 
@@ -247,11 +256,12 @@ const KanbanBoard3: React.FC = () => {
         const reward: Reward = {
             id: Math.random().toString(36).slice(2, 11),
             title: newReward.title,
-            points: newReward.points
+            points: newReward.points,
+            color: newReward.color // Renk özelliğini ekliyoruz
         };
 
         setRewards(prev => [...prev, reward]);
-        setNewReward({ title: '', points: '' });
+        setNewReward({ title: '', points: '', color: '' });
         setNewRewardDialog(false);
     };
 
@@ -260,13 +270,18 @@ const KanbanBoard3: React.FC = () => {
 
         setRewards(prev => prev.map(reward =>
             reward.id === editingReward.id
-                ? { ...reward, title: newReward.title, points: newReward.points as number }
+                ? {
+                    ...reward,
+                    title: newReward.title,
+                    points: newReward.points as number,
+                    color: newReward.color // Renk özelliğini ekliyoruz
+                }
                 : reward
         ));
 
         setEditRewardDialog(false);
         setEditingReward(null);
-        setNewReward({ title: '', points: '' });
+        setNewReward({ title: '', points: '', color: '' });
     };
 
     return (

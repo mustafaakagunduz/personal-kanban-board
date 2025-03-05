@@ -8,12 +8,18 @@ export interface Task {
     reward?: string;
     notes?: string;
     dueDate?: string;
+    color?: string;
+}
+
+export interface SelectedTask extends Task {
+    columnId: string;
 }
 
 export interface Reward {
     id: string;
     title: string;
     points: number;
+    color?: string; // Renk özelliğini ekledik
 }
 
 export interface ColumnData {
