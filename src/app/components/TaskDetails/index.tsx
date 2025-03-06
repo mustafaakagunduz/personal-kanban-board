@@ -67,13 +67,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({
                         </div>
                     )}
 
-                    {task?.reward && (
-                        <div>
-                            <Typography>
-                                Ödül: {task.reward}
-                            </Typography>
-                        </div>
-                    )}
+                    <Separator />
 
                     {task?.notes && (
                         <div>
