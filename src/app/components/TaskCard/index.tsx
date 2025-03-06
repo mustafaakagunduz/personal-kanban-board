@@ -63,118 +63,109 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
         // Yapılacaklar kolonunda - minimal bilgi
         if (columnId === 'todo') {
             return (
-                <>
-                    <div className="flex justify-between items-start mb-1">
-                        <Typography variant="h5" className="pr-8 text-white">{task.title}</Typography>
-                        {renderActionButtons()}
+                <div className="flex flex-col h-full justify-between">
+                    <div>
+                        <Typography variant="h5" className="font-bold text-white mb-2">{task.title}</Typography>
+                        {task.description && (
+                            <Typography className="text-white/90 text-sm mb-2">{task.description}</Typography>
+                        )}
                     </div>
-
-                    <div className="flex justify-between items-start mb-1">
-                        <Typography variant="h5" className="pr-8 text-white">{task.description}</Typography>
-                        {renderActionButtons()}
-                    </div>
-
 
                     {/* Puanlar */}
-                    <div className="mt-1">
-                        <Typography className="text-white text-xs">
+                    <div className="mt-auto">
+                        <Typography className="text-white text-xs font-semibold">
                             Puan: {task.points || 0}
                         </Typography>
                     </div>
-                </>
+                </div>
             );
         }
 
         // Devam edenler kolonunda - kompakt görünüm
         else if (columnId === 'inProgress') {
             return (
-                <>
-                    <div className="flex justify-between items-start mb-1">
-                        <Typography variant="h5" className="pr-8 text-white">{task.title}</Typography>
-                        {renderActionButtons()}
-                    </div>
+                <div className="flex flex-col h-full justify-between">
+                    <div>
+                        <Typography variant="h5" className="font-bold text-white mb-2">{task.title}</Typography>
 
-                    {/* Notlar */}
-                    {task.notes && (
-                        <div className="flex items-center mb-1">
-                            <FileText className="h-3 w-3 text-white mr-1" />
-                            <Typography className="text-white text-xs truncate">{task.notes}</Typography>
-                        </div>
-                    )}
-
-                    {/* Bitiş Tarihi ve kalan gün tek satırda */}
-                    {task.dueDate && (
-                        <div className="flex items-center justify-between mb-1">
-                            <span className="flex items-center text-white text-xs">
-                                <Calendar className="h-3 w-3 mr-1" />
-                                {formattedDate}
-                            </span>
-
-                            {daysLeft !== null && (
-                                <span className={cn(
-                                    "text-xs px-1 py-0.5 rounded-sm font-medium",
-                                    daysLeft < 0 ? "bg-red-900/50" :
-                                        daysLeft <= 2 ? "bg-yellow-900/50" : "bg-green-900/50"
-                                )}>
-                                    {daysLeft < 0 ? `${Math.abs(daysLeft)}g gecikme` : `${daysLeft}g kaldı`}
-                                </span>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Puan ve Ödül tek satırda */}
-                    <div className="flex items-center justify-between mt-1">
-                        <Typography className="text-white text-xs font-medium">
-                            {task.points || 0} Puan
-                        </Typography>
-
-                        {task.reward && (
-                            <div className="flex items-center">
-                                <Gift className="h-3 w-3 text-white mr-1" />
-                                <Typography className="text-white text-xs truncate max-w-[100px]">{task.reward}</Typography>
+                        {/* Notlar */}
+                        {task.notes && (
+                            <div className="flex items-center mb-2">
+                                <FileText className="h-3 w-3 text-white/80 mr-1" />
+                                <Typography className="text-white/90 text-xs">{task.notes}</Typography>
                             </div>
                         )}
                     </div>
-                </>
+
+                    <div className="mt-auto">
+                        {/* Bitiş Tarihi ve kalan gün */}
+                        {task.dueDate && (
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="flex items-center text-white/90 text-xs">
+                                    <Calendar className="h-3 w-3 mr-1" />
+                                    {formattedDate}
+                                </span>
+
+                                {daysLeft !== null && (
+                                    <span className={cn(
+                                        "text-xs px-1 py-0.5 rounded-sm font-medium",
+                                        daysLeft < 0 ? "bg-red-900/50" :
+                                            daysLeft <= 2 ? "bg-yellow-900/50" : "bg-green-900/50"
+                                    )}>
+                                        {daysLeft < 0 ? `${Math.abs(daysLeft)}g gecikme` : `${daysLeft}g kaldı`}
+                                    </span>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Puan ve Ödül */}
+                        <div className="flex items-center justify-between">
+                            <Typography className="text-white text-xs font-semibold">
+                                {task.points || 0} Puan
+                            </Typography>
+
+                            {task.reward && (
+                                <div className="flex items-center">
+                                    <Gift className="h-3 w-3 text-white/80 mr-1" />
+                                    <Typography className="text-white/90 text-xs truncate max-w-[100px]">{task.reward}</Typography>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
             );
         }
 
         // Tamamlananlar kolonunda - minimal görünüm
         else if (columnId === 'done') {
             return (
-                <>
-                    <div className="flex justify-between items-start mb-1">
-                        <Typography variant="h5" className="pr-8 text-white">{task.title}</Typography>
-                        {renderActionButtons()}
+                <div className="flex flex-col h-full justify-between">
+                    <div>
+                        <Typography variant="h5" className="font-bold text-white mb-2 line-through opacity-90">{task.title}</Typography>
+                        {task.description && (
+                            <Typography className="text-white/80 text-sm mb-2">{task.description}</Typography>
+                        )}
                     </div>
 
-                    {/* Puan ve ödül */}
-                    <div className="flex items-center justify-between mt-1">
-                        <Typography className="text-white text-xs">
+                    {/* Puan */}
+                    <div className="mt-auto">
+                        <Typography className="text-white text-xs font-semibold">
                             Kazanılan: {task.points || 0} Puan
                         </Typography>
-
-
                     </div>
-
-                    <div className="flex justify-between items-start mb-1">
-                        <Typography variant="h5" className="pr-8 text-white">{task.description}</Typography>
-                        {renderActionButtons()}
-                    </div>
-                </>
+                </div>
             );
         }
 
         // Varsayılan görünüm (diğer tüm durumlar için)
         return (
-            <>
-                <div className="flex justify-between items-start mb-1">
-                    <Typography variant="h5" className="pr-8 text-white">{task.title}</Typography>
-                    {renderActionButtons()}
+            <div className="flex flex-col h-full justify-between">
+                <div>
+                    <Typography variant="h5" className="font-bold text-white mb-2">{task.title}</Typography>
                 </div>
 
-                {/* Tarih, kalan gün ve puan tek satırda */}
-                <div className="flex items-center justify-between text-white text-xs mt-1">
+                {/* Tarih, kalan gün ve puan */}
+                <div className="flex items-center justify-between text-white text-xs mt-auto">
                     {task.dueDate && (
                         <span className="flex items-center">
                             <Calendar className="h-3 w-3 mr-1" />
@@ -187,9 +178,9 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                         </span>
                     )}
 
-                    <span>Puan: {task.points || 0}</span>
+                    <span className="font-semibold">Puan: {task.points || 0}</span>
                 </div>
-            </>
+            </div>
         );
     };
 
@@ -227,19 +218,20 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
     const defaultColor = "#4c1d95";
 
     return (
-        <Card
-            className={taskCardClass}
+        <div
+            className={cn(taskCardClass, "border-0 overflow-hidden")}
             draggable
             onDragStart={(e) => onDragStart(e, task.id, columnId)}
-            style={{ backgroundColor: task.color || defaultColor }}
+            style={{ backgroundColor: task.color ? `${task.color}` : `${defaultColor}` }}
         >
-            <CardContent
+            <div
                 onClick={() => onClick(task, columnId)}
-                className="cursor-pointer py-2 px-3 relative"
+                className="cursor-pointer py-3 px-3 relative h-full min-h-[80px] flex flex-col"
             >
+                {renderActionButtons()}
                 {renderContent()}
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 };
 
