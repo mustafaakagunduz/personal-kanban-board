@@ -48,4 +48,5 @@ export interface NewTaskForm {
     description: string;
     column: string;
     points: number | '';
+    color?: string; // Yeni task oluştururken renk seçimi için eklendi
 }

@@ -60,7 +60,8 @@ const KanbanBoard3: React.FC = () => {
         title: '',
         description: '',
         column: 'todo',
-        points: ''
+        points: '',
+        color: '#800080' // Varsayılan mor renk
     });
     const [newReward, setNewReward] = useState<{ title: string, points: number | '', color?: string }>({
         title: '',
@@ -209,7 +210,8 @@ const KanbanBoard3: React.FC = () => {
             id: Math.random().toString(36).slice(2, 11),
             title: newTask.title,
             description: newTask.description,
-            points: typeof newTask.points === 'number' ? newTask.points : 0
+            points: typeof newTask.points === 'number' ? newTask.points : 0,
+            color: newTask.color || "#800080" // Varsayılan renk
         };
 
         setColumns(prev => ({
@@ -220,7 +222,14 @@ const KanbanBoard3: React.FC = () => {
             }
         }));
 
-        setNewTask({ title: '', description: '', column: 'todo', points: '' });
+        // Form verilerini sıfırla
+        setNewTask({
+            title: '',
+            description: '',
+            column: 'todo',
+            points: '',
+            color: '#800080' // Varsayılan rengi ekledik
+        });
         setOpenDialog(false);
     };
 
