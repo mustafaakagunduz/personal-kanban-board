@@ -14,14 +14,14 @@ const ColorPicker: React.FC<{
 }> = ({ value, onChange }) => {
     // Ön tanımlı renk seçenekleri
     const colorOptions = [
-        { name: "Mor (Varsayılan)", value: "#800080" }, // indigo-900
+        { name: "Mor (Varsayılan)", value: "#6b21a8" }, // indigo-900
         { name: "Mavi", value: "#1f91dc" }, // blue-800
         { name: "Yeşil", value: "#008000" }, // green-800
         { name: "Kırmızı", value: "#ff0000" }, // red-800
-        { name: "Turuncu", value: "#bd4f2b" }, // orange-800
+        { name: "Turuncu", value: "#ff7518" }, // orange-800
         { name: "Sarı", value: "#ffa500" }, // yellow-800
         { name: "Pembe", value: "#ff00ff" }, // pink-800
-        { name: "Mor", value: "#6b21a8" }, // purple-800
+        { name: "Siyah", value: "#000000" }, // purple-800
     ];
 
     return (

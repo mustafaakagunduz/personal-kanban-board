@@ -13,14 +13,14 @@ const ColorPicker: React.FC<{
 }> = ({ value, onChange }) => {
     // Ön tanımlı renk seçenekleri
     const colorOptions = [
-        { name: "Mor (Varsayılan)", value: "#800080" }, // purple
+        { name: "Mor (Varsayılan)", value: "#6b21a8" }, // purple
         { name: "Mavi", value: "#1f91dc" }, // blue
         { name: "Yeşil", value: "#008000" }, // green
         { name: "Kırmızı", value: "#ff0000" }, // red
-        { name: "Turuncu", value: "#bd4f2b" }, // orange
+        { name: "Turuncu", value: "#ff7518" }, // orange
         { name: "Sarı", value: "#ffa500" }, // yellow
         { name: "Pembe", value: "#ff00ff" }, // pink
-        { name: "Koyu Mor", value: "#6b21a8" }, // deep purple
+        { name: "Siyah", value: "#000000" }, // deep purple
     ];
 
     return (
@@ -107,7 +107,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
                     <div className="grid gap-2">
                         <Label>Kart Rengi</Label>
                         <ColorPicker
-                            value={newTask.color || "#800080"} // varsayılan mor renk
+                            value={newTask.color || "#6b21a8"} // varsayılan mor renk
                             onChange={(color) => setNewTask({
                                 ...newTask,
                                 color,
