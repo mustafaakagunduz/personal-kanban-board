@@ -112,7 +112,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                                         daysLeft < 0 ? "bg-red-900/50" :
                                             daysLeft <= 2 ? "bg-yellow-900/50" : "bg-green-900/50"
                                     )}>
-                                        {daysLeft < 0 ? `${Math.abs(daysLeft)}g gecikme` : `${daysLeft}g kaldı`}
+                                        {daysLeft < 0 ? `${Math.abs(daysLeft)}g gecikme` : `${daysLeft} günün kaldı`}
                                     </span>
                                 )}
                             </div>
@@ -171,7 +171,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                             <Calendar className="h-3 w-3 mr-1" />
                             {daysLeft !== null ?
                                 <span className={daysLeft < 0 ? "text-red-400" : ""}>
-                                    {daysLeft < 0 ? `${Math.abs(daysLeft)}g gecikme` : `${daysLeft}g kaldı`}
+                                    {daysLeft < 0 ? `${Math.abs(daysLeft)}g gecikme` : `${daysLeft} günün kaldı`}
                                 </span> :
                                 formattedDate
                             }
