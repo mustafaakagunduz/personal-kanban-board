@@ -3,7 +3,8 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-    Plus,
+
+    Info,
     Calendar,
     Palette,
     Gift, ClipboardList
@@ -24,7 +25,9 @@ import { useLocalStorage } from '../../hooks/useLocalStorage';
 import CalendarDialog from '../Dialogs/CalendarDialog';
 import ColorPickerDialog from "@/src/app/components/Dialogs/ColorPickerDialog";
 import { Typography } from "@/components/ui/typography";
+import InfoDialog from '../Dialogs/InfoDialog';
 import {
+
     Task,
     Reward,
     Columns,
@@ -50,7 +53,7 @@ const KanbanBoard3: React.FC = () => {
 
     const [totalPoints, setTotalPoints] = useLocalStorage<number>('totalPoints', 0);
     const [calendarDialogOpen, setCalendarDialogOpen] = useState<boolean>(false);
-
+    const [infoDialogOpen, setInfoDialogOpen] = useState<boolean>(false);
     //colors:
     const [showColorPicker, setShowColorPicker] = useState(false);
     const [bgColorStart, setBgColorStart] = useLocalStorage<string>("bgColorStart", "#2D9596"); // Güzel bir yeşil-turkuaz
@@ -324,6 +327,15 @@ const KanbanBoard3: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-4">
+
+                        <Button
+                            variant="outline"
+                            className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2 text-white"
+                            onClick={() => setInfoDialogOpen(true)}
+                        >
+                            <Info className="h-5 w-5"/>
+                            <span>Bilgi</span>
+                        </Button>
                         <Button
                             variant="outline"
                             className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2 text-white"
@@ -405,6 +417,11 @@ const KanbanBoard3: React.FC = () => {
                     newTask={newTask}
                     setNewTask={setNewTask}
                     onAddTask={handleAddTask}
+                />
+
+                <InfoDialog
+                    open={infoDialogOpen}
+                    onClose={() => setInfoDialogOpen(false)}
                 />
 
                 <ProgressDialog
