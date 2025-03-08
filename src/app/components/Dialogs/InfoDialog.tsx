@@ -29,10 +29,10 @@ const InfoDialog: React.FC<InfoDialogProps> = ({ open, onClose }) => {
                     </p>
                     <p className="mb-4">
                         Uygulamadaki tüm verileriniz (görevler, ödüller, ayarlar vb.) sadece kullandığınız tarayıcının
-                        yerel depolama biriminde (Local Storage'ında) saklanır ve cihazınızdan dışarı çıkmaz.
+                        yerel depolama biriminde (Local Storage'sinde) saklanır ve cihazınızdan dışarı çıkmaz.
                     </p>
                     <p>
-                        Tarayıcı çerezlerinizi veya geçmişinizi temizlediğinizde bu veriler silinecektir. İhtiyaç
+                        Tarayıcınızın "Local Storage"sini temizlediğinizde bu veriler silinecektir. İhtiyaç
                         duyarsanız verilerinizi yedeklemeniz önerilir.
                     </p>
                 </div>
