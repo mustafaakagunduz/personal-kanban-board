@@ -1,6 +1,7 @@
 import React from 'react';
 import { Typography } from "@/components/ui/typography";
 import { Card } from "@/components/ui/card";
+import { quoteCardClass } from "../KanbanBoard3/styles";
 
 interface DailyQuoteProps {
     date: Date | null;
@@ -56,7 +57,7 @@ const DailyQuote: React.FC<DailyQuoteProps> = ({ date }) => {
     const todayQuote = date ? getQuoteForDay(date) : getQuoteForDay(new Date());
 
     return (
-        <Card className="w-full mt-6 mb-4 bg-white/10 backdrop-blur-sm border-0 shadow-md overflow-hidden">
+        <Card className={`${quoteCardClass} hover:bg-white/20 mt-6 mb-4`}>
             <div className="p-4 text-center">
                 <Typography variant="h4" className="text-white font-light italic mb-2">
                     "{todayQuote.text}"
