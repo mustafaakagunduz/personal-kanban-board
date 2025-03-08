@@ -18,7 +18,6 @@ interface ColorPickerDialogProps {
 
 interface SavedColorScheme {
     id: string;
-    name: string;
     startColor: string;
     endColor: string;
     isSingle: boolean;
@@ -68,13 +67,15 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                                                                  onEndColorChange,
                                                                  onReset
                                                              }) => {
+
+    const activeColor = useRef<'start' | 'end' | 'single'>('start');
+    const [selectedScheme, setSelectedScheme] = useState<SavedColorScheme | null>(null);
+    const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
     const [colorMode, setColorMode] = useState<'gradient' | 'solid' | 'saved'>('gradient');
     const [singleColor, setSingleColor] = useState<string>(startColor);
     const pickerRef = useRef<HTMLDivElement>(null);
     const isDragging = useRef<boolean>(false);
-    const activeColor = useRef<'start' | 'end' | 'single'>('start');
-    const [savedColorName, setSavedColorName] = useState<string>('');
-    const [selectedScheme, setSelectedScheme] = useState<SavedColorScheme | null>(null);
+
 
     // Kaydedilen renk şemalarını saklamak için local storage hook'u
     const [savedColorSchemes, setSavedColorSchemes] = useLocalStorage<SavedColorScheme[]>('savedColorSchemes', []);
@@ -133,7 +134,6 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
     const handleSaveColorScheme = () => {
         const newColorScheme: SavedColorScheme = {
             id: Math.random().toString(36).slice(2, 11),
-            name: savedColorName || `Renk Şeması ${savedColorSchemes.length + 1}`,
             startColor: startColorHex,
             endColor: endColorHex,
             isSingle: colorMode === 'solid',
@@ -141,7 +141,12 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
         };
 
         setSavedColorSchemes([...savedColorSchemes, newColorScheme]);
-        setSavedColorName('');
+        setSaveSuccess(true);
+
+        // 2 saniye sonra başarı mesajını kaldır
+        setTimeout(() => {
+            setSaveSuccess(false);
+        }, 2000);
     };
 
     // Kaydedilen renk şemasını uygula
@@ -427,24 +432,29 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                                 </div>
 
                                 {/* Mevcut ayarı kaydet butonu */}
-                                <div className="mb-3">
-                                    <div className="flex items-center gap-2">
-                                        <Input
-                                            type="text"
-                                            placeholder="Şema ismi"
-                                            value={savedColorName}
-                                            onChange={(e) => setSavedColorName(e.target.value)}
-                                            className="h-8 text-xs flex-1"
-                                        />
-                                        <Button
-                                            onClick={handleSaveColorScheme}
-                                            className="h-8 text-xs gap-1 bg-indigo-500 hover:bg-indigo-600 text-white"
-                                            size="sm"
-                                        >
-                                            <BookmarkPlus className="w-3 h-3" />
-                                            Kaydet
-                                        </Button>
-                                    </div>
+                                <div className="mb-3 mt-4">
+                                    <Button
+                                        onClick={handleSaveColorScheme}
+                                        className={cn(
+                                            "w-full h-9 text-sm gap-1 text-white transition-colors",
+                                            saveSuccess
+                                                ? "bg-green-500 hover:bg-green-600"
+                                                : "bg-indigo-500 hover:bg-indigo-600"
+                                        )}
+                                        size="sm"
+                                    >
+                                        {saveSuccess ? (
+                                            <>
+                                                <Check className="w-4 h-4" />
+                                                Kaydedildi
+                                            </>
+                                        ) : (
+                                            <>
+                                                <BookmarkPlus className="w-4 h-4" />
+                                                Tercihi Kaydet
+                                            </>
+                                        )}
+                                    </Button>
                                 </div>
                             </>
                         ) : (
@@ -466,24 +476,29 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                                 </div>
 
                                 {/* Mevcut ayarı kaydet butonu */}
-                                <div className="mb-3">
-                                    <div className="flex items-center gap-2">
-                                        <Input
-                                            type="text"
-                                            placeholder="Şema ismi"
-                                            value={savedColorName}
-                                            onChange={(e) => setSavedColorName(e.target.value)}
-                                            className="h-8 text-xs flex-1"
-                                        />
-                                        <Button
-                                            onClick={handleSaveColorScheme}
-                                            className="h-8 text-xs gap-1 bg-indigo-500 hover:bg-indigo-600 text-white"
-                                            size="sm"
-                                        >
-                                            <BookmarkPlus className="w-3 h-3" />
-                                            Kaydet
-                                        </Button>
-                                    </div>
+                                <div className="mb-3 mt-4">
+                                    <Button
+                                        onClick={handleSaveColorScheme}
+                                        className={cn(
+                                            "w-full h-9 text-sm gap-1 text-white transition-colors",
+                                            saveSuccess
+                                                ? "bg-green-500 hover:bg-green-600"
+                                                : "bg-indigo-500 hover:bg-indigo-600"
+                                        )}
+                                        size="sm"
+                                    >
+                                        {saveSuccess ? (
+                                            <>
+                                                <Check className="w-4 h-4" />
+                                                Kaydedildi
+                                            </>
+                                        ) : (
+                                            <>
+                                                <BookmarkPlus className="w-4 h-4" />
+                                                Tercihi Kaydet
+                                            </>
+                                        )}
+                                    </Button>
                                 </div>
                             </>
                         )}
@@ -521,7 +536,7 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                                             onClick={() => setSelectedScheme(scheme)}
                                         >
                                             <div className="flex flex-col px-2 pt-1.5 pb-1.5">
-                                                <p className="text-sm font-medium mb-1.5">{scheme.name}</p>
+
                                                 <div className="flex justify-between items-center">
                                                     <div
                                                         className="h-10 flex-grow rounded-md overflow-hidden border border-gray-200 dark:border-gray-700"
