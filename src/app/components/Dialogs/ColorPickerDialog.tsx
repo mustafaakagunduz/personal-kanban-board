@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Check, RefreshCw } from "lucide-react";
+import { Check, RefreshCw, BookmarkPlus } from 'lucide-react';
 import { cn } from "@/lib/utils";
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 interface ColorPickerDialogProps {
     open: boolean;
@@ -13,6 +14,15 @@ interface ColorPickerDialogProps {
     onStartColorChange: (color: string) => void;
     onEndColorChange: (color: string) => void;
     onReset: () => void;
+}
+
+interface SavedColorScheme {
+    id: string;
+    name: string;
+    startColor: string;
+    endColor: string;
+    isSingle: boolean;
+    singleColor?: string;
 }
 
 // Convert RGB to Hex
@@ -58,11 +68,16 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                                                                  onEndColorChange,
                                                                  onReset
                                                              }) => {
-    const [colorMode, setColorMode] = useState<'gradient' | 'solid'>('gradient');
+    const [colorMode, setColorMode] = useState<'gradient' | 'solid' | 'saved'>('gradient');
     const [singleColor, setSingleColor] = useState<string>(startColor);
     const pickerRef = useRef<HTMLDivElement>(null);
     const isDragging = useRef<boolean>(false);
     const activeColor = useRef<'start' | 'end' | 'single'>('start');
+    const [savedColorName, setSavedColorName] = useState<string>('');
+    const [selectedScheme, setSelectedScheme] = useState<SavedColorScheme | null>(null);
+
+    // Kaydedilen renk şemalarını saklamak için local storage hook'u
+    const [savedColorSchemes, setSavedColorSchemes] = useLocalStorage<SavedColorScheme[]>('savedColorSchemes', []);
 
     // Hex input states
     const [startColorHex, setStartColorHex] = useState<string>(startColor);
@@ -82,6 +97,11 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
         setEndColorHex(endColor);
         setSingleColorHex(startColor);
         setSingleColor(startColor);
+
+        // Reset the selected scheme when dialog opens
+        if (open) {
+            setSelectedScheme(null);
+        }
     }, [startColor, endColor, open]);
 
     const handleReset = () => {
@@ -107,6 +127,48 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
             onEndColorChange(singleColor);
         }
         onClose();
+    };
+
+    // Mevcut renk şemasını kaydet
+    const handleSaveColorScheme = () => {
+        const newColorScheme: SavedColorScheme = {
+            id: Math.random().toString(36).slice(2, 11),
+            name: savedColorName || `Renk Şeması ${savedColorSchemes.length + 1}`,
+            startColor: startColorHex,
+            endColor: endColorHex,
+            isSingle: colorMode === 'solid',
+            singleColor: colorMode === 'solid' ? singleColorHex : undefined
+        };
+
+        setSavedColorSchemes([...savedColorSchemes, newColorScheme]);
+        setSavedColorName('');
+    };
+
+    // Kaydedilen renk şemasını uygula
+    const handleApplySavedColorScheme = (scheme: SavedColorScheme) => {
+        if (scheme.isSingle) {
+            const color = scheme.singleColor || scheme.startColor;
+            setSingleColor(color);
+            setSingleColorHex(color);
+            onStartColorChange(color);
+            onEndColorChange(color);
+            setColorMode('solid');
+        } else {
+            setStartColorHex(scheme.startColor);
+            setEndColorHex(scheme.endColor);
+            onStartColorChange(scheme.startColor);
+            onEndColorChange(scheme.endColor);
+            setColorMode('gradient');
+        }
+    };
+
+    // Kaydedilen renk şemasını sil
+    const handleDeleteSavedColorScheme = (id: string) => {
+        // Eğer silinen şema seçiliyse, seçimi kaldır
+        if (selectedScheme && selectedScheme.id === id) {
+            setSelectedScheme(null);
+        }
+        setSavedColorSchemes(savedColorSchemes.filter(scheme => scheme.id !== id));
     };
 
     // Color input handlers
@@ -266,122 +328,238 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                     >
                         Tek Renk
                     </button>
+                    <button
+                        onClick={() => setColorMode('saved')}
+                        className={cn(
+                            "flex-1 py-1.5 px-3 rounded-md text-xs font-medium transition-all",
+                            colorMode === 'saved'
+                                ? "bg-white dark:bg-gray-700 shadow-sm text-indigo-600 dark:text-indigo-400"
+                                : "text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                        )}
+                    >
+                        Kaydedilenler
+                    </button>
                 </div>
 
-                {/* Interactive color picker */}
-                <div
-                    ref={pickerRef}
-                    className="w-full h-56 rounded-lg cursor-pointer mb-4 border border-gray-200 dark:border-gray-700 overflow-hidden"
-                    onClick={handleColorPickerClick}
-                    onMouseDown={handleColorPickerMouseDown}
-                    onMouseMove={handleColorPickerMouseMove}
-                    style={{
-                        background: 'linear-gradient(to bottom, white, black), linear-gradient(to right, hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%), hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(360, 100%, 50%))',
-                        backgroundBlendMode: 'multiply'
-                    }}
-                >
-                    <div className="w-full h-full relative">
+                {colorMode !== 'saved' && (
+                    <>
+                        {/* Interactive color picker */}
+                        <div
+                            ref={pickerRef}
+                            className="w-full h-56 rounded-lg cursor-pointer mb-4 border border-gray-200 dark:border-gray-700 overflow-hidden"
+                            onClick={handleColorPickerClick}
+                            onMouseDown={handleColorPickerMouseDown}
+                            onMouseMove={handleColorPickerMouseMove}
+                            style={{
+                                background: 'linear-gradient(to bottom, white, black), linear-gradient(to right, hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%), hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(360, 100%, 50%))',
+                                backgroundBlendMode: 'multiply'
+                            }}
+                        >
+                            <div className="w-full h-full relative">
+                                {colorMode === 'gradient' ? (
+                                    <>
+                                        <span
+                                            className="absolute w-6 h-6 rounded-full border-2 border-white shadow-md transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                                            style={{
+                                                backgroundColor: startColor,
+                                                left: `${startColorPos.x * 100}%`,
+                                                top: `${startColorPos.y * 100}%`,
+                                            }}
+                                        ></span>
+
+
+                                        <span
+                                            className="absolute w-6 h-6 rounded-full border-2 border-white shadow-md transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                                            style={{
+                                                backgroundColor: endColor,
+                                                left: `${endColorPos.x * 100}%`,
+                                                top: `${endColorPos.y * 100}%`,
+                                            }}
+                                        ></span>
+                                    </>
+                                ) : (
+                                    <span
+                                        className="absolute w-6 h-6 rounded-full border-2 border-white shadow-md transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                                        style={{
+                                            backgroundColor: singleColor,
+                                            left: `${singleColorPos.x * 100}%`,
+                                            top: `${singleColorPos.y * 100}%`,
+                                        }}
+                                    ></span>
+                                )}
+                            </div>
+                        </div>
+
                         {colorMode === 'gradient' ? (
                             <>
-                                <span
-                                    className="absolute w-6 h-6 rounded-full border-2 border-white shadow-md transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-                                    style={{
-                                        backgroundColor: startColor,
-                                        left: `${startColorPos.x * 100}%`,
-                                        top: `${startColorPos.y * 100}%`,
-                                    }}
-                                ></span>
+                                <div className="grid grid-cols-2 gap-3 mb-3">
+                                    <div>
+                                        <p className="text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">Başlangıç(Seçiciden mouse ile seçin) : </p>
+                                        <div className="flex gap-2 items-center">
+                                            <div
+                                                className="w-8 h-8 rounded-md border border-gray-300 dark:border-gray-600"
+                                                style={{backgroundColor: startColor}}
+                                            ></div>
+                                            <Input
+                                                type="text"
+                                                value={startColorHex}
+                                                onChange={handleStartColorChange}
+                                                className="h-8 text-xs"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">Bitiş
+                                            Rengi:[Alt(Opt) + mouse ile seçin]</p>
+                                        <div className="flex gap-2 items-center">
+                                            <div
+                                                className="w-8 h-8 rounded-md border border-gray-300 dark:border-gray-600"
+                                                style={{backgroundColor: endColor}}
+                                            ></div>
+                                            <Input
+                                                type="text"
+                                                value={endColorHex}
+                                                onChange={handleEndColorChange}
+                                                className="h-8 text-xs"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
 
-
-                                <span
-                                    className="absolute w-6 h-6 rounded-full border-2 border-white shadow-md transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-                                    style={{
-                                        backgroundColor: endColor,
-                                        left: `${endColorPos.x * 100}%`,
-                                        top: `${endColorPos.y * 100}%`,
-                                    }}
-                                ></span>
+                                {/* Mevcut ayarı kaydet butonu */}
+                                <div className="mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <Input
+                                            type="text"
+                                            placeholder="Şema ismi"
+                                            value={savedColorName}
+                                            onChange={(e) => setSavedColorName(e.target.value)}
+                                            className="h-8 text-xs flex-1"
+                                        />
+                                        <Button
+                                            onClick={handleSaveColorScheme}
+                                            className="h-8 text-xs gap-1 bg-indigo-500 hover:bg-indigo-600 text-white"
+                                            size="sm"
+                                        >
+                                            <BookmarkPlus className="w-3 h-3" />
+                                            Kaydet
+                                        </Button>
+                                    </div>
+                                </div>
                             </>
                         ) : (
-                            <span
-                                className="absolute w-6 h-6 rounded-full border-2 border-white shadow-md transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-                                style={{
-                                    backgroundColor: singleColor,
-                                    left: `${singleColorPos.x * 100}%`,
-                                    top: `${singleColorPos.y * 100}%`,
-                                }}
-                            ></span>
+                            <>
+                                <div className="mb-3">
+                                    <p className="text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">Renk</p>
+                                    <div className="flex gap-2 items-center">
+                                        <div
+                                            className="w-8 h-8 rounded-md border border-gray-300 dark:border-gray-600"
+                                            style={{backgroundColor: singleColor}}
+                                        ></div>
+                                        <Input
+                                            type="text"
+                                            value={singleColorHex}
+                                            onChange={handleSingleColorChange}
+                                            className="h-8 text-xs"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Mevcut ayarı kaydet butonu */}
+                                <div className="mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <Input
+                                            type="text"
+                                            placeholder="Şema ismi"
+                                            value={savedColorName}
+                                            onChange={(e) => setSavedColorName(e.target.value)}
+                                            className="h-8 text-xs flex-1"
+                                        />
+                                        <Button
+                                            onClick={handleSaveColorScheme}
+                                            className="h-8 text-xs gap-1 bg-indigo-500 hover:bg-indigo-600 text-white"
+                                            size="sm"
+                                        >
+                                            <BookmarkPlus className="w-3 h-3" />
+                                            Kaydet
+                                        </Button>
+                                    </div>
+                                </div>
+                            </>
                         )}
-                    </div>
-                </div>
 
-                {colorMode === 'gradient' ? (
-                    <div className="grid grid-cols-2 gap-3 mb-3">
-
-
-                        <div>
-                            <p className="text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">Başlangıç(Seçiciden mouse ile seçin) : </p>
-                            <div className="flex gap-2 items-center">
-                                <div
-                                    className="w-8 h-8 rounded-md border border-gray-300 dark:border-gray-600"
-                                    style={{backgroundColor: startColor}}
-                                ></div>
-                                <Input
-                                    type="text"
-                                    value={startColorHex}
-                                    onChange={handleStartColorChange}
-                                    className="h-8 text-xs"
-                                />
-                            </div>
-                        </div>
-                        <div>
-                            <p className="text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">Bitiş
-                                Rengi:[Alt(Opt) + mouse ile seçin]</p>
-                            <div className="flex gap-2 items-center">
-                                <div
-                                    className="w-8 h-8 rounded-md border border-gray-300 dark:border-gray-600"
-                                    style={{backgroundColor: endColor}}
-                                ></div>
-                                <Input
-                                    type="text"
-                                    value={endColorHex}
-                                    onChange={handleEndColorChange}
-                                    className="h-8 text-xs"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="mb-3">
-                        <p className="text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">Renk</p>
-                        <div className="flex gap-2 items-center">
+                        <div
+                            className="h-12 rounded-lg mb-4 overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700">
                             <div
-                                className="w-8 h-8 rounded-md border border-gray-300 dark:border-gray-600"
-                                style={{backgroundColor: singleColor}}
+                                className="h-full w-full"
+                                style={{
+                                    background: colorMode === 'gradient'
+                                        ? `linear-gradient(to right, ${startColor}, ${endColor})`
+                                        : singleColor
+                                }}
                             ></div>
-                            <Input
-                                type="text"
-                                value={singleColorHex}
-                                onChange={handleSingleColorChange}
-                                className="h-8 text-xs"
-                            />
                         </div>
-                    </div>
+                    </>
                 )}
 
-                <div
-                    className="h-12 rounded-lg mb-4 overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div
-                        className="h-full w-full"
-                        style={{
-                            background: colorMode === 'gradient'
-                                ? `linear-gradient(to right, ${startColor}, ${endColor})`
-                                : singleColor
-                        }}
-                    ></div>
-                </div>
-
-
+                {colorMode === 'saved' && (
+                    <>
+                        <div className="mb-4 max-h-64 overflow-y-auto">
+                            {savedColorSchemes.length === 0 ? (
+                                <p className="text-sm text-center text-gray-500 dark:text-gray-400 py-4">
+                                    Henüz kaydedilmiş renk şeması bulunmamaktadır.
+                                </p>
+                            ) : (
+                                <div className="grid grid-cols-1 gap-2">
+                                    {savedColorSchemes.map((scheme) => (
+                                        <div
+                                            key={scheme.id}
+                                            className={cn(
+                                                "border border-gray-200 dark:border-gray-700 rounded-lg p-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer",
+                                                selectedScheme?.id === scheme.id ? "ring-2 ring-indigo-500 bg-indigo-50 dark:bg-indigo-900/20" : ""
+                                            )}
+                                            onClick={() => setSelectedScheme(scheme)}
+                                        >
+                                            <div className="flex justify-between items-center">
+                                                <div className="flex items-center gap-2 flex-1">
+                                                    <div
+                                                        className="h-8 w-8 rounded-md overflow-hidden border border-gray-200 dark:border-gray-700 flex-shrink-0"
+                                                        style={{
+                                                            background: scheme.isSingle
+                                                                ? scheme.singleColor || scheme.startColor
+                                                                : `linear-gradient(to right, ${scheme.startColor}, ${scheme.endColor})`
+                                                        }}
+                                                    />
+                                                    <p className="text-sm font-medium truncate">{scheme.name}</p>
+                                                </div>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteSavedColorScheme(scheme.id);
+                                                    }}
+                                                    className="text-gray-500 hover:text-red-500 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        {savedColorSchemes.length > 0 && (
+                            <Button
+                                onClick={() => selectedScheme && handleApplySavedColorScheme(selectedScheme)}
+                                disabled={!selectedScheme}
+                                className="w-full h-9 mb-4 text-sm bg-indigo-500 hover:bg-indigo-600 text-white disabled:bg-indigo-300 dark:disabled:bg-indigo-800"
+                            >
+                                Seçili Temayı Uygula
+                            </Button>
+                        )}
+                    </>
+                )}
 
                 <DialogFooter
                     className="flex justify-center gap-3 pt-3 border-t border-gray-100 dark:border-gray-800 mt-2">
