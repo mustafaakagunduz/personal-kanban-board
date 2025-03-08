@@ -299,7 +299,7 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="max-w-[400px] p-4 bg-white dark:bg-gray-900 rounded-xl shadow-lg">
+            <DialogContent className="max-w-[550px] w-[90vw] p-4 bg-white dark:bg-gray-900 rounded-xl shadow-lg">
                 <DialogHeader className="mb-3 pb-2 border-b border-gray-100 dark:border-gray-800">
                     <DialogTitle className="text-base font-semibold text-center">Arkaplan Rengini
                         Özelleştir</DialogTitle>
@@ -504,7 +504,7 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
 
                 {colorMode === 'saved' && (
                     <>
-                        <div className="mb-4 max-h-64 overflow-y-auto">
+                        <div className="mb-4 max-h-80 overflow-y-auto px-1">
                             {savedColorSchemes.length === 0 ? (
                                 <p className="text-sm text-center text-gray-500 dark:text-gray-400 py-4">
                                     Henüz kaydedilmiş renk şeması bulunmamaktadır.
@@ -515,34 +515,34 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                                         <div
                                             key={scheme.id}
                                             className={cn(
-                                                "border border-gray-200 dark:border-gray-700 rounded-lg p-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer",
-                                                selectedScheme?.id === scheme.id ? "ring-2 ring-indigo-500 bg-indigo-50 dark:bg-indigo-900/20" : ""
+                                                "border border-gray-200 dark:border-gray-700 rounded-lg mx-1 my-0.5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer overflow-hidden",
+                                                selectedScheme?.id === scheme.id ? "ring-1 ring-inset ring-indigo-500 bg-indigo-50 dark:bg-indigo-900/20" : ""
                                             )}
                                             onClick={() => setSelectedScheme(scheme)}
                                         >
-                                            <div className="flex justify-between items-center">
-                                                <div className="flex items-center gap-2 flex-1">
+                                            <div className="flex flex-col px-2 pt-1.5 pb-1.5">
+                                                <p className="text-sm font-medium mb-1.5">{scheme.name}</p>
+                                                <div className="flex justify-between items-center">
                                                     <div
-                                                        className="h-8 w-8 rounded-md overflow-hidden border border-gray-200 dark:border-gray-700 flex-shrink-0"
+                                                        className="h-10 flex-grow rounded-md overflow-hidden border border-gray-200 dark:border-gray-700"
                                                         style={{
                                                             background: scheme.isSingle
                                                                 ? scheme.singleColor || scheme.startColor
                                                                 : `linear-gradient(to right, ${scheme.startColor}, ${scheme.endColor})`
                                                         }}
                                                     />
-                                                    <p className="text-sm font-medium truncate">{scheme.name}</p>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDeleteSavedColorScheme(scheme.id);
+                                                        }}
+                                                        className="ml-2 text-gray-400 hover:text-red-500 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
                                                 </div>
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleDeleteSavedColorScheme(scheme.id);
-                                                    }}
-                                                    className="text-gray-500 hover:text-red-500 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-                                                >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
-                                                </button>
                                             </div>
                                         </div>
                                     ))}
@@ -553,7 +553,7 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                             <Button
                                 onClick={() => selectedScheme && handleApplySavedColorScheme(selectedScheme)}
                                 disabled={!selectedScheme}
-                                className="w-full h-9 mb-4 text-sm bg-indigo-500 hover:bg-indigo-600 text-white disabled:bg-indigo-300 dark:disabled:bg-indigo-800"
+                                className="w-[96%] mx-auto h-10 mb-4 text-sm bg-indigo-500 hover:bg-indigo-600 text-white disabled:bg-indigo-300 dark:disabled:bg-indigo-800"
                             >
                                 Seçili Temayı Uygula
                             </Button>
