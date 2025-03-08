@@ -39,7 +39,7 @@ const InfoDialog: React.FC<InfoDialogProps> = ({ open, onClose }) => {
                 <div className="flex justify-center mt-6">
                     <Button
                         onClick={onClose}
-                        className="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white"
+                        className="bg-gradient-to-r from-[#2D9596] to-[#265073] hover:from-[#249090] hover:to-[#1e405e] text-white cursor-pointer"
                     >
                         Anladım
                     </Button>
