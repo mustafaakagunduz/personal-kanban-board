@@ -22,25 +22,28 @@ const InfoDialog: React.FC<InfoDialogProps> = ({ open, onClose }) => {
                 <DialogHeader>
                     <DialogTitle className="text-xl font-bold text-gray-800">Gizlilik Bilgilendirmesi</DialogTitle>
                 </DialogHeader>
-                <div className="text-gray-700 my-4">
+                <div className="text-gray-700 my-4 text-justify">
                     <p className="mb-4">
-                        Kanban uygulaması hiçbir kişisel verinizi sunucularımıza kaydetmez veya üçüncü taraflarla paylaşmaz.
+                        Kanban uygulaması hiçbir kişisel verinizi sunucularımıza kaydetmez veya üçüncü taraflarla
+                        paylaşmaz.
                     </p>
                     <p className="mb-4">
-                        Uygulamadaki tüm verileriniz (görevler, ödüller, ayarlar vb.) sadece kullandığınız tarayıcının yerel depolama biriminde (Local Storage'ında) saklanır ve cihazınızdan dışarı çıkmaz.
+                        Uygulamadaki tüm verileriniz (görevler, ödüller, ayarlar vb.) sadece kullandığınız tarayıcının
+                        yerel depolama biriminde (Local Storage'ında) saklanır ve cihazınızdan dışarı çıkmaz.
                     </p>
                     <p>
-                        Tarayıcı çerezlerinizi veya geçmişinizi temizlediğinizde bu veriler silinecektir. İhtiyaç duyarsanız verilerinizi yedeklemeniz önerilir.
+                        Tarayıcı çerezlerinizi veya geçmişinizi temizlediğinizde bu veriler silinecektir. İhtiyaç
+                        duyarsanız verilerinizi yedeklemeniz önerilir.
                     </p>
                 </div>
-                <DialogFooter>
+                <div className="flex justify-center mt-6">
                     <Button
                         onClick={onClose}
                         className="bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white"
                     >
                         Anladım
                     </Button>
-                </DialogFooter>
+                </div>
             </DialogContent>
         </Dialog>
     );

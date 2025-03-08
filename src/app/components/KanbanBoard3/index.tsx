@@ -7,8 +7,9 @@ import {
     Info,
     Calendar,
     Palette,
-    Gift, ClipboardList
+    Gift, ClipboardList, HelpCircle
 } from 'lucide-react';
+import HelpDialog from '../Dialogs/HelpDialog';
 import { Button } from "@/components/ui/button";
 import Column from '../Column';
 import Rewards from '../Rewards';
@@ -72,7 +73,7 @@ const KanbanBoard3: React.FC = () => {
         points: '',
         color: '#4c1d95' // Varsayılan renk
     });
-
+    const [helpDialogOpen, setHelpDialogOpen] = useState<boolean>(false);
     const [progressDetails, setProgressDetails] = useState<ProgressDetails>({
         duration: '', reward: '', notes: '', dueDate: ''
     });
@@ -327,14 +328,21 @@ const KanbanBoard3: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-4">
-
+                        <Button
+                            variant="outline"
+                            className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2 text-white"
+                            onClick={() => setHelpDialogOpen(true)}
+                        >
+                            <HelpCircle className="h-5 w-5"/>
+                            <span>Yardım</span>
+                        </Button>
                         <Button
                             variant="outline"
                             className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2 text-white"
                             onClick={() => setInfoDialogOpen(true)}
                         >
                             <Info className="h-5 w-5"/>
-                            <span>Bilgi</span>
+                            <span>Gizlilik</span>
                         </Button>
                         <Button
                             variant="outline"
@@ -411,6 +419,11 @@ const KanbanBoard3: React.FC = () => {
                 </div>
 
                 {/* Dialogs */}
+
+                <HelpDialog
+                    open={helpDialogOpen}
+                    onClose={() => setHelpDialogOpen(false)}
+                />
                 <TaskDialog
                     open={openDialog}
                     onClose={() => setOpenDialog(false)}
