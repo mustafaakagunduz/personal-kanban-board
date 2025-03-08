@@ -41,7 +41,15 @@ const ProgressDialog: React.FC<ProgressDialogProps> = ({
                             type="date"
                             value={progressDetails.dueDate}
                             min={today ? formatDate(today).split('/').reverse().join('-') : ''}
-                            onChange={(e) => setProgressDetails({ ...progressDetails, dueDate: e.target.value })}
+                            onChange={(e) => setProgressDetails({...progressDetails, dueDate: e.target.value})}
+                            onKeyDown={(e) => {
+                                // Takvim açma amacıyla kullanılan tuşlara izin ver
+                                if (e.key === 'Tab' || e.key === 'Enter' || e.key === 'Escape' || e.key === ' ') {
+                                    return;
+                                }
+                                // Diğer tüm klavye girişlerini engelle
+                                e.preventDefault();
+                            }}
                         />
                     </div>
                     <div className="grid gap-2">
@@ -54,7 +62,7 @@ const ProgressDialog: React.FC<ProgressDialogProps> = ({
                             id="notes"
                             rows={4}
                             value={progressDetails.notes}
-                            onChange={(e) => setProgressDetails({ ...progressDetails, notes: e.target.value })}
+                            onChange={(e) => setProgressDetails({...progressDetails, notes: e.target.value})}
                         />
                     </div>
                 </div>

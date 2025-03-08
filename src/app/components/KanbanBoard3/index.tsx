@@ -18,6 +18,7 @@ import CelebrationDialog from '../Dialogs/CelebrationDialog';
 import TaskDetails from '../TaskDetails';
 import RewardDialog from '../Dialogs/RewardDialog';
 import DeleteConfirmationDialog from '../Dialogs/DeleteConfirmationDialog';
+import DailyQuote from "@/src/app/components/DailyQuote/DailyQuote";
 import { formatDate, getTodayStart } from '../../utils/dateUtils';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import CalendarDialog from '../Dialogs/CalendarDialog';
@@ -295,12 +296,13 @@ const KanbanBoard3: React.FC = () => {
 
     return (
         <div
-            className="h-screen w-screen overflow-hidden"
+            className="h-screen w-screen overflow-y-auto" // Burada overflow-hidden -> overflow-y-auto olarak değiştirildi
             style={{
                 background: `linear-gradient(to bottom right, ${bgColorStart}, ${bgColorEnd})`
             }}
         >
-            <div className="p-6 flex-1 flex flex-col">
+            <div className="p-6 flex flex-col min-h-screen">
+                {/* Header Section - Fixed at top */}
                 <div className="flex justify-between mb-6">
                     <div className="flex items-center">
                         {today ? (
@@ -323,7 +325,7 @@ const KanbanBoard3: React.FC = () => {
 
                     <div className="flex items-center gap-4">
                         <Button
-                            variant="outline" // "ghost" yerine "outline" kullanılacak
+                            variant="outline"
                             className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2 text-white"
                             onClick={() => setShowColorPicker(true)}
                         >
@@ -341,7 +343,9 @@ const KanbanBoard3: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="flex flex-col gap-4 h-full">
+                {/* Main Content Section */}
+                <div className="flex flex-col gap-4 flex-1 mb-6">
+                    {/* Buttons Bar */}
                     <div className="mb-4 flex gap-2">
                         <Button
                             variant="outline"
@@ -362,7 +366,8 @@ const KanbanBoard3: React.FC = () => {
                         </Button>
                     </div>
 
-                    <div className="flex gap-4 h-full overflow-auto">
+                    {/* Columns Container - Columns içeren div */}
+                    <div className="flex gap-4 flex-1 min-h-0">
                         {Object.entries(columns).map(([columnId, column]) => (
                             <Column
                                 key={columnId}
@@ -386,6 +391,11 @@ const KanbanBoard3: React.FC = () => {
                             onDeleteReward={handleDeleteReward}
                         />
                     </div>
+                </div>
+
+                {/* Footer Section - Quote */}
+                <div className="mt-auto pb-4">
+                    {today && <DailyQuote date={today} />}
                 </div>
 
                 {/* Dialogs */}

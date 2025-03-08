@@ -188,17 +188,20 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
     const renderActionButtons = () => {
         return (
             <div className="absolute right-2 top-2 flex space-x-1">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-white h-6 w-6 p-0 hover:bg-white/10"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onEditClick(task, columnId);
-                    }}
-                >
-                    <Edit className="h-3 w-3" />
-                </Button>
+                {/* Edit button - hide in "done" column */}
+                {columnId !== 'done' && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-white h-6 w-6 p-0 hover:bg-white/10"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onEditClick(task, columnId);
+                        }}
+                    >
+                        <Edit className="h-3 w-3" />
+                    </Button>
+                )}
                 <Button
                     variant="ghost"
                     size="icon"
@@ -235,4 +238,4 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
     );
 };
 
-export default TaskCardComponent;
+export default TaskCardComponent
