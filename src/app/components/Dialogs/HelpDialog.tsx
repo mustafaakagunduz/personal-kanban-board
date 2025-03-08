@@ -110,6 +110,24 @@ const HelpDialog: React.FC<HelpDialogProps> = ({ open, onClose }) => {
                             Görev ve ödül kartlarınızın rengini ve içeriğini düzenleyebilir, Kanban tahtanızın rengini gradyan veya tek renk şeklinde özelleştirebilir, daha sonra yeniden kullanmak için kaydedebilirsiniz
                         </p>
                     </AccordionItem>
+
+                    <AccordionItem
+                        title="İletişim"
+                        isOpen={openSection === "iletişim"}
+                        toggle={() => toggleSection("iletişim")}
+                    >
+                        <p className="mb-3">
+                            Öneriler ve özellik istekleri için benimle aşağıdaki kanallardan iletişime geçebilirsiniz:
+                        </p>
+                        <p className="mb-3">
+                            e-mail : akagunduzmustafa00@gmail.com
+                        </p>
+                        <p className="mb-3">
+                            LinkedIn : <a href="https://www.linkedin.com/in/mustafa-akagunduz/" target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-blue-500 hover:underline">linkedin.com/in/mustafa-akagunduz/</a>
+                        </p>
+                    </AccordionItem>
                 </div>
                 <div className="flex justify-center mt-6">
                     <Button
