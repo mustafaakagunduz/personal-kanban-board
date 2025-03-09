@@ -82,7 +82,7 @@ const KanbanBoard3: React.FC = () => {
                     description: 'Ana sayfa ve ürün sayfaları için yeni tasarım öğelerini oluştur.',
                     points: 45,
                     duration: '3 gün',
-                    reward: 'Kahve molası',
+
                     notes: 'Mobil uyumluluk önemli',
                     dueDate: getDateInFuture(3),
                     color: '#ff7518' // Turuncu
@@ -93,7 +93,7 @@ const KanbanBoard3: React.FC = () => {
                     description: 'Ödeme sistemini yeni API ile entegre et ve test senaryolarını çalıştır.',
                     points: 60,
                     duration: '5 gün',
-                    reward: 'Erken çıkış',
+
                     notes: 'Dokümantasyon güncellenmeli',
                     dueDate: getDateInFuture(5),
                     color: '#ff0000' // Kırmızı
