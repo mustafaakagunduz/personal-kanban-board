@@ -169,37 +169,29 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
         );
     };
 
-    // Helper function for action buttons
-    const renderActionButtons = () => {
-        return (
-            <div className="absolute right-2 top-2 flex space-x-1">
-                {/* Edit button - hide in "done" column */}
-                {columnId !== 'done' && (
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-white h-6 w-6 p-0 hover:bg-white/10"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onEditClick(task, columnId);
-                        }}
-                    >
-                        <Edit className="h-3 w-3" />
-                    </Button>
-                )}
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-white h-6 w-6 p-0 hover:bg-white/10"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onDeleteClick(task, columnId);
-                    }}
-                >
-                    <Trash2 className="h-3 w-3" />
-                </Button>
-            </div>
-        );
+    // Improved function for delete button - simplified logic
+    const handleDeleteClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onDeleteClick(task, columnId);
+    };
+
+    // Improved function for edit button
+    const handleEditClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onEditClick(task, columnId);
+    };
+
+    // Improved function for card click
+    const handleCardClick = (e: React.MouseEvent) => {
+        // Only trigger card click if the event wasn't handled by buttons
+        if (!(e.target instanceof Element &&
+            (e.target.closest('button') ||
+                e.target.tagName === 'BUTTON' ||
+                e.target.parentElement?.tagName === 'BUTTON'))) {
+            onClick(task, columnId);
+        }
     };
 
     // Default color (indigo-900)
@@ -213,10 +205,36 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
             style={{ backgroundColor: task.color ? `${task.color}` : `${defaultColor}` }}
         >
             <div
-                onClick={() => onClick(task, columnId)}
+                onClick={handleCardClick}
                 className="cursor-pointer py-3 px-3 relative h-full min-h-[80px] flex flex-col"
             >
-                {renderActionButtons()}
+                {/* Action buttons - positioned absolutely */}
+                <div className="absolute right-2 top-2 flex space-x-1 z-10">
+                    {/* Edit button - hide in "done" column */}
+                    {columnId !== 'done' && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-white h-6 w-6 p-0 hover:bg-white/10"
+                            onClick={handleEditClick}
+                        >
+                            <Edit className="h-3 w-3" />
+                        </Button>
+                    )}
+
+                    {/* Delete button with improved styling and event handling */}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-white h-6 w-6 p-0 hover:bg-white/10"
+                        onClick={handleDeleteClick}
+                        aria-label="Delete task"
+                    >
+                        <Trash2 className="h-3 w-3" />
+                    </Button>
+                </div>
+
+                {/* Task content */}
                 {renderContent()}
             </div>
         </div>
