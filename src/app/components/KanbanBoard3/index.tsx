@@ -40,21 +40,109 @@ import {
     ColumnData
 } from '../../types';
 
+// Use this function from dateUtils instead of defining it locally
+// Import it at the top with your other imports
+import { getDateInFuture } from "../../utils/dateUtils";
+
 const KanbanBoard3: React.FC = () => {
-    // Local storage hooks
-    const [columns, setColumns] = useLocalStorage<Columns>('kanbanData', {
-        todo: { title: 'Yapılacaklar', items: [] },
-        inProgress: { title: 'Devam Edenler', items: [] },
-        done: { title: 'Tamamlananlar', items: [] }
-    });
+    // Örnek görevler
+    const sampleTasks = {
+        todo: {
+            title: '🎯 Yapılacaklar 🎯',
+            items: [
+                {
+                    id: 'todo-1',
+                    title: 'Haftalık raporu hazırla',
+                    description: 'Pazartesi toplantısı için satış raporunu hazırla ve sunum dosyasını oluştur.',
+                    points: 30,
+                    color: '#6b21a8' // Mor
+                },
+                {
+                    id: 'todo-2',
+                    title: 'E-postaları yanıtla',
+                    description: 'Müşterilerden gelen acil e-postaları yanıtla ve takip işlemlerini gerçekleştir.',
+                    points: 15,
+                    color: '#1f91dc' // Mavi
+                },
+                {
+                    id: 'todo-3',
+                    title: 'Proje planını güncelle',
+                    description: 'Yeni isteklere göre proje planını güncelle ve takım üyelerine bilgi ver.',
+                    points: 25,
+                    color: '#008000' // Yeşil
+                }
+            ]
+        },
+        inProgress: {
+            title: '⏳️ Devam Edenler ⏳',
+            items: [
+                {
+                    id: 'progress-1',
+                    title: 'Web sitesi tasarımı',
+                    description: 'Ana sayfa ve ürün sayfaları için yeni tasarım öğelerini oluştur.',
+                    points: 45,
+                    duration: '3 gün',
+                    reward: 'Kahve molası',
+                    notes: 'Mobil uyumluluk önemli',
+                    dueDate: getDateInFuture(3),
+                    color: '#ff7518' // Turuncu
+                },
+                {
+                    id: 'progress-2',
+                    title: 'API entegrasyonu',
+                    description: 'Ödeme sistemini yeni API ile entegre et ve test senaryolarını çalıştır.',
+                    points: 60,
+                    duration: '5 gün',
+                    reward: 'Erken çıkış',
+                    notes: 'Dokümantasyon güncellenmeli',
+                    dueDate: getDateInFuture(5),
+                    color: '#ff0000' // Kırmızı
+                },
+                {
+                    id: 'progress-3',
+                    title: 'Müşteri araştırması',
+                    description: 'Müşteri geri bildirimlerini analiz et ve iyileştirme önerileri hazırla.',
+                    points: 35,
+                    duration: '2 gün',
+                    reward: '',
+                    notes: 'Yönetim ekibine sunum yapılacak',
+                    dueDate: getDateInFuture(2),
+                    color: '#ffa500' // Sarı
+                }
+            ]
+        },
+        done: {
+            title: '✅ Tamamlananlar ✅',
+            items: [
+                {
+                    id: 'done-1',
+                    title: 'Bütçe planlaması',
+                    description: 'Q2 için departman bütçesini hazırla ve onaya gönder.',
+                    points: 40,
+                    color: '#ff00ff' // Pembe
+                },
+                {
+                    id: 'done-2',
+                    title: 'Ekip toplantısı',
+                    description: 'Haftalık ekip toplantısını düzenle ve notları paylaş.',
+                    points: 20,
+                    color: '#000000' // Siyah
+                }
+            ]
+        }
+    };
+
+    // Local storage hooks - Yeni projeler için örnek veriler, varsa localStorage'dan alır
+    const [columns, setColumns] = useLocalStorage<Columns>('kanbanData', sampleTasks);
 
     const [rewards, setRewards] = useLocalStorage<Reward[]>('rewards', [
-        { id: '1', title: 'Latte', points: 35 },
-        { id: '2', title: 'Sinema', points: 100 },
-        { id: '3', title: 'Pizza', points: 75 },
+        { id: '1', title: 'Latte', points: 35, color: '#6b21a8' },
+        { id: '2', title: 'Sinema', points: 100, color: '#1f91dc' },
+        { id: '3', title: 'Pizza', points: 75, color: '#008000' },
+        { id: '4', title: 'Kitap', points: 50, color: '#ff7518' },
     ]);
 
-    const [totalPoints, setTotalPoints] = useLocalStorage<number>('totalPoints', 0);
+    const [totalPoints, setTotalPoints] = useLocalStorage<number>('totalPoints', 150); // Başlangıçta biraz puan
     const [calendarDialogOpen, setCalendarDialogOpen] = useState<boolean>(false);
     const [infoDialogOpen, setInfoDialogOpen] = useState<boolean>(false);
     //colors:

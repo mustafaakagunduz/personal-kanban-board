@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { formatDate } from '../../utils/dateUtils';
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { formatDate, safeParseDate, isSameCalendarDay } from '../../utils/dateUtils';
 
 interface TaskWithDueDate {
     id: string;
@@ -24,6 +24,13 @@ const CalendarDialog: React.FC<CalendarDialogProps> = ({
                                                            onSelectDate,
                                                            tasksWithDueDates = []
                                                        }) => {
+    // Log tasks with due dates for debugging
+    useEffect(() => {
+        if (tasksWithDueDates.length > 0) {
+            console.log('Tasks with due dates:', tasksWithDueDates);
+        }
+    }, [tasksWithDueDates]);
+
     // Use selectedDate or current date as the default
     const [currentDate, setCurrentDate] = useState(() => {
         return selectedDate ? new Date(selectedDate) : new Date();
@@ -138,44 +145,30 @@ const CalendarDialog: React.FC<CalendarDialogProps> = ({
         );
     };
 
-    // Bir günde son tarihi olan görevleri bul - DÜZELTME: Tarih formatı sorununu çözdük
+    // A day has tasks function - improved version
     const getTasksForDay = (day: number, monthOffset: number) => {
         if (!tasksWithDueDates || tasksWithDueDates.length === 0) return [];
 
-        // Gün için tarih oluştur - Yıl, ay ve günü manuel olarak birleştiriyoruz
-        const targetDay = day;
-        const targetMonth = month + monthOffset + 1; // Aylar 1'den başlıyor
-        const targetYear = year;
+        // Create a date for this calendar cell
+        const calendarCellDate = new Date(year, month + monthOffset, day);
 
-        // Görev tarihlerini "YYYY-MM-DD" formatında kontrol etmek yerine
-        // Gün, ay ve yıl parçalarını ayrı ayrı kontrol edeceğiz
+        // Filter tasks for this date, comparing only the calendar day (ignoring time)
         return tasksWithDueDates.filter(task => {
             try {
-                let taskDate;
+                // Parse the task's due date
+                const taskDueDate = safeParseDate(task.dueDate);
 
-                // İlk olarak, tarih "Tarih: XX.XX.XXXX" formatında olabilir
-                if (typeof task.dueDate === "string" && task.dueDate.includes("Tarih:")) {
-                    // "Tarih: " kısmını kaldırıp işliyoruz
-                    const datePart = task.dueDate.replace("Tarih:", "").trim();
-                    taskDate = new Date(datePart);
-                } else {
-                    // Doğrudan tarih nesnesi oluşturuyoruz
-                    taskDate = new Date(task.dueDate);
-                }
+                // Skip invalid dates
+                if (!taskDueDate) return false;
 
-                // Tarih geçerli mi kontrol et
-                if (isNaN(taskDate.getTime())) {
-                    return false;
-                }
-
-                // Gün, ay ve yıl eşleşiyor mu kontrol et
+                // Compare only year, month, and day
                 return (
-                    taskDate.getDate() === targetDay &&
-                    taskDate.getMonth() + 1 === targetMonth && // getMonth() 0'dan başlar
-                    taskDate.getFullYear() === targetYear
+                    taskDueDate.getDate() === calendarCellDate.getDate() &&
+                    taskDueDate.getMonth() === calendarCellDate.getMonth() &&
+                    taskDueDate.getFullYear() === calendarCellDate.getFullYear()
                 );
             } catch (error) {
-                console.error("Tarih işleme hatası:", error);
+                console.error(`Error checking task due date for "${task.title}":`, error);
                 return false;
             }
         });

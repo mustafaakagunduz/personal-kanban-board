@@ -1,10 +1,9 @@
 import React from 'react';
 import { Task } from '../../types';
-import { getDaysLeft, formatDate } from '../../utils/dateUtils';
-import { Card, CardContent } from "@/components/ui/card";
+import { getDaysLeft, formatDate, safeParseDate } from '../../utils/dateUtils';
 import { Typography } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Calendar, Gift, FileText, Clock } from 'lucide-react';
+import { Edit, Trash2, Calendar, Gift, FileText } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { taskCardClass } from "../KanbanBoard3/styles";
 
@@ -27,40 +26,26 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                                                         onClick,
                                                         today
                                                     }) => {
-    // Debug bilgileri konsola yazdırma
-    console.log(`Task ID: ${task.id}, DueDate: ${task.dueDate}, Today:`, today);
+    // Parse date safely and get formatted date
+    const { formattedDate, dueDate } = React.useMemo(() => {
+        if (!task.dueDate) return { formattedDate: '', dueDate: null };
 
-    // Bitiş tarihinin geçerli olup olmadığını kontrol et
-    let validDueDate = false;
-    let formattedDate = '';
+        const parsedDate = safeParseDate(task.dueDate);
+        return {
+            dueDate: parsedDate,
+            formattedDate: parsedDate ? formatDate(parsedDate) : 'Geçersiz tarih'
+        };
+    }, [task.dueDate]);
 
-    try {
-        if (task.dueDate) {
-            const date = new Date(task.dueDate);
-            formattedDate = formatDate(date);
-            validDueDate = !isNaN(date.getTime());
-            console.log(`Task ${task.id} date validation: ${validDueDate}, formatted: ${formattedDate}`);
-        }
-    } catch (error) {
-        console.error(`Error formatting date for task ${task.id}:`, error);
-    }
-
-    // Kalan günleri hesapla
+    // Calculate days left safely
     const daysLeft = React.useMemo(() => {
-        if (!task.dueDate || !today || !validDueDate) return null;
-        try {
-            return getDaysLeft(task.dueDate, today);
-        } catch (error) {
-            console.error(`Error calculating days left for task ${task.id}:`, error);
-            return null;
-        }
-    }, [task.dueDate, today, validDueDate, task.id]);
+        if (!task.dueDate || !today) return null;
+        return getDaysLeft(task.dueDate, today);
+    }, [task.dueDate, today]);
 
-    console.log(`Days Left for task ${task.id}: ${daysLeft}`);
-
-    // Koşullu render işlevi
+    // Conditional render function
     const renderContent = () => {
-        // Yapılacaklar kolonunda - minimal bilgi
+        // Todo column - minimal info
         if (columnId === 'todo') {
             return (
                 <div className="flex flex-col h-full justify-between">
@@ -71,7 +56,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                         )}
                     </div>
 
-                    {/* Puanlar */}
+                    {/* Points */}
                     <div className="mt-auto">
                         <Typography className="text-white text-xs font-semibold">
                             Puan: {task.points || 0}
@@ -81,14 +66,14 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
             );
         }
 
-        // Devam edenler kolonunda - kompakt görünüm
+        // In progress column - compact view
         else if (columnId === 'inProgress') {
             return (
                 <div className="flex flex-col h-full justify-between">
                     <div>
                         <Typography variant="h5" className="font-bold text-white mb-2">{task.title}</Typography>
 
-                        {/* Notlar */}
+                        {/* Notes */}
                         {task.notes && (
                             <div className="flex items-center mb-2">
                                 <FileText className="h-3 w-3 text-white/80 mr-1" />
@@ -98,7 +83,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                     </div>
 
                     <div className="mt-auto">
-                        {/* Bitiş Tarihi ve kalan gün */}
+                        {/* Due date and days left */}
                         {task.dueDate && (
                             <div className="flex items-center justify-between mb-2">
                                 <span className="flex items-center text-white/90 text-xs">
@@ -118,7 +103,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                             </div>
                         )}
 
-                        {/* Puan ve Ödül */}
+                        {/* Points and Reward */}
                         <div className="flex items-center justify-between">
                             <Typography className="text-white text-xs font-semibold">
                                 {task.points || 0} Puan
@@ -136,7 +121,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
             );
         }
 
-        // Tamamlananlar kolonunda - minimal görünüm
+        // Done column - minimal view
         else if (columnId === 'done') {
             return (
                 <div className="flex flex-col h-full justify-between">
@@ -147,7 +132,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                         )}
                     </div>
 
-                    {/* Puan */}
+                    {/* Points */}
                     <div className="mt-auto">
                         <Typography className="text-white text-xs font-semibold">
                             Kazanılan: {task.points || 0} Puan
@@ -157,14 +142,14 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
             );
         }
 
-        // Varsayılan görünüm (diğer tüm durumlar için)
+        // Default view (for all other cases)
         return (
             <div className="flex flex-col h-full justify-between">
                 <div>
                     <Typography variant="h5" className="font-bold text-white mb-2">{task.title}</Typography>
                 </div>
 
-                {/* Tarih, kalan gün ve puan */}
+                {/* Date, days left and points */}
                 <div className="flex items-center justify-between text-white text-xs mt-auto">
                     {task.dueDate && (
                         <span className="flex items-center">
@@ -184,7 +169,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
         );
     };
 
-    // Düzenleme ve silme butonlarını oluşturan yardımcı işlev
+    // Helper function for action buttons
     const renderActionButtons = () => {
         return (
             <div className="absolute right-2 top-2 flex space-x-1">
@@ -217,7 +202,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
         );
     };
 
-    // Varsayılan renk değeri (indigo-900)
+    // Default color (indigo-900)
     const defaultColor = "#4c1d95";
 
     return (
@@ -238,4 +223,4 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
     );
 };
 
-export default TaskCardComponent
+export default TaskCardComponent;

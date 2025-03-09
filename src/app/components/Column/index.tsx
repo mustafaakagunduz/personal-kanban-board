@@ -32,23 +32,28 @@ const Column: React.FC<ColumnProps> = ({
             return column.items;
         }
 
-        return [...column.items].sort((taskA, taskB) => {
-            // Tasks without a due date should be at the bottom
-            if (!taskA.dueDate) return 1;
-            if (!taskB.dueDate) return -1;
+        try {
+            return [...column.items].sort((taskA, taskB) => {
+                // Tasks without a due date should be at the bottom
+                if (!taskA.dueDate) return 1;
+                if (!taskB.dueDate) return -1;
 
-            // Calculate days left for each task
-            const daysLeftA = getDaysLeft(taskA.dueDate, today);
-            const daysLeftB = getDaysLeft(taskB.dueDate, today);
+                // Calculate days left for each task
+                const daysLeftA = getDaysLeft(taskA.dueDate, today);
+                const daysLeftB = getDaysLeft(taskB.dueDate, today);
 
-            // Handle null values
-            if (daysLeftA === null && daysLeftB === null) return 0;
-            if (daysLeftA === null) return 1;
-            if (daysLeftB === null) return -1;
+                // Handle null values (invalid dates)
+                if (daysLeftA === null && daysLeftB === null) return 0;
+                if (daysLeftA === null) return 1;
+                if (daysLeftB === null) return -1;
 
-            // Sort by days left (ascending order - least days at top)
-            return daysLeftA - daysLeftB;
-        });
+                // Sort by days left (ascending order - least days at top)
+                return daysLeftA - daysLeftB;
+            });
+        } catch (error) {
+            console.error('Error sorting tasks:', error);
+            return column.items; // Return unsorted if there's an error
+        }
     }, [column.items, columnId, today]);
 
     return (
