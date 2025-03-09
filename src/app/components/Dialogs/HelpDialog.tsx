@@ -68,81 +68,107 @@ const HelpDialog: React.FC<HelpDialogProps> = ({ open, onClose }) => {
         <Dialog open={open} onOpenChange={onClose}>
             <DialogContent className="bg-white/90 backdrop-blur-md rounded-lg shadow-lg border-0 max-w-md max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle className="text-xl font-bold text-gray-800">Nasıl Kullanılır?</DialogTitle>
+                    <DialogTitle className="text-xl font-bold text-gray-800">🧭 Kanban'ı Keşfedin! </DialogTitle>
                 </DialogHeader>
                 <div className="text-gray-700 my-4">
                     <AccordionItem
-                        title="Görevleri Yönetme"
+                        title="🎯 Görevleri Yönetme"
                         isOpen={openSection === "görevleri-yönetme"}
                         toggle={() => toggleSection("görevleri-yönetme")}
                     >
                         <p className="mb-3">
-                            "Yeni Görev" butonu ile "Yapılacak"lar kolonuna kolayca yeni bir görev ekleyebilir, daha
-                            sonra bu görevi "sürükle & bırak" metoduyla, tamamlanacağı son tarih ile beraber "Devam Edenler" kolonuna
-                            taşıyabilirsiniz.
+                            <span className="font-medium text-[#2D9596]">"Yeni Görev"</span> butonu ile hayallerinizi
+                            ve hedeflerinizi kolayca listeye ekleyin! ✍️
+                        </p>
+                        <p className="mb-3">
+                            Görevlerinizi <span className="font-medium text-[#2D9596]">sürükle & bırak</span> yöntemiyle
+                            ilerleme durumuna göre taşıyabilir, son tarih belirleyebilirsiniz. 🔄
+                        </p>
+                    </AccordionItem>
+                    <AccordionItem
+                        title="📋 Günlük Yapılacaklar"
+                        isOpen={openSection === "gunluk-yapilacaklar"}
+                        toggle={() => toggleSection("gunluk-yapilacaklar")}
+                    >
+                        <p className="mb-3">
+                            <span className="font-medium text-[#2D9596]">"Bugün Yapacaklarım"</span> özelliği ile günlük görevlerinizi kolayca takip edebilirsiniz! 🗓️
                         </p>
 
+                        <ul className="list-disc pl-5 mb-3 space-y-2">
+                            <li>Farklı öncelik seviyelerinde (yüksek 🔴, orta 🟠, düşük 🟢) görevler ekleyebilirsiniz</li>
+                            <li>Görevleri tamamlandı olarak işaretleyebilir veya silebilirsiniz</li>
 
+
+                        </ul>
+                        <p className="mb-3">
+                            Günlük yapacaklarınızı planlayarak, gününüzü daha verimli hale getirin ve hiçbir görevi atlamadığınızdan emin olun! ✅
+                        </p>
                     </AccordionItem>
-
                     <AccordionItem
-                        title="Takvim"
+                        title="📅 Takvim Özellikleri"
                         isOpen={openSection === "sürükle-bırak"}
                         toggle={() => toggleSection("sürükle-bırak")}
                     >
                         <p className="mb-3">
-                            Sol üsteki takvimden bugünün tarihini görebilir, takvimdeki günlere tıklayarak da yeni görev
-                            ekleyebilirsiniz..
+                            Sol üstteki takvim ile bugünü görebilir, istediğiniz güne tıklayarak
+                            hemen o güne özel görev oluşturabilirsiniz! 🗓️
                         </p>
                         <p className="mb-3">
-                            "Devam edenler" kolonundaki görevlerinizin son tarihi takvimde gösterilir, mouse ile üzerine gelince görevlerinizin başlıklarını görebilirsiniz
+                            <span className="text-red-500 font-medium">Kırmızı noktalar</span> o gün son tarihi olan görevlerinizi
+                            gösterir. Merak ettiğiniz tarihin üzerine fareyle gelerek hangi görevler olduğunu
+                            görebilirsiniz. 👀
                         </p>
-
                     </AccordionItem>
 
                     <AccordionItem
-                        title="Ödül Sistemi"
+                        title="🎁 Kendinizi Ödüllendirin"
                         isOpen={openSection === "ödül-sistemi"}
                         toggle={() => toggleSection("ödül-sistemi")}
                     >
                         <p className="mb-3">
-                            "Devam Edenler" kolonundaki bir görevinizi "Tamamlananlar"a taşıdığınız zaman, görevinizin puanı kadar puan kazanırsınız.
+                            Görevlerinizi tamamladıkça puanlar kazanın ve bu puanlarla kendinize
+                            küçük ödüller verin! 🏆
                         </p>
                         <p className="mb-3">
-                            Sağ üst kısımda puanınızı görebilir ve bu puanları
-                            ödüller için kullanabilirsiniz. Yeterli puanı topladığınızda ödül kartlarındaki "Kullan"
-                            butonu aktif hale gelecek, kullandığınız takdirde puanınız belirtilen miktarda düşecektir
+                            Sağ üstte biriken puanlarınızı görebilir, <span className="font-medium text-[#2D9596]">
+                            "Yeni Ödül"</span> butonu ile kendinize motivasyon ödülleri ekleyebilirsiniz. 💰
                         </p>
                         <p className="mb-3">
-                            "Yeni Ödül" butonu ile "Ödüller" kolonuna yeni ödüller ekleyebilirsiniz.
+                            Yeterli puanı topladığınızda <span className="font-medium text-green-500">"Kullan"</span> butonu
+                            aktif olur - kendinizi şımartmanın tam zamanı! 💫
                         </p>
                     </AccordionItem>
 
                     <AccordionItem
-                        title="Özelleştirme"
+                        title="🎨 Kişiselleştirme"
                         isOpen={openSection === "özelleştirme"}
                         toggle={() => toggleSection("özelleştirme")}
                     >
                         <p className="mb-3">
-                            Görev ve ödül kartlarınızın rengini ve içeriğini düzenleyebilir, Kanban tahtanızın rengini gradyan veya tek renk şeklinde özelleştirebilir, daha sonra yeniden kullanmak için kaydedebilirsiniz
+                            Kendinize özel bir çalışma alanı yaratın! Görev ve ödül kartlarınızın renklerini değiştirin,
+                            Kanban tahtanızı sevdiğiniz renklerle süsleyin. 🌈
+                        </p>
+                        <p className="mb-3">
+                            Favori renk kombinasyonlarınızı kaydederek her zaman size ilham veren bir ortamda
+                            çalışabilirsiniz! ✨
                         </p>
                     </AccordionItem>
 
                     <AccordionItem
-                        title="İletişim"
+                        title="📬 İletişim"
                         isOpen={openSection === "iletişim"}
                         toggle={() => toggleSection("iletişim")}
                     >
                         <p className="mb-3">
-                            Öneriler ve özellik istekleri için benimle aşağıdaki kanallardan iletişime geçebilirsiniz:
+                            Fikir ve önerileriniz değerli! Benimle aşağıdaki kanallardan iletişime geçebilirsiniz: 📝
                         </p>
                         <p className="mb-3">
-                            e-mail : akagunduzmustafa00@gmail.com
+                            📧 E-mail: <span className="font-medium">akagunduzmustafa00@gmail.com</span>
                         </p>
                         <p className="mb-3">
-                            LinkedIn : <a href="https://www.linkedin.com/in/mustafa-akagunduz/" target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="text-blue-500 hover:underline">linkedin.com/in/mustafa-akagunduz/</a>
+                            🔗 LinkedIn: <a href="https://www.linkedin.com/in/mustafa-akagunduz/" target="_blank"
+                                           rel="noopener noreferrer"
+                                           className="text-blue-500 hover:underline font-medium">linkedin.com/in/mustafa-akagunduz/</a>
                         </p>
                     </AccordionItem>
                 </div>
@@ -151,7 +177,7 @@ const HelpDialog: React.FC<HelpDialogProps> = ({ open, onClose }) => {
                         onClick={onClose}
                         className="bg-gradient-to-r from-[#2D9596] to-[#265073] hover:from-[#249090] hover:to-[#1e405e] text-white cursor-pointer"
                     >
-                        Anladım
+                        Harika, Anladım! 👍
                     </Button>
                 </div>
             </DialogContent>

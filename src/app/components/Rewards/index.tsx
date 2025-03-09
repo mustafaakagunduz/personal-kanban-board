@@ -27,7 +27,7 @@ const Rewards: React.FC<RewardsProps> = ({
         <div className={kanbanColumnClass}>
             <div className="flex justify-center items-center mb-4">
                 <Typography variant="h4" className={columnHeaderClass}>
-                    Ödüller
+                    🏆 Ödüller 🏆
                 </Typography>
             </div>
 
