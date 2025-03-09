@@ -482,7 +482,7 @@ const KanbanBoard3: React.FC = () => {
                             onClick={() => setHelpDialogOpen(true)}
                         >
                             <HelpCircle className="h-5 w-5"/>
-                            <span>Yardım</span>
+                            <span>Kanban'ı Keşfedin!</span>
                         </Button>
                         <Button
                             variant="outline"
