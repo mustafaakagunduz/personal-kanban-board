@@ -57,29 +57,28 @@ const DailyQuote: React.FC<DailyQuoteProps> = ({ date }) => {
     const todayQuote = date ? getQuoteForDay(date) : getQuoteForDay(new Date());
 
     return (
-
-        <Card className={`${quoteCardClass} hover:bg-white/20 mt-6 mb-4 transition-all duration-300`}>
-            <div className="p-6 text-center relative">
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 text-sm font-medium text-white/80">
+        <Card className={`${quoteCardClass} hover:bg-white/20 mt-4 mb-2 transition-all duration-300 max-w-3xl mx-auto`}>
+            <div className="p-4 text-center relative">
+                <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 text-xs font-medium text-white/80">
                     Günün Sözü
                 </div>
 
-                <div className="absolute left-3 top-4 text-white/30 text-4xl font-serif">"</div>
-                <div className="absolute right-3 bottom-8 text-white/30 text-4xl font-serif">"</div>
+                <div className="absolute left-2 top-3 text-white/30 text-3xl font-serif">"</div>
+                <div className="absolute right-2 bottom-6 text-white/30 text-3xl font-serif">"</div>
 
                 <Typography
-                    variant="h4"
-                    className="text-white font-light italic mb-4 pt-4 px-6 leading-relaxed"
+                    variant="h5"
+                    className="text-white font-light italic mb-2 pt-2 px-4 leading-relaxed"
                 >
                     {todayQuote.text}
                 </Typography>
 
                 <div className="flex items-center justify-center">
-                    <div className="h-px w-10 bg-white/40 mr-3"></div>
-                    <Typography variant="muted" className="text-white/80 font-medium">
+                    <div className="h-px w-8 bg-white/40 mr-2"></div>
+                    <Typography variant="muted" className="text-white/80 font-medium text-sm">
                         {todayQuote.author}
                     </Typography>
-                    <div className="h-px w-10 bg-white/40 ml-3"></div>
+                    <div className="h-px w-8 bg-white/40 ml-2"></div>
                 </div>
             </div>
         </Card>
