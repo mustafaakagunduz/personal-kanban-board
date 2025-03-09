@@ -29,7 +29,7 @@ import CalendarDialog from '../Dialogs/CalendarDialog';
 import ColorPickerDialog from "@/src/app/components/Dialogs/ColorPickerDialog";
 import { Typography } from "@/components/ui/typography";
 import InfoDialog from '../Dialogs/InfoDialog';
-import DailyToDoDialog from '../Dialogs/DailyToDoDialog'; // Yeni import eklendi
+import DailyToDoDialog from '../Dialogs/DailyToDoDialog';
 import {
     Task,
     Reward,
@@ -131,7 +131,7 @@ const KanbanBoard3: React.FC = () => {
         setNewReward({
             title: reward.title,
             points: reward.points,
-            color: reward.color // Renk özelliğini ekliyoruz
+            color: reward.color
         });
         setEditRewardDialog(true);
     };
@@ -277,7 +277,7 @@ const KanbanBoard3: React.FC = () => {
             id: Math.random().toString(36).slice(2, 11),
             title: newReward.title,
             points: newReward.points,
-            color: newReward.color // Renk özelliğini ekliyoruz
+            color: newReward.color
         };
 
         setRewards(prev => [...prev, reward]);
@@ -294,7 +294,7 @@ const KanbanBoard3: React.FC = () => {
                     ...reward,
                     title: newReward.title,
                     points: newReward.points as number,
-                    color: newReward.color // Renk özelliğini ekliyoruz
+                    color: newReward.color
                 }
                 : reward
         ));
@@ -304,9 +304,25 @@ const KanbanBoard3: React.FC = () => {
         setNewReward({ title: '', points: '', color: '' });
     };
 
+    // New function to handle date selection from calendar
+    const handleCalendarDateSelect = (date: Date) => {
+        // Format the date for the description
+        const formattedDate = formatDate(date);
+
+        // Pre-fill the task form with the selected date in the description
+        setNewTask({
+            ...newTask,
+            description: `${formattedDate} 'e kadar..`,
+            column: 'todo'
+        });
+
+        // Open the task dialog
+        setOpenDialog(true);
+    };
+
     return (
         <div
-            className="h-screen w-screen overflow-y-auto" // Burada overflow-hidden -> overflow-y-auto olarak değiştirildi
+            className="h-screen w-screen overflow-y-auto"
             style={{
                 background: `linear-gradient(to bottom right, ${bgColorStart}, ${bgColorEnd})`
             }}
@@ -504,6 +520,7 @@ const KanbanBoard3: React.FC = () => {
                     open={calendarDialogOpen}
                     onClose={() => setCalendarDialogOpen(false)}
                     selectedDate={today || undefined}
+                    onSelectDate={handleCalendarDateSelect} // Add the new prop here
                 />
 
                 <ColorPickerDialog
@@ -524,7 +541,7 @@ const KanbanBoard3: React.FC = () => {
                     onClose={() => {
                         setEditRewardDialog(false);
                         setEditingReward(null);
-                        setNewReward({title: '', points: ''});
+                        setNewReward({title: '', points: '', color: ''});
                     }}
                     reward={newReward}
                     setReward={setNewReward}
