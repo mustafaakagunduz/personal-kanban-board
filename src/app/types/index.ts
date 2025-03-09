@@ -38,6 +38,15 @@ export interface ProgressDetails {
     dueDate: string;
 }
 
+interface TodoItem {
+    id: string;           // Benzersiz ID
+    text: string;         // Görev metni
+    completed: boolean;   // Tamamlanma durumu
+    createdAt: string;    // Oluşturulma tarihi (ISO string)
+    priority?: 'low' | 'medium' | 'high';  // Öncelik seviyesi
+    timeEstimate?: number;  // Tahmini süre (dakika)
+}
+
 export interface SelectedTask extends Task {
     columnId: string;
     columnStatus?: string;

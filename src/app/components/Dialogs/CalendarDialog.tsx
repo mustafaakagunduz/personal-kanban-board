@@ -1,21 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { formatDate } from '../../utils/dateUtils'; // Assuming you have this utility
 
 interface CalendarDialogProps {
     open: boolean;
     onClose: () => void;
     selectedDate?: Date;
+    onSelectDate?: (date: Date) => void; // New prop for date selection
 }
 
 const CalendarDialog: React.FC<CalendarDialogProps> = ({
                                                            open,
                                                            onClose,
-                                                           selectedDate
+                                                           selectedDate,
+                                                           onSelectDate
                                                        }) => {
-    // Başlangıç tarihi olarak seçilen tarihi veya bugünü kullan
+    // Use selectedDate or current date as the default
     const [currentDate, setCurrentDate] = useState(() => {
-        return selectedDate ? new Date(selectedDate) : new Date(2025, 1, 28);
+        return selectedDate ? new Date(selectedDate) : new Date();
     });
 
     // Takvim görünümü için gerekli tarih bilgilerini hesapla
@@ -117,12 +120,25 @@ const CalendarDialog: React.FC<CalendarDialogProps> = ({
         );
     };
 
+    // Handle day click - new function
+    const handleDayClick = (day: number, monthOffset: number) => {
+        // Create a date object for the selected day
+        const selectedDay = new Date(year, month + monthOffset, day);
+
+        // Call the callback if provided
+        if (onSelectDate) {
+            onSelectDate(selectedDay);
+        }
+
+        // Close the dialog
+        onClose();
+    };
+
     return (
         <Dialog open={open} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-md rounded-xl p-0 max-h-[90vh] overflow-auto">
                 <DialogHeader className="border-b p-6 relative">
                     <DialogTitle className="text-center text-2xl font-medium">Takvim</DialogTitle>
-
                 </DialogHeader>
 
                 <div className="p-6">
@@ -157,20 +173,21 @@ const CalendarDialog: React.FC<CalendarDialogProps> = ({
                             const monthOffset = isCurrentMonth ? 0 : (index < prevMonthDays.length ? -1 : 1);
 
                             // Şu anki gün bugün mü?
-                            const isToday = day === currentDate.getDate() &&
-                                month === currentDate.getMonth() &&
-                                year === currentDate.getFullYear() &&
+                            const isToday = day === new Date().getDate() &&
+                                month === new Date().getMonth() &&
+                                year === new Date().getFullYear() &&
                                 isCurrentMonth;
 
                             return (
                                 <div
                                     key={`day-${index}`}
-                                    className={`text-center py-2 text-lg cursor-pointer hover:bg-gray-100 rounded-full
+                                    className={`text-center py-2 text-lg cursor-pointer hover:bg-gray-100 hover:text-black rounded-full
                                         ${isCurrentMonth ? 'text-black' : 'text-gray-400'}
                                         ${isSelectedDay(day, monthOffset) ?
                                         'bg-black text-white hover:bg-black hover:bg-opacity-90 rounded-full w-10 h-10 flex items-center justify-center mx-auto' : ''}
                                         ${isToday && !isSelectedDay(day, monthOffset) ?
                                         'font-bold border border-gray-400 rounded-full w-10 h-10 flex items-center justify-center mx-auto' : ''}`}
+                                    onClick={() => handleDayClick(day, monthOffset)}
                                 >
                                     {day}
                                 </div>

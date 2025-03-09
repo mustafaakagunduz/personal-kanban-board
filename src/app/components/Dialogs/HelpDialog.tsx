@@ -77,18 +77,23 @@ const HelpDialog: React.FC<HelpDialogProps> = ({ open, onClose }) => {
                         toggle={() => toggleSection("görevleri-yönetme")}
                     >
                         <p className="mb-3">
-                            "Yeni Görev" butonu ile "Yapılacak"lar kolonuna kolayca yeni bir görev ekleyebilir, daha sonra bu görevi tamamlanması gereken son tarih ile beraber "Devam Edenler" kolonuna taşıyabilirsiniz. "Yeni Ödül" butonu ile "Ödüller" kolonuna yeni ödüller ekleyebilirsiniz.
+                            "Yeni Görev" butonu ile "Yapılacak"lar kolonuna kolayca yeni bir görev ekleyebilir, daha
+                            sonra bu görevi "sürükle & bırak" metoduyla, tamamlanacağı son tarih ile beraber "Devam Edenler" kolonuna
+                            taşıyabilirsiniz.
                         </p>
+
+
                     </AccordionItem>
 
                     <AccordionItem
-                        title="Sürükle & Bırak"
+                        title="Takvim"
                         isOpen={openSection === "sürükle-bırak"}
                         toggle={() => toggleSection("sürükle-bırak")}
                     >
                         <p className="mb-3">
-                            Görevleri kolonlar arasında taşımak için sürükle & bırak özelliğini kullanabilirsiniz.
+                            Sol üsteki takvimden bugünün tarihini görebilir, takvimdeki günlere tıklayarak da yeni görev ekleyebilirsiniz..
                         </p>
+
                     </AccordionItem>
 
                     <AccordionItem
@@ -97,7 +102,15 @@ const HelpDialog: React.FC<HelpDialogProps> = ({ open, onClose }) => {
                         toggle={() => toggleSection("ödül-sistemi")}
                     >
                         <p className="mb-3">
-                            Sağ üst kısımda puanınızı görebilir, görevleri tamamladıkça puan kazanır ve bu puanları ödüller için kullanabilirsiniz. Yeterli puanı topladığınızda ödül kartlarındaki "Kullan" butonu aktif hale gelecek, kullandığınız takdirde puanınız belirtilen miktarda düşecektir
+                            "Devam Edenler" kolonundaki bir görevinizi "Tamamlananlar"a taşıdığınız zaman, görevinizin puanı kadar puan kazanırsınız.
+                        </p>
+                        <p className="mb-3">
+                            Sağ üst kısımda puanınızı görebilir ve bu puanları
+                            ödüller için kullanabilirsiniz. Yeterli puanı topladığınızda ödül kartlarındaki "Kullan"
+                            butonu aktif hale gelecek, kullandığınız takdirde puanınız belirtilen miktarda düşecektir
+                        </p>
+                        <p className="mb-3">
+                            "Yeni Ödül" butonu ile "Ödüller" kolonuna yeni ödüller ekleyebilirsiniz.
                         </p>
                     </AccordionItem>
 

@@ -3,11 +3,13 @@
 
 import React, { useState, useEffect } from 'react';
 import {
-
     Info,
     Calendar,
     Palette,
-    Gift, ClipboardList, HelpCircle
+    Gift,
+    ClipboardList,
+    HelpCircle,
+    CheckSquare
 } from 'lucide-react';
 import HelpDialog from '../Dialogs/HelpDialog';
 import { Button } from "@/components/ui/button";
@@ -27,8 +29,8 @@ import CalendarDialog from '../Dialogs/CalendarDialog';
 import ColorPickerDialog from "@/src/app/components/Dialogs/ColorPickerDialog";
 import { Typography } from "@/components/ui/typography";
 import InfoDialog from '../Dialogs/InfoDialog';
+import DailyToDoDialog from '../Dialogs/DailyToDoDialog'; // Yeni import eklendi
 import {
-
     Task,
     Reward,
     Columns,
@@ -59,6 +61,10 @@ const KanbanBoard3: React.FC = () => {
     const [showColorPicker, setShowColorPicker] = useState(false);
     const [bgColorStart, setBgColorStart] = useLocalStorage<string>("bgColorStart", "#2D9596"); // Güzel bir yeşil-turkuaz
     const [bgColorEnd, setBgColorEnd] = useLocalStorage<string>("bgColorEnd", "#265073"); // Koyu mavi
+
+    // Yeni eklenen state - DailyToDo için
+    const [dailyToDoDialogOpen, setDailyToDoDialogOpen] = useState<boolean>(false);
+
     // State
     const [today, setToday] = useState<Date | null>(null);
     const [newTask, setNewTask] = useState<NewTaskForm>({
@@ -308,18 +314,32 @@ const KanbanBoard3: React.FC = () => {
             <div className="p-6 flex flex-col min-h-screen">
                 {/* Header Section - Fixed at top */}
                 <div className="flex justify-between mb-6">
-                    <div className="flex items-center">
+                    <div className="flex items-center gap-2">
                         {today ? (
-                            <Button
-                                variant="outline"
-                                className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2"
-                                onClick={() => setCalendarDialogOpen(true)}
-                            >
-                                <Calendar className="h-4 w-4 text-white"/>
-                                <Typography variant="h5" className="text-white">
-                                    Bugün: {formatDate(today)}
-                                </Typography>
-                            </Button>
+                            <>
+                                <Button
+                                    variant="outline"
+                                    className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2"
+                                    onClick={() => setCalendarDialogOpen(true)}
+                                >
+                                    <Calendar className="h-4 w-4 text-white"/>
+                                    <Typography variant="h5" className="text-white">
+                                        Bugün: {formatDate(today)}
+                                    </Typography>
+                                </Button>
+
+                                {/* Yeni buton: Bugün Yapacaklarım */}
+                                <Button
+                                    variant="outline"
+                                    className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2"
+                                    onClick={() => setDailyToDoDialogOpen(true)}
+                                >
+                                    <CheckSquare className="h-4 w-4 text-white"/>
+                                    <Typography variant="h5" className="text-white">
+                                        Bugün Yapacaklarım
+                                    </Typography>
+                                </Button>
+                            </>
                         ) : (
                             <Typography variant="h5" className="text-white">
                                 Yükleniyor...
@@ -419,7 +439,6 @@ const KanbanBoard3: React.FC = () => {
                 </div>
 
                 {/* Dialogs */}
-
                 <HelpDialog
                     open={helpDialogOpen}
                     onClose={() => setHelpDialogOpen(false)}
@@ -517,6 +536,13 @@ const KanbanBoard3: React.FC = () => {
                     open={taskDetailsDialog}
                     onClose={() => setTaskDetailsDialog(false)}
                     task={selectedTaskDetails}
+                />
+
+                {/* Yeni Dialog: Bugün Yapacaklarım */}
+                <DailyToDoDialog
+                    open={dailyToDoDialogOpen}
+                    onClose={() => setDailyToDoDialogOpen(false)}
+                    date={today}
                 />
             </div>
         </div>
