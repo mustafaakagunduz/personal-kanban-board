@@ -8,36 +8,36 @@ interface DailyQuoteProps {
 }
 
 const quotes = [
-    { text: "Başarı, her gün tekrarlanan küçük çabaların toplamıdır.", author: "Robert Collier", emoji: "✨" },
-    { text: "Bir hedefin yoksa, hiçbir rüzgar sana yardım edemez.", author: "Seneca", emoji: "🧭" },
-    { text: "Bugün yaptığın seçimler, yarının olasılıklarını belirler.", author: "Ralph Marston", emoji: "🔀" },
-    { text: "Hayatta en önemli şey, yapmaktan korktuğunuz şeyleri yapmaktır.", author: "Eleanor Roosevelt", emoji: "🦁" },
-    { text: "Sistemleri hedeflerine, hedefleri olmayan kişiler sistemlerin hedeflerine hizmet eder.", author: "Robert Kiyosaki", emoji: "🎯" },
-    { text: "Zamanın değerini bilmek, zamanı en iyi şekilde kullanmakla başlar.", author: "William Penn", emoji: "⏳" },
-    { text: "Her büyük başarı, küçük başlangıçlarla ortaya çıkar.", author: "Robin Sharma", emoji: "🌱" },
-    { text: "Gün doğar, her şey sıfırlanır. Şu anı yaşa, geleceği tasarla.", author: "Konfüçyüs", emoji: "🌅" },
-    { text: "İyi bir plan bugün uygulanan, mükemmel bir plandan yarın uygulanacak olandan daha iyidir.", author: "George S. Patton", emoji: "📝" },
-    { text: "Düşlerin büyüklüğü, onları gerçekleştirme çabanı belirler.", author: "Mahatma Gandhi", emoji: "💫" },
-    { text: "Disiplin, istediğin ile ihtiyacın olan arasındaki köprüdür.", author: "Jim Rohn", emoji: "🌉" },
-    { text: "Bir hedefin gerçekliği, onu gerçekleştirme kararlılığınla doğru orantılıdır.", author: "Bo Bennett", emoji: "⚡" },
-    { text: "Yapabileceklerini hayal et, sonra her gün bir adım at.", author: "Arthur Ashe", emoji: "👣" },
-    { text: "Başarı bir yolculuktur, bir varış noktası değil.", author: "Ben Sweetland", emoji: "🚶" },
-    { text: "Tutku olmadan, harekete geçme nedeni yoktur; vizyonsuz, yön yoktur.", author: "Roy T. Bennett", emoji: "🔥" },
-    { text: "Dün bir tarih, yarın bir sır, bugün bir armağandır.", author: "Eleanor Roosevelt", emoji: "🎁" },
-    { text: "Planlama, geleceği bugüne taşır.", author: "Alan Lakein", emoji: "🗓️" },
-    { text: "Yapılandırılmış bir günlük rutininiz varsa, zihin özgürlüğünüz vardır.", author: "Michael Hyatt", emoji: "🧠" },
-    { text: "Parçaları yönetirseniz, bütünü kontrol edersiniz.", author: "Chuck Palahniuk", emoji: "🧩" },
-    { text: "Gelecek, bugün kurdurduğun temellerin üzerine inşa edilir.", author: "Ralph Waldo Emerson", emoji: "🏗️" },
-    { text: "Geç kalmak hayatın bir parçasıdır ama erken başlamak zaferin bir parçasıdır.", author: "Anonim", emoji: "⏰" },
-    { text: "Zamanını yönetmeyi öğrenmek, kendini yönetmeyi öğrenmektir.", author: "Brian Tracy", emoji: "⌚" },
-    { text: "Erteleme, fırsatın doğal düşmanıdır.", author: "Victor Kiam", emoji: "⏱️" },
-    { text: "Bir şeye zaman ayırmak, ona değer vermektir.", author: "Jim Rohn", emoji: "💎" },
-    { text: "Yaşamak için planla, hayal etmek için zaman bırak.", author: "Anonim", emoji: "💭" },
-    { text: "Kusursuz bir gün yoktur, ama mükemmel anlar vardır.", author: "Anonim", emoji: "✨" },
-    { text: "Büyük başarılar, küçük alışkanlıklarla başlar.", author: "Robin Sharma", emoji: "🌟" },
-    { text: "Yapacak bir şey olması için değil, olmamak için yaşa.", author: "Henry David Thoreau", emoji: "🌿" },
-    { text: "Günü planla, yolu çiz, hayatı yaşa.", author: "Anonim", emoji: "🗺️" },
-    { text: "İyi planlanmış yarım saat, plansız bir saate bedeldir.", author: "Seth Godin", emoji: "⏲️" }
+    { text: "Başarı, her gün tekrarlanan küçük çabaların toplamıdır. ✨", author: "Robert Collier" },
+    { text: "Bir hedefin yoksa, hiçbir rüzgar sana yardım edemez. 🧭", author: "Seneca" },
+    { text: "Bugün yaptığın seçimler, yarının olasılıklarını belirler. 🔀", author: "Ralph Marston" },
+    { text: "Hayatta en önemli şey, yapmaktan korktuğunuz şeyleri yapmaktır. 🦁", author: "Eleanor Roosevelt" },
+    { text: "Sistemleri hedeflerine, hedefleri olmayan kişiler sistemlerin hedeflerine hizmet eder. 🎯", author: "Robert Kiyosaki" },
+    { text: "Zamanın değerini bilmek, zamanı en iyi şekilde kullanmakla başlar. ⏳", author: "William Penn" },
+    { text: "Her büyük başarı, küçük başlangıçlarla ortaya çıkar. 🌱", author: "Robin Sharma" },
+    { text: "Gün doğar, her şey sıfırlanır. Şu anı yaşa, geleceği tasarla. 🌅", author: "Konfüçyüs" },
+    { text: "İyi bir plan bugün uygulanan, mükemmel bir plandan yarın uygulanacak olandan daha iyidir. 📝", author: "George S. Patton" },
+    { text: "Düşlerin büyüklüğü, onları gerçekleştirme çabanı belirler. 💫", author: "Mahatma Gandhi" },
+    { text: "Disiplin, istediğin ile ihtiyacın olan arasındaki köprüdür. 🌉", author: "Jim Rohn" },
+    { text: "Bir hedefin gerçekliği, onu gerçekleştirme kararlılığınla doğru orantılıdır. ⚡", author: "Bo Bennett" },
+    { text: "Yapabileceklerini hayal et, sonra her gün bir adım at. 👣", author: "Arthur Ashe" },
+    { text: "Başarı bir yolculuktur, bir varış noktası değil. 🚶", author: "Ben Sweetland" },
+    { text: "Tutku olmadan, harekete geçme nedeni yoktur; vizyonsuz, yön yoktur. 🔥", author: "Roy T. Bennett" },
+    { text: "Dün bir tarih, yarın bir sır, bugün bir armağandır. 🎁", author: "Eleanor Roosevelt" },
+    { text: "Planlama, geleceği bugüne taşır. 🗓️", author: "Alan Lakein" },
+    { text: "Yapılandırılmış bir günlük rutininiz varsa, zihin özgürlüğünüz vardır. 🧠", author: "Michael Hyatt" },
+    { text: "Parçaları yönetirseniz, bütünü kontrol edersiniz. 🧩", author: "Chuck Palahniuk" },
+    { text: "Gelecek, bugün kurdurduğun temellerin üzerine inşa edilir. 🏗️", author: "Ralph Waldo Emerson" },
+    { text: "Geç kalmak hayatın bir parçasıdır ama erken başlamak zaferin bir parçasıdır. ⏰", author: "Anonim" },
+    { text: "Zamanını yönetmeyi öğrenmek, kendini yönetmeyi öğrenmektir. ⌚", author: "Brian Tracy" },
+    { text: "Erteleme, fırsatın doğal düşmanıdır. ⏱️", author: "Victor Kiam" },
+    { text: "Bir şeye zaman ayırmak, ona değer vermektir. 💎", author: "Jim Rohn" },
+    { text: "Yaşamak için planla, hayal etmek için zaman bırak. 💭", author: "Anonim" },
+    { text: "Kusursuz bir gün yoktur, ama mükemmel anlar vardır. ✨", author: "Anonim" },
+    { text: "Büyük başarılar, küçük alışkanlıklarla başlar. 🌟", author: "Robin Sharma" },
+    { text: "Yapacak bir şey olması için değil, olmamak için yaşa. 🌿", author: "Henry David Thoreau" },
+    { text: "Günü planla, yolu çiz, hayatı yaşa. 🗺️", author: "Anonim" },
+    { text: "İyi planlanmış yarım saat, plansız bir saate bedeldir. ⏲️", author: "Seth Godin" }
 ];
 
 const DailyQuote: React.FC<DailyQuoteProps> = ({ date }) => {
@@ -57,10 +57,11 @@ const DailyQuote: React.FC<DailyQuoteProps> = ({ date }) => {
     const todayQuote = date ? getQuoteForDay(date) : getQuoteForDay(new Date());
 
     return (
+
         <Card className={`${quoteCardClass} hover:bg-white/20 mt-6 mb-4 transition-all duration-300`}>
             <div className="p-6 text-center relative">
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 text-3xl opacity-80">
-                    {todayQuote.emoji}
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 text-sm font-medium text-white/80">
+                    Günün Sözü
                 </div>
 
                 <div className="absolute left-3 top-4 text-white/30 text-4xl font-serif">"</div>
