@@ -67,6 +67,8 @@ const KanbanBoard3: React.FC = () => {
 
     // State
     const [today, setToday] = useState<Date | null>(null);
+    // Görevlerin son tarihlerini izleme
+    const [tasksWithDueDates, setTasksWithDueDates] = useState<Array<{id: string, title: string, dueDate: string}>>([]);
     const [newTask, setNewTask] = useState<NewTaskForm>({
         title: '',
         description: '',
@@ -107,6 +109,27 @@ const KanbanBoard3: React.FC = () => {
     useEffect(() => {
         setToday(getTodayStart());
     }, []);
+
+    // Son tarihi olan görevleri izle
+    useEffect(() => {
+        // Tüm kolonlardaki görevleri kontrol et
+        const tasksWithDates: Array<{id: string, title: string, dueDate: string}> = [];
+
+        // Özellikle 'inProgress' kolonundaki görevlere odaklan
+        if (columns.inProgress && columns.inProgress.items) {
+            columns.inProgress.items.forEach(task => {
+                if (task.dueDate) {
+                    tasksWithDates.push({
+                        id: task.id,
+                        title: task.title,
+                        dueDate: task.dueDate
+                    });
+                }
+            });
+        }
+
+        setTasksWithDueDates(tasksWithDates);
+    }, [columns]);
 
     // Handler functions
     const handleTaskClick = (task: Task, columnId: string): void => {
@@ -246,6 +269,7 @@ const KanbanBoard3: React.FC = () => {
 
     const handleProgressSubmit = (): void => {
         if (!movingTask) return;
+        // progressDetails içindeki dueDate'i ekliyoruz
         moveTask('todo', 'inProgress', movingTask.id, progressDetails);
         setOpenProgressDialog(false);
         setProgressDetails({ duration: '', reward: '', notes: '', dueDate: '' });
@@ -520,7 +544,8 @@ const KanbanBoard3: React.FC = () => {
                     open={calendarDialogOpen}
                     onClose={() => setCalendarDialogOpen(false)}
                     selectedDate={today || undefined}
-                    onSelectDate={handleCalendarDateSelect} // Add the new prop here
+                    onSelectDate={handleCalendarDateSelect}
+                    tasksWithDueDates={tasksWithDueDates} // Son tarihi olan görevleri gönder
                 />
 
                 <ColorPickerDialog

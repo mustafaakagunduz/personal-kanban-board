@@ -1,20 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { formatDate } from '../../utils/dateUtils'; // Assuming you have this utility
+import { formatDate } from '../../utils/dateUtils';
+
+interface TaskWithDueDate {
+    id: string;
+    title: string;
+    dueDate: string;
+}
 
 interface CalendarDialogProps {
     open: boolean;
     onClose: () => void;
     selectedDate?: Date;
-    onSelectDate?: (date: Date) => void; // New prop for date selection
+    onSelectDate?: (date: Date) => void;
+    tasksWithDueDates?: TaskWithDueDate[];
 }
 
 const CalendarDialog: React.FC<CalendarDialogProps> = ({
                                                            open,
                                                            onClose,
                                                            selectedDate,
-                                                           onSelectDate
+                                                           onSelectDate,
+                                                           tasksWithDueDates = []
                                                        }) => {
     // Use selectedDate or current date as the default
     const [currentDate, setCurrentDate] = useState(() => {
@@ -120,6 +128,59 @@ const CalendarDialog: React.FC<CalendarDialogProps> = ({
         );
     };
 
+    // Bugün mü kontrol et
+    const isTodayCheck = (day: number, monthOffset: number) => {
+        const today = new Date();
+        return (
+            day === today.getDate() &&
+            month + monthOffset === today.getMonth() &&
+            year === today.getFullYear()
+        );
+    };
+
+    // Bir günde son tarihi olan görevleri bul - DÜZELTME: Tarih formatı sorununu çözdük
+    const getTasksForDay = (day: number, monthOffset: number) => {
+        if (!tasksWithDueDates || tasksWithDueDates.length === 0) return [];
+
+        // Gün için tarih oluştur - Yıl, ay ve günü manuel olarak birleştiriyoruz
+        const targetDay = day;
+        const targetMonth = month + monthOffset + 1; // Aylar 1'den başlıyor
+        const targetYear = year;
+
+        // Görev tarihlerini "YYYY-MM-DD" formatında kontrol etmek yerine
+        // Gün, ay ve yıl parçalarını ayrı ayrı kontrol edeceğiz
+        return tasksWithDueDates.filter(task => {
+            try {
+                let taskDate;
+
+                // İlk olarak, tarih "Tarih: XX.XX.XXXX" formatında olabilir
+                if (typeof task.dueDate === "string" && task.dueDate.includes("Tarih:")) {
+                    // "Tarih: " kısmını kaldırıp işliyoruz
+                    const datePart = task.dueDate.replace("Tarih:", "").trim();
+                    taskDate = new Date(datePart);
+                } else {
+                    // Doğrudan tarih nesnesi oluşturuyoruz
+                    taskDate = new Date(task.dueDate);
+                }
+
+                // Tarih geçerli mi kontrol et
+                if (isNaN(taskDate.getTime())) {
+                    return false;
+                }
+
+                // Gün, ay ve yıl eşleşiyor mu kontrol et
+                return (
+                    taskDate.getDate() === targetDay &&
+                    taskDate.getMonth() + 1 === targetMonth && // getMonth() 0'dan başlar
+                    taskDate.getFullYear() === targetYear
+                );
+            } catch (error) {
+                console.error("Tarih işleme hatası:", error);
+                return false;
+            }
+        });
+    };
+
     // Handle day click - new function
     const handleDayClick = (day: number, monthOffset: number) => {
         // Create a date object for the selected day
@@ -178,10 +239,14 @@ const CalendarDialog: React.FC<CalendarDialogProps> = ({
                                 year === new Date().getFullYear() &&
                                 isCurrentMonth;
 
+                            // Bu gün için görevleri al
+                            const tasksForDay = isCurrentMonth ? getTasksForDay(day, monthOffset) : [];
+                            const hasTasks = tasksForDay.length > 0;
+
                             return (
                                 <div
                                     key={`day-${index}`}
-                                    className={`text-center py-2 text-lg cursor-pointer hover:bg-gray-100 hover:text-black rounded-full
+                                    className={`text-center py-2 text-lg cursor-pointer hover:bg-gray-100 hover:text-black rounded-full relative 
                                         ${isCurrentMonth ? 'text-black' : 'text-gray-400'}
                                         ${isSelectedDay(day, monthOffset) ?
                                         'bg-black text-white hover:bg-black hover:bg-opacity-90 rounded-full w-10 h-10 flex items-center justify-center mx-auto' : ''}
@@ -189,7 +254,28 @@ const CalendarDialog: React.FC<CalendarDialogProps> = ({
                                         'font-bold border border-gray-400 rounded-full w-10 h-10 flex items-center justify-center mx-auto' : ''}`}
                                     onClick={() => handleDayClick(day, monthOffset)}
                                 >
-                                    {day}
+                                    {/* Gerekli klass'ları ayarla */}
+                                    <div className={`w-full h-full flex items-center justify-center ${hasTasks ? 'group' : ''}`}>
+                                        {day}
+
+                                        {/* Son tarihi olan görevleri göster */}
+                                        {hasTasks && (
+                                            <div className="w-2 h-2 bg-red-500 rounded-full absolute bottom-0 right-1 mb-1"></div>
+                                        )}
+
+                                        {/* Tooltip - tüm tarih kutucuğu için geçerli */}
+                                        {hasTasks && (
+                                            <div className="absolute z-10 invisible group-hover:visible bg-black bg-opacity-80 text-white p-2 rounded text-xs -mb-2 bottom-full left-1/2 transform -translate-x-1/2 min-w-[150px] max-w-[200px]">
+                                                <p className="font-bold mb-1">Son tarihli görevler:</p>
+                                                <ul className="list-disc list-inside">
+                                                    {tasksForDay.map(task => (
+                                                        <li key={task.id} className="truncate text-left">{task.title}</li>
+                                                    ))}
+                                                </ul>
+                                                <div className="absolute left-1/2 transform -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black border-opacity-80"></div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             );
                         })}

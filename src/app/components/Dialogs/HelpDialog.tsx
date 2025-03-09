@@ -91,7 +91,11 @@ const HelpDialog: React.FC<HelpDialogProps> = ({ open, onClose }) => {
                         toggle={() => toggleSection("sürükle-bırak")}
                     >
                         <p className="mb-3">
-                            Sol üsteki takvimden bugünün tarihini görebilir, takvimdeki günlere tıklayarak da yeni görev ekleyebilirsiniz..
+                            Sol üsteki takvimden bugünün tarihini görebilir, takvimdeki günlere tıklayarak da yeni görev
+                            ekleyebilirsiniz..
+                        </p>
+                        <p className="mb-3">
+                            "Devam edenler" kolonundaki görevlerinizin son tarihi takvimde gösterilir, mouse ile üzerine gelince görevlerinizin başlıklarını görebilirsiniz
                         </p>
 
                     </AccordionItem>
