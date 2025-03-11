@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { formatDate, safeParseDate, isSameCalendarDay } from '../../utils/dateUtils';
+import { formatDate, safeParseDate } from '../../utils/dateUtils';
 
 interface TaskWithDueDate {
     id: string;
@@ -39,6 +39,9 @@ const CalendarDialog: React.FC<CalendarDialogProps> = ({
     // Takvim görünümü için gerekli tarih bilgilerini hesapla
     const [year, setYear] = useState<number>(currentDate.getFullYear());
     const [month, setMonth] = useState<number>(currentDate.getMonth());
+
+    // Geçmiş tarih tooltipini kontrol etmek için state
+    const [pastDateTooltip, setPastDateTooltip] = useState<{day: number, month: number, year: number} | null>(null);
 
     // Ay değişikliğinde year ve month değerlerini güncelle
     useEffect(() => {
@@ -179,27 +182,31 @@ const CalendarDialog: React.FC<CalendarDialogProps> = ({
         // Seçilen gün için tarih nesnesi oluştur
         const selectedDay = new Date(year, month + monthOffset, day);
 
-        // Bugünün başlangıcı için tarih nesnesi oluştur (saat, dakika, saniye 0)
+        // Bugünün başlangıcı için tarih nesnesi oluştur
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
 
-        // Seçilen gün bugünden önceyse (geçmiş bir tarihse) uyarı göster
+        // Seçilen gün bugünden önceyse (geçmiş bir tarihse) tooltip'i göster
         if (selectedDay < todayStart) {
-            // Burada fonksiyonu erken sonlandırıp tooltip göstermek üzere işlem yapıyoruz
-            // Dialog'u kapatmıyoruz ki kullanıcı başka bir gün seçebilsin
-            return;
+            // Tooltip'i göster
+            setPastDateTooltip({day, month: month + monthOffset, year});
+
+            // 3 saniye sonra tooltip'i gizle
+            setTimeout(() => {
+                setPastDateTooltip(null);
+            }, 1500);
+
+            return; // İşlemi sonlandır
         }
 
-        // Seçilen gün bugün veya gelecekteyse normal işlemi devam ettir
-        // Callback varsa çağır
+        // Call the callback if provided
         if (onSelectDate) {
             onSelectDate(selectedDay);
         }
 
-        // Dialog'u kapat
+        // Close the dialog
         onClose();
     };
-
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
@@ -255,31 +262,23 @@ const CalendarDialog: React.FC<CalendarDialogProps> = ({
                             todayStart.setHours(0, 0, 0, 0);
                             const isPastDate = dayDate < todayStart;
 
-                            // Tooltip gösterimi için state kullanımı
-                            const [showPastDateTooltip, setShowPastDateTooltip] = React.useState(false);
+                            // Tooltip görünürlüğünü kontrol et
+                            const showPastDateTooltip = isPastDate &&
+                                pastDateTooltip &&
+                                pastDateTooltip.day === day &&
+                                pastDateTooltip.month === (month + monthOffset) &&
+                                pastDateTooltip.year === year;
 
                             return (
                                 <div
                                     key={`day-${index}`}
                                     className={`text-center py-2 text-lg cursor-pointer hover:bg-gray-100 hover:text-black rounded-full relative 
-                                    ${isCurrentMonth ? 'text-black' : 'text-gray-400'}
-                                    ${isSelectedDay(day, monthOffset) ?
+                                        ${isCurrentMonth ? 'text-black' : 'text-gray-400'}
+                                        ${isSelectedDay(day, monthOffset) ?
                                         'bg-black text-white hover:bg-black hover:bg-opacity-90 rounded-full w-10 h-10 flex items-center justify-center mx-auto' : ''}
-                                    ${isToday && !isSelectedDay(day, monthOffset) ?
+                                        ${isToday && !isSelectedDay(day, monthOffset) ?
                                         'font-bold border border-gray-400 rounded-full w-10 h-10 flex items-center justify-center mx-auto' : ''}`}
-                                    onClick={() => {
-                                        // Geçmiş tarihler için görev atamasını engelle ve tooltip göster
-                                        if (isPastDate) {
-                                            // Tooltip gösterimi için state'i değiştir
-                                            setShowPastDateTooltip(true);
-                                            // 3 saniye sonra tooltip'i gizle
-                                            setTimeout(() => {
-                                                setShowPastDateTooltip(false);
-                                            }, 1500);
-                                        } else {
-                                            handleDayClick(day, monthOffset);
-                                        }
-                                    }}
+                                    onClick={() => handleDayClick(day, monthOffset)}
                                 >
                                     {/* Gerekli klass'ları ayarla */}
                                     <div className={`w-full h-full flex items-center justify-center ${hasTasks ? 'group' : ''}`}>
@@ -305,7 +304,7 @@ const CalendarDialog: React.FC<CalendarDialogProps> = ({
                                         )}
 
                                         {/* Geçmiş tarih uyarı tooltip'i - tıklama ile gösterilir */}
-                                        {isPastDate && showPastDateTooltip && (
+                                        {showPastDateTooltip && (
                                             <div className="absolute z-10 bg-red-600 text-white p-2 rounded text-xs -mb-2 bottom-full left-1/2 transform -translate-x-1/2 min-w-[200px] max-w-[250px]">
                                                 <p className="font-bold">Bugünden önceki bir tarihe görev atayamazsınız</p>
                                                 <div className="absolute left-1/2 transform -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-red-600"></div>
