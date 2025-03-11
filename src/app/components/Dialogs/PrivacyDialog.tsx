@@ -1,4 +1,4 @@
-// /src/components/Dialogs/InfoDialog.tsx
+// /src/components/Dialogs/PrivacyDialog.tsx
 import React from 'react';
 import {
     Dialog,
@@ -16,7 +16,7 @@ interface InfoDialogProps {
     onClose: () => void;
 }
 
-const InfoDialog: React.FC<InfoDialogProps> = ({ open, onClose }) => {
+const PrivacyDialog: React.FC<InfoDialogProps> = ({ open, onClose }) => {
     return (
         <Dialog open={open} onOpenChange={onClose}>
             <DialogContent className="bg-white/90 backdrop-blur-md rounded-lg shadow-lg border-0 max-w-md">
@@ -63,4 +63,4 @@ const InfoDialog: React.FC<InfoDialogProps> = ({ open, onClose }) => {
     );
 };
 
-export default InfoDialog;
+export default PrivacyDialog;

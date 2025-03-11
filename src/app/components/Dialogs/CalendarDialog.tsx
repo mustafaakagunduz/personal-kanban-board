@@ -176,17 +176,30 @@ const CalendarDialog: React.FC<CalendarDialogProps> = ({
 
     // Handle day click - new function
     const handleDayClick = (day: number, monthOffset: number) => {
-        // Create a date object for the selected day
+        // Seçilen gün için tarih nesnesi oluştur
         const selectedDay = new Date(year, month + monthOffset, day);
 
-        // Call the callback if provided
+        // Bugünün başlangıcı için tarih nesnesi oluştur (saat, dakika, saniye 0)
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+
+        // Seçilen gün bugünden önceyse (geçmiş bir tarihse) uyarı göster
+        if (selectedDay < todayStart) {
+            // Burada fonksiyonu erken sonlandırıp tooltip göstermek üzere işlem yapıyoruz
+            // Dialog'u kapatmıyoruz ki kullanıcı başka bir gün seçebilsin
+            return;
+        }
+
+        // Seçilen gün bugün veya gelecekteyse normal işlemi devam ettir
+        // Callback varsa çağır
         if (onSelectDate) {
             onSelectDate(selectedDay);
         }
 
-        // Close the dialog
+        // Dialog'u kapat
         onClose();
     };
+
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
@@ -236,32 +249,50 @@ const CalendarDialog: React.FC<CalendarDialogProps> = ({
                             const tasksForDay = isCurrentMonth ? getTasksForDay(day, monthOffset) : [];
                             const hasTasks = tasksForDay.length > 0;
 
+                            // Geçmiş tarih kontrolü
+                            const dayDate = new Date(year, month + monthOffset, day);
+                            const todayStart = new Date();
+                            todayStart.setHours(0, 0, 0, 0);
+                            const isPastDate = dayDate < todayStart;
+
+                            // Tooltip gösterimi için state kullanımı
+                            const [showPastDateTooltip, setShowPastDateTooltip] = React.useState(false);
+
                             return (
                                 <div
                                     key={`day-${index}`}
                                     className={`text-center py-2 text-lg cursor-pointer hover:bg-gray-100 hover:text-black rounded-full relative 
-                                        ${isCurrentMonth ? 'text-black' : 'text-gray-400'}
-                                        ${isSelectedDay(day, monthOffset) ?
+                                    ${isCurrentMonth ? 'text-black' : 'text-gray-400'}
+                                    ${isSelectedDay(day, monthOffset) ?
                                         'bg-black text-white hover:bg-black hover:bg-opacity-90 rounded-full w-10 h-10 flex items-center justify-center mx-auto' : ''}
-                                        ${isToday && !isSelectedDay(day, monthOffset) ?
+                                    ${isToday && !isSelectedDay(day, monthOffset) ?
                                         'font-bold border border-gray-400 rounded-full w-10 h-10 flex items-center justify-center mx-auto' : ''}`}
-                                    onClick={() => handleDayClick(day, monthOffset)}
+                                    onClick={() => {
+                                        // Geçmiş tarihler için görev atamasını engelle ve tooltip göster
+                                        if (isPastDate) {
+                                            // Tooltip gösterimi için state'i değiştir
+                                            setShowPastDateTooltip(true);
+                                            // 3 saniye sonra tooltip'i gizle
+                                            setTimeout(() => {
+                                                setShowPastDateTooltip(false);
+                                            }, 1500);
+                                        } else {
+                                            handleDayClick(day, monthOffset);
+                                        }
+                                    }}
                                 >
                                     {/* Gerekli klass'ları ayarla */}
-                                    <div
-                                        className={`w-full h-full flex items-center justify-center ${hasTasks ? 'group' : ''}`}>
+                                    <div className={`w-full h-full flex items-center justify-center ${hasTasks ? 'group' : ''}`}>
                                         {day}
 
                                         {/* Son tarihi olan görevleri göster */}
                                         {hasTasks && (
-                                            <div
-                                                className="w-2 h-2 bg-red-500 rounded-full absolute bottom-0 right-1 mb-1"></div>
+                                            <div className="w-2 h-2 bg-red-500 rounded-full absolute bottom-0 right-1 mb-1"></div>
                                         )}
 
-                                        {/* Tooltip - tüm tarih kutucuğu için geçerli */}
+                                        {/* Görevler için Tooltip - hover ile gösterilir */}
                                         {hasTasks && (
-                                            <div
-                                                className="absolute z-10 invisible group-hover:visible bg-black bg-opacity-80 text-white p-2 rounded text-xs -mb-2 bottom-full left-1/2 transform -translate-x-1/2 min-w-[150px] max-w-[200px]">
+                                            <div className="absolute z-10 invisible group-hover:visible bg-black bg-opacity-80 text-white p-2 rounded text-xs -mb-2 bottom-full left-1/2 transform -translate-x-1/2 min-w-[150px] max-w-[200px]">
                                                 <p className="font-bold mb-1">Son tarihli görevler:</p>
                                                 <ul className="list-disc list-inside">
                                                     {tasksForDay.map(task => (
@@ -269,8 +300,15 @@ const CalendarDialog: React.FC<CalendarDialogProps> = ({
                                                             className="truncate text-left">{task.title}</li>
                                                     ))}
                                                 </ul>
-                                                <div
-                                                    className="absolute left-1/2 transform -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black border-opacity-80"></div>
+                                                <div className="absolute left-1/2 transform -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black border-opacity-80"></div>
+                                            </div>
+                                        )}
+
+                                        {/* Geçmiş tarih uyarı tooltip'i - tıklama ile gösterilir */}
+                                        {isPastDate && showPastDateTooltip && (
+                                            <div className="absolute z-10 bg-red-600 text-white p-2 rounded text-xs -mb-2 bottom-full left-1/2 transform -translate-x-1/2 min-w-[200px] max-w-[250px]">
+                                                <p className="font-bold">Bugünden önceki bir tarihe görev atayamazsınız</p>
+                                                <div className="absolute left-1/2 transform -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-red-600"></div>
                                             </div>
                                         )}
                                     </div>

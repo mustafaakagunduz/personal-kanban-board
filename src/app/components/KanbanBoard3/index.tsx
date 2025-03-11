@@ -28,7 +28,7 @@ import { useLocalStorage } from '../../hooks/useLocalStorage';
 import CalendarDialog from '../Dialogs/CalendarDialog';
 import ColorPickerDialog from "@/src/app/components/Dialogs/ColorPickerDialog";
 import { Typography } from "@/components/ui/typography";
-import InfoDialog from '../Dialogs/InfoDialog';
+import PrivacyDialog from '../Dialogs/PrivacyDialog';
 import DailyToDoDialog from '../Dialogs/DailyToDoDialog';
 import {
     Task,
@@ -456,7 +456,7 @@ const KanbanBoard3: React.FC = () => {
                                     </Typography>
                                 </Button>
 
-                                {/* Yeni buton: Bugün Yapacaklarım */}
+
                                 <Button
                                     variant="outline"
                                     className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2"
@@ -579,7 +579,7 @@ const KanbanBoard3: React.FC = () => {
                     onAddTask={handleAddTask}
                 />
 
-                <InfoDialog
+                <PrivacyDialog
                     open={infoDialogOpen}
                     onClose={() => setInfoDialogOpen(false)}
                 />
@@ -668,7 +668,7 @@ const KanbanBoard3: React.FC = () => {
                     task={selectedTaskDetails}
                 />
 
-                {/* Yeni Dialog: Bugün Yapacaklarım */}
+
                 <DailyToDoDialog
                     open={dailyToDoDialogOpen}
                     onClose={() => setDailyToDoDialogOpen(false)}
