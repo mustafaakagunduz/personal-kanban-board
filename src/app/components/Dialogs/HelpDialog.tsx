@@ -77,8 +77,7 @@ const HelpDialog: React.FC<HelpDialogProps> = ({ open, onClose }) => {
                         toggle={() => toggleSection("görevleri-yönetme")}
                     >
                         <p className="mb-3">
-                            <span className="font-medium text-[#2D9596]">"Yeni Görev"</span> butonu ile hayallerinizi
-                            ve hedeflerinizi kolayca listeye ekleyin! ✍️
+                            <span className="font-medium text-[#2D9596]">"Yeni Görev"</span> butonu ile 'Yapılacaklar' listenizde kolayca yeni bir görev kartı oluşturabilirsiniz.. ✍️
                         </p>
                         <p className="mb-3">
                             Görevlerinizi <span className="font-medium text-[#2D9596]">sürükle & bırak</span> yöntemiyle
