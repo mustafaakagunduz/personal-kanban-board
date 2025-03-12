@@ -6,7 +6,7 @@ import { quoteCardClass } from "../KanbanBoard3/styles";
 interface DailyQuoteProps {
     date: Date | null;
 }
-
+//deneme
 const quotes = [
     { text: "Başarı, sabırla örülen emeklerin meyvesidir. 🍂", author: "Mevlana" },
     { text: "Rüzgarın yönünü değiştiremezsin, ama yelkenlerini ayarlayabilirsin. ⛵", author: "Aristoteles" },
