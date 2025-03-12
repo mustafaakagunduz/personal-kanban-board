@@ -29,7 +29,7 @@ const PrivacyDialog: React.FC<InfoDialogProps> = ({ open, onClose }) => {
                     <div className="flex items-start gap-3">
                         <Lock className="text-[#2D9596] h-5 w-5 mt-1 flex-shrink-0" />
                         <p>
-                            <span className="font-medium">Verileriniz size özel! 🔒</span> Kanban uygulaması hiçbir kişisel verinizi
+                            <span className="font-medium">Verileriniz size özel! </span> Kanban uygulaması hiçbir kişisel verinizi
                             sunucularımıza kaydetmez veya üçüncü taraflarla paylaşmaz.
                         </p>
                     </div>
@@ -37,7 +37,7 @@ const PrivacyDialog: React.FC<InfoDialogProps> = ({ open, onClose }) => {
                     <div className="flex items-start gap-3">
                         <Database className="text-[#2D9596] h-5 w-5 mt-1 flex-shrink-0" />
                         <p>
-                            <span className="font-medium">Yerel depolama avantajı! 💻</span> Görevleriniz, ödülleriniz ve tüm ayarlarınız
+                            <span className="font-medium">Yerel depolama avantajı! </span> Görevleriniz, ödülleriniz ve tüm ayarlarınız
                             sadece kullandığınız tarayıcının yerel depolama alanında saklanır ve cihazınızdan dışarı çıkmaz.
                         </p>
                     </div>
