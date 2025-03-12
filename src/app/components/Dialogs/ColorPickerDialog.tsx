@@ -593,7 +593,7 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                         size="sm"
                     >
                         <Check className="w-3 h-3"/>
-                        Kaydet
+                        Uygula!
                     </Button>
                 </DialogFooter>
             </DialogContent>
