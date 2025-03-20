@@ -1,5 +1,6 @@
 // /src/utils/dateUtils.ts
 import * as dateFns from 'date-fns';
+import { tr, enUS } from 'date-fns/locale'; // Dil localization paketlerini import edin
 
 /**
  * Safely parses a date string into a Date object
@@ -21,16 +22,22 @@ export const safeParseDate = (dateString: string): Date | null => {
 
 /**
  * Format a date to a readable string using date-fns
+ * Now accepts a language parameter to format date according to locale
  */
-export const formatDate = (date: Date): string => {
+export const formatDate = (date: Date, language: string = 'tr'): string => {
     try {
         if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
-            return 'Geçersiz tarih';
+            return language === 'tr' ? 'Geçersiz tarih' : 'Invalid date';
         }
-        return dateFns.format(date, 'dd/MM/yyyy');
+
+        // Choose appropriate locale based on language
+        const locale = language === 'tr' ? tr : enUS;
+
+        // Use locale in formatting
+        return dateFns.format(date, 'dd/MM/yyyy', { locale });
     } catch (error) {
         console.error('Error formatting date:', error);
-        return 'Tarih hatası';
+        return language === 'tr' ? 'Tarih hatası' : 'Date error';
     }
 };
 
@@ -88,5 +95,43 @@ export const isSameCalendarDay = (date1: Date | string, date2: Date | string): b
     } catch (error) {
         console.error('Error comparing dates:', error);
         return false;
+    }
+};
+
+/**
+ * Get date format pattern based on language
+ * Useful for input date fields
+ */
+export const getDateFormat = (language: string = 'tr'): string => {
+    return language === 'tr' ? 'dd/MM/yyyy' : 'MM/dd/yyyy';
+};
+
+/**
+ * Parse date string based on locale format
+ */
+export const parseLocaleDate = (dateStr: string, language: string = 'tr'): Date | null => {
+    try {
+        const locale = language === 'tr' ? tr : enUS;
+        const pattern = language === 'tr' ? 'dd/MM/yyyy' : 'MM/dd/yyyy';
+        return dateFns.parse(dateStr, pattern, new Date(), { locale });
+    } catch (error) {
+        console.error(`Error parsing locale date: ${dateStr}`, error);
+        return null;
+    }
+};
+
+/**
+ * Sets the locale for date input elements
+ * This helps fix browser's date input localization issues
+ */
+export const setDateInputLocale = (language: string = 'tr'): void => {
+    // This approach may not work in all browsers, but it's worth a try
+    try {
+        const htmlElement = document.querySelector('html');
+        if (htmlElement) {
+            htmlElement.setAttribute('lang', language);
+        }
+    } catch (error) {
+        console.error('Error setting date input locale:', error);
     }
 };

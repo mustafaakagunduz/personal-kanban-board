@@ -1,3 +1,4 @@
+// /src/app/components/Dialogs/ColorPickerDialog.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Check, RefreshCw, BookmarkPlus } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface ColorPickerDialogProps {
     open: boolean;
@@ -41,7 +43,7 @@ const hexToRgb = (hex: string): { r: number, g: number, b: number } | null => {
         : null;
 };
 
-// HSL to Hex conversion (already included in your original code)
+// HSL to Hex conversion
 function hslToHex(h: number, s: number, l: number): string {
     l /= 100;
     const a = s * Math.min(l, 1 - l) / 100;
@@ -67,6 +69,8 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                                                                  onEndColorChange,
                                                                  onReset
                                                              }) => {
+    // Dil hook'unu kullan
+    const { t } = useLanguage();
 
     const activeColor = useRef<'start' | 'end' | 'single'>('start');
     const [selectedScheme, setSelectedScheme] = useState<SavedColorScheme | null>(null);
@@ -306,8 +310,7 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
         <Dialog open={open} onOpenChange={onClose}>
             <DialogContent className="max-w-[550px] w-[90vw] p-4 bg-white dark:bg-gray-900 rounded-xl shadow-lg">
                 <DialogHeader className="mb-3 pb-2 border-b border-gray-100 dark:border-gray-800">
-                    <DialogTitle className="text-base font-semibold text-center">Arkaplan Rengini
-                        Özelleştir</DialogTitle>
+                    <DialogTitle className="text-base font-semibold text-center">{t('dialog.colorPicker')}</DialogTitle>
                 </DialogHeader>
 
                 <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-md mb-4">
@@ -320,7 +323,7 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                                 : "text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
                         )}
                     >
-                        Gradyan Renk
+                        {t('dialog.gradientColor')}
                     </button>
                     <button
                         onClick={() => setColorMode('solid')}
@@ -331,7 +334,7 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                                 : "text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
                         )}
                     >
-                        Tek Renk
+                        {t('dialog.solidColor')}
                     </button>
                     <button
                         onClick={() => setColorMode('saved')}
@@ -342,7 +345,7 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                                 : "text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
                         )}
                     >
-                        Kaydedilenler
+                        {t('dialog.savedColors')}
                     </button>
                 </div>
 
@@ -399,7 +402,7 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                             <>
                                 <div className="grid grid-cols-2 gap-3 mb-3">
                                     <div>
-                                        <p className="text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">Başlangıç(Seçiciden mouse ile seçin) : </p>
+                                        <p className="text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">{t('dialog.startColor')}</p>
                                         <div className="flex gap-2 items-center">
                                             <div
                                                 className="w-8 h-8 rounded-md border border-gray-300 dark:border-gray-600"
@@ -414,8 +417,7 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                                         </div>
                                     </div>
                                     <div>
-                                        <p className="text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">Bitiş
-                                            Rengi:[Alt(Opt) + mouse ile seçin]</p>
+                                        <p className="text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">{t('dialog.endColor')}</p>
                                         <div className="flex gap-2 items-center">
                                             <div
                                                 className="w-8 h-8 rounded-md border border-gray-300 dark:border-gray-600"
@@ -446,12 +448,12 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                                         {saveSuccess ? (
                                             <>
                                                 <Check className="w-4 h-4" />
-                                                Kaydedildi
+                                                {t('dialog.saved')}
                                             </>
                                         ) : (
                                             <>
                                                 <BookmarkPlus className="w-4 h-4" />
-                                                Tercihi Kaydet
+                                                {t('dialog.savePreference')}
                                             </>
                                         )}
                                     </Button>
@@ -460,7 +462,7 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                         ) : (
                             <>
                                 <div className="mb-3">
-                                    <p className="text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">Renk</p>
+                                    <p className="text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">{t('colors.label')}</p>
                                     <div className="flex gap-2 items-center">
                                         <div
                                             className="w-8 h-8 rounded-md border border-gray-300 dark:border-gray-600"
@@ -490,12 +492,12 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                                         {saveSuccess ? (
                                             <>
                                                 <Check className="w-4 h-4" />
-                                                Kaydedildi
+                                                {t('dialog.saved')}
                                             </>
                                         ) : (
                                             <>
                                                 <BookmarkPlus className="w-4 h-4" />
-                                                Tercihi Kaydet
+                                                {t('dialog.savePreference')}
                                             </>
                                         )}
                                     </Button>
@@ -522,7 +524,7 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                         <div className="mb-4 max-h-80 overflow-y-auto px-1">
                             {savedColorSchemes.length === 0 ? (
                                 <p className="text-sm text-center text-gray-500 dark:text-gray-400 py-4">
-                                    Henüz kaydedilmiş renk şeması bulunmamaktadır.
+                                    {t('dialog.noSavedSchemes')}
                                 </p>
                             ) : (
                                 <div className="grid grid-cols-1 gap-2">
@@ -570,14 +572,13 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                                 disabled={!selectedScheme}
                                 className="w-[96%] mx-auto h-10 mb-4 text-sm bg-indigo-500 hover:bg-indigo-600 text-white disabled:bg-indigo-300 dark:disabled:bg-indigo-800"
                             >
-                                Seçili Temayı Uygula
+                                {t('dialog.applySelectedTheme')}
                             </Button>
                         )}
                     </>
                 )}
 
-                <DialogFooter
-                    className="flex justify-center gap-3 pt-3 border-t border-gray-100 dark:border-gray-800 mt-2">
+                <DialogFooter className="flex justify-center gap-3 pt-3 border-t border-gray-100 dark:border-gray-800 mt-2">
                     <Button
                         variant="outline"
                         onClick={handleReset}
@@ -585,7 +586,7 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                         size="sm"
                     >
                         <RefreshCw className="w-3 h-3"/>
-                        Varsayılana Dön
+                        {t('dialog.resetToDefault')}
                     </Button>
                     <Button
                         onClick={handleSave}
@@ -593,7 +594,7 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                         size="sm"
                     >
                         <Check className="w-3 h-3"/>
-                        Uygula!
+                        {t('dialog.apply')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

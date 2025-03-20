@@ -1,3 +1,4 @@
+// /src/app/components/Dialogs/HelpDialog.tsx
 import React, { useState } from 'react';
 import {
     Dialog,
@@ -9,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface HelpDialogProps {
     open: boolean;
@@ -57,6 +59,9 @@ const AccordionItem: React.FC<AccordionItemProps> = ({ title, children, isOpen, 
 };
 
 const HelpDialog: React.FC<HelpDialogProps> = ({ open, onClose }) => {
+    // Dil hook'unu kullan
+    const { t, language } = useLanguage();
+
     // Akordeon durumları için state
     const [openSection, setOpenSection] = useState<string | null>("görevleri-yönetme");
 
@@ -64,111 +69,62 @@ const HelpDialog: React.FC<HelpDialogProps> = ({ open, onClose }) => {
         setOpenSection(openSection === section ? null : section);
     };
 
+    // HTML içeren metinleri güvenli bir şekilde render etme
+    const renderHTML = (htmlString: string) => {
+        return <div dangerouslySetInnerHTML={{ __html: htmlString }} />;
+    };
+
     return (
         <Dialog open={open} onOpenChange={onClose}>
             <DialogContent className="bg-white/90 backdrop-blur-md rounded-lg shadow-lg border-0 max-w-md max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle className="text-xl font-bold text-gray-800">🧭 Kanban'ı Keşfedin! </DialogTitle>
+                    <DialogTitle className="text-xl font-bold text-gray-800">{t('dialog.help.title')}</DialogTitle>
                 </DialogHeader>
                 <div className="text-gray-700 my-4">
                     <AccordionItem
-                        title="🎯 Görevleri Yönetme"
+                        title={t('dialog.help.section1')}
                         isOpen={openSection === "görevleri-yönetme"}
                         toggle={() => toggleSection("görevleri-yönetme")}
                     >
-                        <p className="mb-3">
-                            <span className="font-medium text-[#2D9596]">"Yeni Görev"</span> butonu ile 'Yapılacaklar' listenizde kolayca yeni bir görev kartı oluşturabilirsiniz.. ✍️
-                        </p>
-                        <p className="mb-3">
-                            Görevlerinizi <span className="font-medium text-[#2D9596]">sürükle & bırak</span> yöntemiyle
-                            ilerleme durumuna göre taşıyabilir, son tarih belirleyebilirsiniz. 🔄
-                        </p>
+                        {renderHTML(t('dialog.help.section1Text'))}
                     </AccordionItem>
                     <AccordionItem
-                        title="📋 Günlük Yapılacaklar"
+                        title={t('dialog.help.section2')}
                         isOpen={openSection === "gunluk-yapilacaklar"}
                         toggle={() => toggleSection("gunluk-yapilacaklar")}
                     >
-                        <p className="mb-3">
-                            <span className="font-medium text-[#2D9596]">"Bugün Yapacaklarım"</span> özelliği ile günlük görevlerinizi kolayca takip edebilirsiniz! 🗓️
-                        </p>
-
-                        <ul className="list-disc pl-5 mb-3 space-y-2">
-                            <li>Farklı öncelik seviyelerinde (yüksek 🔴, orta 🟠, düşük 🟢) görevler ekleyebilirsiniz</li>
-                            <li>Görevleri tamamlandı olarak işaretleyebilir veya silebilirsiniz</li>
-
-
-                        </ul>
-                        <p className="mb-3">
-                            Günlük yapacaklarınızı planlayarak, gününüzü daha verimli hale getirin ve hiçbir görevi atlamadığınızdan emin olun! ✅
-                        </p>
+                        {renderHTML(t('dialog.help.section2Text'))}
                     </AccordionItem>
                     <AccordionItem
-                        title="📅 Takvim Özellikleri"
+                        title={t('dialog.help.section3')}
                         isOpen={openSection === "sürükle-bırak"}
                         toggle={() => toggleSection("sürükle-bırak")}
                     >
-                        <p className="mb-3">
-                            Sol üstteki takvim ile bugünü görebilir, istediğiniz güne tıklayarak
-                            hemen o güne özel görev oluşturabilirsiniz! 🗓️
-                        </p>
-                        <p className="mb-3">
-                            <span className="text-red-500 font-medium">Kırmızı noktalar</span> o gün son tarihi olan görevlerinizi
-                            gösterir. Merak ettiğiniz tarihin üzerine fareyle gelerek hangi görevler olduğunu
-                            görebilirsiniz. 👀
-                        </p>
+                        {renderHTML(t('dialog.help.section3Text'))}
                     </AccordionItem>
 
                     <AccordionItem
-                        title="🎁 Kendinizi Ödüllendirin"
+                        title={t('dialog.help.section4')}
                         isOpen={openSection === "ödül-sistemi"}
                         toggle={() => toggleSection("ödül-sistemi")}
                     >
-                        <p className="mb-3">
-                            Görevlerinizi tamamladıkça puanlar kazanın ve bu puanlarla kendinize
-                            küçük ödüller verin! 🏆
-                        </p>
-                        <p className="mb-3">
-                            Sağ üstte biriken puanlarınızı görebilir, <span className="font-medium text-[#2D9596]">
-                            "Yeni Ödül"</span> butonu ile kendinize motivasyon ödülleri ekleyebilirsiniz. 💰
-                        </p>
-                        <p className="mb-3">
-                            Yeterli puanı topladığınızda <span className="font-medium text-green-500">"Kullan"</span> butonu
-                            aktif olur - kendinizi şımartmanın tam zamanı! 💫
-                        </p>
+                        {renderHTML(t('dialog.help.section4Text'))}
                     </AccordionItem>
 
                     <AccordionItem
-                        title="🎨 Kişiselleştirme"
+                        title={t('dialog.help.section5')}
                         isOpen={openSection === "özelleştirme"}
                         toggle={() => toggleSection("özelleştirme")}
                     >
-                        <p className="mb-3">
-                            Kendinize özel bir çalışma alanı yaratın! Görev ve ödül kartlarınızın renklerini değiştirin,
-                            Kanban tahtanızı sevdiğiniz renklerle süsleyin. 🌈
-                        </p>
-                        <p className="mb-3">
-                            Favori renk kombinasyonlarınızı kaydederek her zaman size ilham veren bir ortamda
-                            çalışabilirsiniz! ✨
-                        </p>
+                        {renderHTML(t('dialog.help.section5Text'))}
                     </AccordionItem>
 
                     <AccordionItem
-                        title="📬 İletişim"
+                        title={t('dialog.help.section6')}
                         isOpen={openSection === "iletişim"}
                         toggle={() => toggleSection("iletişim")}
                     >
-                        <p className="mb-3">
-                            Fikir ve önerileriniz değerli! Benimle aşağıdaki kanallardan iletişime geçebilirsiniz: 📝
-                        </p>
-                        <p className="mb-3">
-                            📧 E-mail: <span className="font-medium">akagunduzmustafa00@gmail.com</span>
-                        </p>
-                        <p className="mb-3">
-                            🔗 LinkedIn: <a href="https://www.linkedin.com/in/mustafa-akagunduz/" target="_blank"
-                                           rel="noopener noreferrer"
-                                           className="text-blue-500 hover:underline font-medium">linkedin.com/in/mustafa-akagunduz/</a>
-                        </p>
+                        {renderHTML(t('dialog.help.section6Text'))}
                     </AccordionItem>
                 </div>
                 <div className="flex justify-center mt-6">
@@ -176,7 +132,7 @@ const HelpDialog: React.FC<HelpDialogProps> = ({ open, onClose }) => {
                         onClick={onClose}
                         className="bg-gradient-to-r from-[#2D9596] to-[#265073] hover:from-[#249090] hover:to-[#1e405e] text-white cursor-pointer"
                     >
-                        Harika, Anladım! 👍
+                        {t('dialog.help.understand')}
                     </Button>
                 </div>
             </DialogContent>

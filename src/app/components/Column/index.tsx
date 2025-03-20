@@ -1,9 +1,11 @@
+// /src/app/components/Column/index.tsx
 import React, { useMemo } from 'react';
 import { ColumnData, Task } from '../../types';
 import TaskCardComponent from '../TaskCard';
 import { Typography } from "@/components/ui/typography";
 import { kanbanColumnClass, columnHeaderClass } from "../KanbanBoard3/styles";
 import { getDaysLeft } from '../../utils/dateUtils';
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface ColumnProps {
     columnId: string;
@@ -26,6 +28,9 @@ const Column: React.FC<ColumnProps> = ({
                                            onTaskClick,
                                            today
                                        }) => {
+    // Dil hook'unu ekleyin
+    const { t } = useLanguage();
+
     // Sort tasks based on deadline for the inProgress column
     const sortedItems = useMemo(() => {
         if (columnId !== 'inProgress' || !today) {

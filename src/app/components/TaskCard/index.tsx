@@ -1,3 +1,4 @@
+// /src/app/components/TaskCard/TaskCard.tsx
 import React from 'react';
 import { Task } from '../../types';
 import { getDaysLeft, formatDate, safeParseDate } from '../../utils/dateUtils';
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Calendar, Gift, FileText } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { taskCardClass } from "../KanbanBoard3/styles";
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface TaskCardProps {
     task: Task;
@@ -26,6 +28,9 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                                                         onClick,
                                                         today
                                                     }) => {
+    // Dil hook'unu kullan
+    const { t } = useLanguage();
+
     // Parse date safely and get formatted date
     const { formattedDate, dueDate } = React.useMemo(() => {
         if (!task.dueDate) return { formattedDate: '', dueDate: null };
@@ -33,9 +38,9 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
         const parsedDate = safeParseDate(task.dueDate);
         return {
             dueDate: parsedDate,
-            formattedDate: parsedDate ? formatDate(parsedDate) : 'Geçersiz tarih'
+            formattedDate: parsedDate ? formatDate(parsedDate) : t('taskCard.invalidDate')
         };
-    }, [task.dueDate]);
+    }, [task.dueDate, t]);
 
     // Calculate days left safely
     const daysLeft = React.useMemo(() => {
@@ -59,7 +64,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                     {/* Points */}
                     <div className="mt-auto">
                         <Typography className="text-white text-xs font-semibold">
-                            Puan: {task.points || 0}
+                            {t('taskCard.points')}: {task.points || 0}
                         </Typography>
                     </div>
                 </div>
@@ -97,7 +102,10 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                                         daysLeft < 0 ? "bg-red-900/50" :
                                             daysLeft <= 2 ? "bg-yellow-900/50" : "bg-green-900/50"
                                     )}>
-                                        {daysLeft < 0 ? `${Math.abs(daysLeft)}g gecikme` : `${daysLeft} günün kaldı`}
+                                        {daysLeft < 0
+                                            ? t('taskCard.daysOverdue').replace('{days}', Math.abs(daysLeft).toString())
+                                            : t('taskCard.daysLeft').replace('{days}', daysLeft.toString())
+                                        }
                                     </span>
                                 )}
                             </div>
@@ -106,7 +114,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                         {/* Points and Reward */}
                         <div className="flex items-center justify-between">
                             <Typography className="text-white text-xs font-semibold">
-                                {task.points || 0} Puan
+                                {task.points || 0} {t('taskCard.points')}
                             </Typography>
 
                             {task.reward && (
@@ -135,7 +143,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                     {/* Points */}
                     <div className="mt-auto">
                         <Typography className="text-white text-xs font-semibold">
-                            Kazanılan: {task.points || 0} Puan
+                            {t('taskCard.pointsEarned')}: {task.points || 0} {t('taskCard.points')}
                         </Typography>
                     </div>
                 </div>
@@ -156,14 +164,17 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                             <Calendar className="h-3 w-3 mr-1" />
                             {daysLeft !== null ?
                                 <span className={daysLeft < 0 ? "text-red-400" : ""}>
-                                    {daysLeft < 0 ? `${Math.abs(daysLeft)}g gecikme` : `${daysLeft} günün kaldı`}
+                                    {daysLeft < 0
+                                        ? t('taskCard.daysOverdue').replace('{days}', Math.abs(daysLeft).toString())
+                                        : t('taskCard.daysLeft').replace('{days}', daysLeft.toString())
+                                    }
                                 </span> :
                                 formattedDate
                             }
                         </span>
                     )}
 
-                    <span className="font-semibold">Puan: {task.points || 0}</span>
+                    <span className="font-semibold">{t('taskCard.points')}: {task.points || 0}</span>
                 </div>
             </div>
         );
@@ -228,7 +239,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                         size="icon"
                         className="text-white h-6 w-6 p-0 hover:bg-white/10"
                         onClick={handleDeleteClick}
-                        aria-label="Delete task"
+                        aria-label={t('button.delete')}
                     >
                         <Trash2 className="h-3 w-3" />
                     </Button>

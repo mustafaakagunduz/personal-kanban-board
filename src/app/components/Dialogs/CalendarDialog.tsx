@@ -1,7 +1,9 @@
+// /src/app/components/Dialogs/CalendarDialog.tsx
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { formatDate, safeParseDate } from '../../utils/dateUtils';
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface TaskWithDueDate {
     id: string;
@@ -24,6 +26,9 @@ const CalendarDialog: React.FC<CalendarDialogProps> = ({
                                                            onSelectDate,
                                                            tasksWithDueDates = []
                                                        }) => {
+    // Dil hook'unu kullan
+    const { t, language } = useLanguage();
+
     // Log tasks with due dates for debugging
     useEffect(() => {
         if (tasksWithDueDates.length > 0) {
@@ -49,14 +54,32 @@ const CalendarDialog: React.FC<CalendarDialogProps> = ({
         setMonth(currentDate.getMonth());
     }, [currentDate]);
 
-    // Türkçe ay isimleri
-    const turkishMonths = [
-        "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
-        "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
-    ];
+    // Dile göre ay isimleri
+    const getMonthNames = () => {
+        if (language === 'tr') {
+            return [
+                "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+                "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
+            ];
+        } else {
+            return [
+                "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            ];
+        }
+    };
 
-    // Turkish day abbreviations
-    const dayAbbreviations = ["Pt", "Sa", "Ça", "Pe", "Cu", "Ct", "Pz"];
+    // Dile göre gün kısaltmaları
+    const getDayAbbreviations = () => {
+        if (language === 'tr') {
+            return ["Pt", "Sa", "Ça", "Pe", "Cu", "Ct", "Pz"];
+        } else {
+            return ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+        }
+    };
+
+    const monthNames = getMonthNames();
+    const dayAbbreviations = getDayAbbreviations();
 
     // Bir önceki aya git
     const goToPreviousMonth = () => {
@@ -212,7 +235,7 @@ const CalendarDialog: React.FC<CalendarDialogProps> = ({
         <Dialog open={open} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-md rounded-xl p-0 max-h-[90vh] overflow-auto">
                 <DialogHeader className="border-b p-6 relative">
-                    <DialogTitle className="text-center text-2xl font-medium">Takvim</DialogTitle>
+                    <DialogTitle className="text-center text-2xl font-medium">{t('dialog.calendar')}</DialogTitle>
                 </DialogHeader>
 
                 <div className="p-6">
@@ -223,7 +246,7 @@ const CalendarDialog: React.FC<CalendarDialogProps> = ({
                         >
                             <ChevronLeft size={24}/>
                         </button>
-                        <h2 className="text-xl font-medium">{turkishMonths[month]} {year}</h2>
+                        <h2 className="text-xl font-medium">{monthNames[month]} {year}</h2>
                         <button
                             className="rounded-full p-2 hover:bg-gray-100"
                             onClick={goToNextMonth}
@@ -272,12 +295,14 @@ const CalendarDialog: React.FC<CalendarDialogProps> = ({
                             return (
                                 <div
                                     key={`day-${index}`}
-                                    className={`text-center py-2 text-lg cursor-pointer hover:bg-gray-100 hover:text-black rounded-full relative 
-                                        ${isCurrentMonth ? 'text-black' : 'text-gray-400'}
-                                        ${isSelectedDay(day, monthOffset) ?
-                                        'bg-black text-white hover:bg-black hover:bg-opacity-90 rounded-full w-10 h-10 flex items-center justify-center mx-auto' : ''}
-                                        ${isToday && !isSelectedDay(day, monthOffset) ?
-                                        'font-bold border border-gray-400 rounded-full w-10 h-10 flex items-center justify-center mx-auto' : ''}`}
+                                    className={cn(
+                                        "text-center py-2 text-lg cursor-pointer hover:bg-gray-100 hover:text-black rounded-full relative",
+                                        isCurrentMonth ? 'text-black' : 'text-gray-400',
+                                        isSelectedDay(day, monthOffset) ?
+                                            'bg-black text-white hover:bg-black hover:bg-opacity-90 rounded-full w-10 h-10 flex items-center justify-center mx-auto' : '',
+                                        isToday && !isSelectedDay(day, monthOffset) ?
+                                            'font-bold border border-gray-400 rounded-full w-10 h-10 flex items-center justify-center mx-auto' : ''
+                                    )}
                                     onClick={() => handleDayClick(day, monthOffset)}
                                 >
                                     {/* Gerekli klass'ları ayarla */}
@@ -292,7 +317,7 @@ const CalendarDialog: React.FC<CalendarDialogProps> = ({
                                         {/* Görevler için Tooltip - hover ile gösterilir */}
                                         {hasTasks && (
                                             <div className="absolute z-10 invisible group-hover:visible bg-black bg-opacity-80 text-white p-2 rounded text-xs -mb-2 bottom-full left-1/2 transform -translate-x-1/2 min-w-[150px] max-w-[200px]">
-                                                <p className="font-bold mb-1">Son tarihli görevler:</p>
+                                                <p className="font-bold mb-1">{t('dialog.tasksWithDueDate')}:</p>
                                                 <ul className="list-disc list-inside">
                                                     {tasksForDay.map(task => (
                                                         <li key={task.id}
@@ -306,7 +331,7 @@ const CalendarDialog: React.FC<CalendarDialogProps> = ({
                                         {/* Geçmiş tarih uyarı tooltip'i - tıklama ile gösterilir */}
                                         {showPastDateTooltip && (
                                             <div className="absolute z-10 bg-red-600 text-white p-2 rounded text-xs -mb-2 bottom-full left-1/2 transform -translate-x-1/2 min-w-[200px] max-w-[250px]">
-                                                <p className="font-bold">Bugünden önceki bir tarihe görev atayamazsınız</p>
+                                                <p className="font-bold">{t('dialog.futureDateRequired')}</p>
                                                 <div className="absolute left-1/2 transform -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-red-600"></div>
                                             </div>
                                         )}
@@ -317,12 +342,16 @@ const CalendarDialog: React.FC<CalendarDialogProps> = ({
                     </div>
                 </div>
                 <div className="border-t p-4 text-center text-sm text-gray-500">
-                    <p>Günlere tıklayarak yeni görev oluşturabilir, mouse ile üzerine gelerek o gün tamamlanacak
-                        görevleri görebilirsiniz.</p>
+                    <p>{t('dialog.calendarHelp')}</p>
                 </div>
             </DialogContent>
         </Dialog>
     );
+};
+
+// Helper function for className conditionals
+const cn = (...classes: (string | boolean)[]) => {
+    return classes.filter(Boolean).join(' ');
 };
 
 export default CalendarDialog;

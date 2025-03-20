@@ -1,3 +1,4 @@
+// /src/app/components/Dialogs/TaskDialog.tsx
 import React from 'react';
 import { NewTaskForm } from '../../types';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -5,22 +6,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useLanguage } from '../../../context/LanguageContext';
 
 // Renk seçimi için basit bir bileşen
 const ColorPicker: React.FC<{
     value: string;
     onChange: (color: string) => void;
 }> = ({ value, onChange }) => {
+    // Dil hook'unu ekleyin
+    const { t } = useLanguage();
+
     // Ön tanımlı renk seçenekleri
     const colorOptions = [
-        { name: "Mor (Varsayılan)", value: "#6b21a8" }, // purple
-        { name: "Mavi", value: "#1f91dc" }, // blue
-        { name: "Yeşil", value: "#008000" }, // green
-        { name: "Kırmızı", value: "#ff0000" }, // red
-        { name: "Turuncu", value: "#ff7518" }, // orange
-        { name: "Sarı", value: "#ffa500" }, // yellow
-        { name: "Pembe", value: "#ff00ff" }, // pink
-        { name: "Siyah", value: "#000000" }, // deep purple
+        { name: t("colors.purple"), value: "#6b21a8" }, // purple
+        { name: t("colors.blue"), value: "#1f91dc" }, // blue
+        { name: t("colors.green"), value: "#008000" }, // green
+        { name: t("colors.red"), value: "#ff0000" }, // red
+        { name: t("colors.orange"), value: "#ff7518" }, // orange
+        { name: t("colors.yellow"), value: "#ffa500" }, // yellow
+        { name: t("colors.pink"), value: "#ff00ff" }, // pink
+        { name: t("colors.black"), value: "#000000" }, // black
     ];
 
     return (
@@ -64,15 +69,18 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
                                                    setNewTask,
                                                    onAddTask
                                                }) => {
+    // Dil hook'unu kullan
+    const { t } = useLanguage();
+
     return (
         <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Yeni Görev Ekle</DialogTitle>
+                    <DialogTitle>{t('dialog.newTask')}</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="title">Görev Başlığı</Label>
+                        <Label htmlFor="title">{t('dialog.taskTitle')}</Label>
                         <Input
                             id="title"
                             value={newTask.title}
@@ -81,7 +89,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
                         />
                     </div>
                     <div className="grid gap-2">
-                        <Label htmlFor="description">Görev Açıklaması</Label>
+                        <Label htmlFor="description">{t('dialog.taskDescription')}</Label>
                         <Textarea
                             id="description"
                             rows={4}
@@ -90,7 +98,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
                         />
                     </div>
                     <div className="grid gap-2">
-                        <Label htmlFor="points">Puan</Label>
+                        <Label htmlFor="points">{t('dialog.taskPoints')}</Label>
                         <Input
                             id="points"
                             type="number"
@@ -103,9 +111,9 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
                         />
                     </div>
 
-                    {/* Yeni renk seçimi bölümü */}
+                    {/* Renk seçimi bölümü */}
                     <div className="grid gap-2">
-                        <Label>Kart Rengi</Label>
+                        <Label>{t('dialog.taskCardColor')}</Label>
                         <ColorPicker
                             value={newTask.color || "#6b21a8"} // varsayılan mor renk
                             onChange={(color) => setNewTask({
@@ -117,8 +125,8 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={onClose}>İptal</Button>
-                    <Button onClick={onAddTask}>Ekle</Button>
+                    <Button variant="outline" onClick={onClose}>{t('button.cancel')}</Button>
+                    <Button onClick={onAddTask}>{t('button.add')}</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

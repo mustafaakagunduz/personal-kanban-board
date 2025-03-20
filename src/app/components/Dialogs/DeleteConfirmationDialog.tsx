@@ -1,4 +1,4 @@
-// /src/components/Dialogs/DeleteConfirmationDialog.tsx
+// /src/app/components/Dialogs/DeleteConfirmationDialog.tsx
 import React from 'react';
 import {
     AlertDialog,
@@ -10,6 +10,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface DeleteConfirmationDialogProps {
     open: boolean;
@@ -22,20 +23,26 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
                                                                                open,
                                                                                onClose,
                                                                                onConfirm,
-                                                                               title = 'Görevi Sil'
+                                                                               title
                                                                            }) => {
+    // Dil hook'unu kullan
+    const { t } = useLanguage();
+
+    // Dialog başlığını ayarla - ya customTitle ya da çeviri
+    const dialogTitle = title || t('dialog.deleteTask');
+
     return (
         <AlertDialog open={open} onOpenChange={(open) => !open && onClose()}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>{title}</AlertDialogTitle>
+                    <AlertDialogTitle>{dialogTitle}</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Bu görevi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+                        {t('dialog.deleteConfirm')}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel onClick={onClose}>İptal</AlertDialogCancel>
-                    <AlertDialogAction onClick={onConfirm}>Evet, Sil</AlertDialogAction>
+                    <AlertDialogCancel onClick={onClose}>{t('button.cancel')}</AlertDialogCancel>
+                    <AlertDialogAction onClick={onConfirm}>{t('button.confirm')}</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>

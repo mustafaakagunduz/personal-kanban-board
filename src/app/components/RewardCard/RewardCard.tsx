@@ -1,3 +1,4 @@
+// /src/app/components/RewardCard/RewardCard.tsx
 import React from 'react';
 import { Reward } from '../../types';
 import { Typography } from "@/components/ui/typography";
@@ -5,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Gift } from 'lucide-react';
 import { taskCardClass } from "../KanbanBoard3/styles";
 import { cn } from "@/lib/utils";
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface RewardCardProps {
     reward: Reward;
@@ -21,6 +23,9 @@ const RewardCard: React.FC<RewardCardProps> = ({
                                                    onEditReward,
                                                    onDeleteReward
                                                }) => {
+    // Dil hook'unu kullan
+    const { t } = useLanguage();
+
     // Varsayılan renk değeri (indigo-900)
     const defaultColor = "#4c1d95";
 
@@ -71,7 +76,7 @@ const RewardCard: React.FC<RewardCardProps> = ({
                         <div className="flex items-center">
                             <Gift className="h-4 w-4 text-white/90 mr-1" />
                             <Typography className="text-white text-xs font-semibold">
-                                {reward.points} Puan
+                                {reward.points} {t('taskCard.points')}
                             </Typography>
                         </div>
 
@@ -85,7 +90,7 @@ const RewardCard: React.FC<RewardCardProps> = ({
                                 totalPoints < reward.points && "border border-white/30 text-white/50"
                             )}
                         >
-                            Kullan
+                            {t('button.use')}
                         </Button>
                     </div>
                 </div>

@@ -1,4 +1,4 @@
-// /src/components/Dialogs/TaskEditDialog.tsx
+// /src/app/components/Dialogs/TaskEditDialog.tsx
 import React from 'react';
 import { SelectedTask } from '../../types';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -6,22 +6,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useLanguage } from '../../../context/LanguageContext';
 
 // Renk seçimi için basit bir bileşen
 const ColorPicker: React.FC<{
     value: string;
     onChange: (color: string) => void;
 }> = ({ value, onChange }) => {
+    // Dil hook'unu ekleyin
+    const { t } = useLanguage();
+
     // Ön tanımlı renk seçenekleri
     const colorOptions = [
-        { name: "Mor (Varsayılan)", value: "#6b21a8" }, // indigo-900
-        { name: "Mavi", value: "#1f91dc" }, // blue-800
-        { name: "Yeşil", value: "#008000" }, // green-800
-        { name: "Kırmızı", value: "#ff0000" }, // red-800
-        { name: "Turuncu", value: "#ff7518" }, // orange-800
-        { name: "Sarı", value: "#ffa500" }, // yellow-800
-        { name: "Pembe", value: "#ff00ff" }, // pink-800
-        { name: "Siyah", value: "#000000" }, // purple-800
+        { name: t("colors.purple"), value: "#6b21a8" }, // purple
+        { name: t("colors.blue"), value: "#1f91dc" }, // blue
+        { name: t("colors.green"), value: "#008000" }, // green
+        { name: t("colors.red"), value: "#ff0000" }, // red
+        { name: t("colors.orange"), value: "#ff7518" }, // orange
+        { name: t("colors.yellow"), value: "#ffa500" }, // yellow
+        { name: t("colors.pink"), value: "#ff00ff" }, // pink
+        { name: t("colors.black"), value: "#000000" }, // black
     ];
 
     return (
@@ -73,15 +77,18 @@ const TaskEditDialog: React.FC<TaskEditDialogProps> = ({
                                                            setSelectedTask,
                                                            onSave
                                                        }) => {
+    // Dil hook'unu kullan
+    const { t } = useLanguage();
+
     return (
         <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Görevi Düzenle</DialogTitle>
+                    <DialogTitle>{t('dialog.editTask')}</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="title">Görev Başlığı</Label>
+                        <Label htmlFor="title">{t('dialog.taskTitle')}</Label>
                         <Input
                             id="title"
                             value={editTitle}
@@ -90,7 +97,7 @@ const TaskEditDialog: React.FC<TaskEditDialogProps> = ({
                         />
                     </div>
                     <div className="grid gap-2">
-                        <Label htmlFor="description">Görev Açıklaması</Label>
+                        <Label htmlFor="description">{t('dialog.taskDescription')}</Label>
                         <Textarea
                             id="description"
                             rows={4}
@@ -99,7 +106,7 @@ const TaskEditDialog: React.FC<TaskEditDialogProps> = ({
                         />
                     </div>
                     <div className="grid gap-2">
-                        <Label htmlFor="points">Puan</Label>
+                        <Label htmlFor="points">{t('dialog.taskPoints')}</Label>
                         <Input
                             id="points"
                             type="number"
@@ -116,7 +123,7 @@ const TaskEditDialog: React.FC<TaskEditDialogProps> = ({
                     </div>
                     {selectedTask?.dueDate && (
                         <div className="grid gap-2">
-                            <Label htmlFor="dueDate">Bitiş Tarihi</Label>
+                            <Label htmlFor="dueDate">{t('dialog.dueDate')}</Label>
                             <Input
                                 id="dueDate"
                                 type="date"
@@ -133,9 +140,9 @@ const TaskEditDialog: React.FC<TaskEditDialogProps> = ({
                         </div>
                     )}
 
-                    {/* Yeni renk seçimi bölümü */}
+                    {/* Renk seçimi bölümü */}
                     <div className="grid gap-2">
-                        <Label>Kart Rengi</Label>
+                        <Label>{t('dialog.taskCardColor')}</Label>
                         <ColorPicker
                             value={selectedTask?.color || "#4c1d95"} // varsayılan indigo-900
                             onChange={(color) => {
@@ -150,8 +157,8 @@ const TaskEditDialog: React.FC<TaskEditDialogProps> = ({
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={onClose}>İptal</Button>
-                    <Button onClick={onSave}>Kaydet</Button>
+                    <Button variant="outline" onClick={onClose}>{t('button.cancel')}</Button>
+                    <Button onClick={onSave}>{t('button.save')}</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

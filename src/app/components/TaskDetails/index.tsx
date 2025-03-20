@@ -1,3 +1,4 @@
+// /src/app/components/TaskDetails/index.tsx (TaskDetails Başlık Sorunu Düzeltmesi)
 import React from 'react';
 import { SelectedTask } from '../../types';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -5,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
 import { formatDate } from '../../utils/dateUtils';
 import { Separator } from "@/components/ui/separator";
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface TaskDetailsProps {
     open: boolean;
@@ -17,8 +19,8 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({
                                                      onClose,
                                                      task
                                                  }) => {
-    // Debug bilgileri konsola yazdırma
-    console.log("TaskDetails - Task:", task);
+    // Dil hook'unu kullan
+    const { t, language } = useLanguage();
 
     // Bitiş tarihinin geçerli olup olmadığını kontrol et
     let formattedDueDate = '';
@@ -26,11 +28,10 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({
         try {
             const dueDate = new Date(task.dueDate);
             if (!isNaN(dueDate.getTime())) {
-                formattedDueDate = formatDate(dueDate);
-                console.log("Formatted due date:", formattedDueDate);
+                formattedDueDate = formatDate(dueDate, language);
             } else {
                 console.error("Invalid date format:", task.dueDate);
-                formattedDueDate = "Geçersiz tarih formatı";
+                formattedDueDate = t('taskCard.invalidDate');
             }
         } catch (error) {
             console.error("Error formatting date:", error);
@@ -42,19 +43,19 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({
         <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle>Görev Detayları</DialogTitle>
+                    <DialogTitle>{t('dialog.taskDetails')}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 my-2">
-                    <Typography variant="h4">Görev Adı: {task?.title}</Typography>
+                    <Typography variant="h4">{t('dialog.taskTitle')}: {task?.title}</Typography>
 
                     <Separator />
                     <div>
-                        <Typography variant="h5" className="mb-1">Açıklaması: {task?.description}</Typography>
+                        <Typography variant="h5" className="mb-1">{t('dialog.taskDescription')}: {task?.description}</Typography>
                     </div>
 
                     <Separator />
                     <div>
-                        <Typography>Puan: {task?.points || 0}</Typography>
+                        <Typography>{t('taskCard.points')}: {task?.points || 0}</Typography>
                     </div>
 
                     <Separator />
@@ -62,7 +63,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({
                     {task?.dueDate && (
                         <div>
                             <Typography>
-                                Bitiş Tarihi: {formattedDueDate}
+                                {t('dialog.dueDate')}: {formattedDueDate}
                             </Typography>
                         </div>
                     )}
@@ -71,12 +72,12 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({
 
                     {task?.notes && (
                         <div>
-                            <Typography variant="h5" className="mb-1">Notlar: {task.notes}</Typography>
+                            <Typography variant="h5" className="mb-1">{t('taskCard.notes')}: {task.notes}</Typography>
                         </div>
                     )}
                 </div>
                 <DialogFooter>
-                    <Button onClick={onClose}>Kapat</Button>
+                    <Button onClick={onClose}>{t('button.close')}</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

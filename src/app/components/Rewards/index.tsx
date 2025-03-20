@@ -1,3 +1,4 @@
+// /src/app/components/Rewards/index.tsx
 import React from 'react';
 import { Reward } from '../../types';
 import { Typography } from "@/components/ui/typography";
@@ -5,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from 'lucide-react';
 import { kanbanColumnClass, columnHeaderClass } from "../KanbanBoard3/styles";
 import RewardCard from "@/src/app/components/RewardCard/RewardCard";
+import { useLanguage } from '../../../context/LanguageContext';
 
 interface RewardsProps {
     rewards: Reward[];
@@ -23,11 +25,14 @@ const Rewards: React.FC<RewardsProps> = ({
                                              onEditReward,
                                              onDeleteReward
                                          }) => {
+    // Dil hook'unu kullan
+    const { t } = useLanguage();
+
     return (
         <div className={kanbanColumnClass}>
             <div className="flex justify-center items-center mb-4">
                 <Typography variant="h4" className={columnHeaderClass}>
-                    🏆 Ödüller 🏆
+                    {t('column.rewards')}
                 </Typography>
             </div>
 
@@ -42,8 +47,6 @@ const Rewards: React.FC<RewardsProps> = ({
                         onDeleteReward={onDeleteReward}
                     />
                 ))}
-
-
             </div>
         </div>
     );

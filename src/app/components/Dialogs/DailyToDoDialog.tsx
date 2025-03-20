@@ -1,4 +1,4 @@
-// src/components/Dialogs/DailyToDoDialog.tsx
+// /src/app/components/Dialogs/DailyToDoDialog.tsx
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -16,6 +16,7 @@ import { Typography } from "@/components/ui/typography";
 import { Plus, Trash2, Calendar, Clock, Filter, ArrowUpDown, GripVertical } from 'lucide-react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { formatDate } from '../../utils/dateUtils';
+import { useLanguage } from '../../../context/LanguageContext';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -123,6 +124,9 @@ const SortableTodoItem: React.FC<SortableTodoItemProps> = ({ todo, toggleTodo, d
 };
 
 const DailyToDoDialog: React.FC<DailyToDoDialogProps> = ({ open, onClose, date }) => {
+    // Dil hook'unu kullan
+    const { t } = useLanguage();
+
     // State tanımları
     const [todos, setTodos] = useLocalStorage<TodoItem[]>('dailyTodos', []);
     const [newTodo, setNewTodo] = useState('');
@@ -254,7 +258,7 @@ const DailyToDoDialog: React.FC<DailyToDoDialogProps> = ({ open, onClose, date }
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <Calendar className="h-5 w-5" />
-                        <span>Bugün Yapacaklarım</span>
+                        <span>{t('dialog.dailyTodo')}</span>
                         {date && <span className="text-sm text-muted-foreground ml-2">({formatDate(date)})</span>}
                     </DialogTitle>
                 </DialogHeader>
@@ -263,7 +267,7 @@ const DailyToDoDialog: React.FC<DailyToDoDialogProps> = ({ open, onClose, date }
                 <div className="flex flex-col space-y-2 mb-4">
                     <div className="flex items-center space-x-2">
                         <Input
-                            placeholder="Yeni görev ekle..."
+                            placeholder={t('dialog.addNewTodo')}
                             value={newTodo}
                             onChange={(e) => setNewTodo(e.target.value)}
                             onKeyDown={handleKeyPress}
@@ -278,24 +282,24 @@ const DailyToDoDialog: React.FC<DailyToDoDialogProps> = ({ open, onClose, date }
                                         <DropdownMenuTrigger asChild>
                                             <Button variant="outline" size="sm" className={getPriorityColor(newTodoPriority)}>
                                                 <ArrowUpDown className="h-4 w-4 mr-1" />
-                                                Öncelik
+                                                {t('dialog.priority')}
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
                                             <DropdownMenuItem onClick={() => setNewTodoPriority('high')} className="text-red-600">
-                                                Yüksek Öncelik
+                                                {t('dialog.highPriority')}
                                             </DropdownMenuItem>
                                             <DropdownMenuItem onClick={() => setNewTodoPriority('medium')} className="text-amber-500">
-                                                Orta Öncelik
+                                                {t('dialog.mediumPriority')}
                                             </DropdownMenuItem>
                                             <DropdownMenuItem onClick={() => setNewTodoPriority('low')} className="text-green-600">
-                                                Düşük Öncelik
+                                                {t('dialog.lowPriority')}
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                    <p>Öncelik Seç</p>
+                                    <p>{t('dialog.priority')}</p>
                                 </TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
@@ -315,18 +319,18 @@ const DailyToDoDialog: React.FC<DailyToDoDialogProps> = ({ open, onClose, date }
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm">
                                 <Filter className="h-4 w-4 mr-1" />
-                                Sırala
+                                {t('dialog.sort')}
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => setSortBy('custom')}>
-                                Özel Sıralama
+                                {t('dialog.customSort')}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setSortBy('created')}>
-                                Oluşturma Tarihine Göre
+                                {t('dialog.sortByDate')}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setSortBy('priority')}>
-                                Önceliğe Göre
+                                {t('dialog.sortByPriority')}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -336,11 +340,11 @@ const DailyToDoDialog: React.FC<DailyToDoDialogProps> = ({ open, onClose, date }
                 <div className="min-h-80 max-h-96 overflow-y-auto flex flex-col">
                     {todos.length === 0 ? (
                         <Typography className="text-center text-gray-500 py-16 my-auto">
-                            Henüz görev eklenmedi.
+                            {t('dialog.noTasks')}
                         </Typography>
                     ) : filteredTodos.length === 0 ? (
                         <Typography className="text-center text-gray-500 py-16 my-auto">
-                            Seçilen filtrelere uygun görev bulunamadı.
+                            {t('dialog.noFilteredTasks')}
                         </Typography>
                     ) : (
                         <DndContext
@@ -370,10 +374,10 @@ const DailyToDoDialog: React.FC<DailyToDoDialogProps> = ({ open, onClose, date }
 
                 <DialogFooter className="flex justify-between items-center mt-4">
                     <div className="text-sm text-muted-foreground">
-                        <div>{completedCount} / {totalCount} tamamlandı</div>
+                        <div>{t('dialog.tasksCompleted').replace('{completed}', completedCount.toString()).replace('{total}', totalCount.toString())}</div>
                     </div>
                     <Button onClick={onClose} variant="outline">
-                        Kapat
+                        {t('button.close')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

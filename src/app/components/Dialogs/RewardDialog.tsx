@@ -1,25 +1,29 @@
-// /src/components/Dialogs/RewardDialog.tsx
+// /src/app/components/Dialogs/RewardDialog.tsx
 import React from 'react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useLanguage } from '../../../context/LanguageContext';
 
 // Renk seçici bileşen
 const ColorPicker: React.FC<{
     value: string;
     onChange: (color: string) => void;
 }> = ({ value, onChange }) => {
+    // Dil hook'unu kullan
+    const { t } = useLanguage();
+
     // Ön tanımlı renk seçenekleri
     const colorOptions = [
-        { name: "Mor (Varsayılan)", value: "#800080" }, // indigo-900
-        { name: "Mavi", value: "#1f91dc" }, // blue-800
-        { name: "Yeşil", value: "#008000" }, // green-800
-        { name: "Kırmızı", value: "#ff0000" }, // red-800
-        { name: "Turuncu", value: "#bd4f2b" }, // orange-800
-        { name: "Sarı", value: "#ffa500" }, // yellow-800
-        { name: "Pembe", value: "#ff00ff" }, // pink-800
-        { name: "Mor", value: "#6b21a8" }, // purple-800
+        { name: t("colors.purple"), value: "#800080" }, // indigo-900
+        { name: t("colors.blue"), value: "#1f91dc" }, // blue-800
+        { name: t("colors.green"), value: "#008000" }, // green-800
+        { name: t("colors.red"), value: "#ff0000" }, // red-800
+        { name: t("colors.orange"), value: "#bd4f2b" }, // orange-800
+        { name: t("colors.yellow"), value: "#ffa500" }, // yellow-800
+        { name: t("colors.pink"), value: "#ff00ff" }, // pink-800
+        { name: t("colors.black"), value: "#000000" }, // black
     ];
 
     return (
@@ -65,15 +69,18 @@ const RewardDialog: React.FC<RewardDialogProps> = ({
                                                        onSave,
                                                        isEditing
                                                    }) => {
+    // Dil hook'unu kullan
+    const { t } = useLanguage();
+
     return (
         <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>{isEditing ? 'Ödül Düzenle' : 'Yeni Ödül Ekle'}</DialogTitle>
+                    <DialogTitle>{isEditing ? t('dialog.editReward') : t('dialog.newReward')}</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="title">Ödül Başlığı</Label>
+                        <Label htmlFor="title">{t('dialog.rewardTitle')}</Label>
                         <Input
                             id="title"
                             value={reward.title}
@@ -82,7 +89,7 @@ const RewardDialog: React.FC<RewardDialogProps> = ({
                         />
                     </div>
                     <div className="grid gap-2">
-                        <Label htmlFor="points">Puan</Label>
+                        <Label htmlFor="points">{t('dialog.rewardPoints')}</Label>
                         <Input
                             id="points"
                             type="number"
@@ -96,7 +103,7 @@ const RewardDialog: React.FC<RewardDialogProps> = ({
 
                     {/* Renk seçimi bölümü */}
                     <div className="grid gap-2">
-                        <Label>Kart Rengi</Label>
+                        <Label>{t('dialog.rewardCardColor')}</Label>
                         <ColorPicker
                             value={reward.color || "#4c1d95"} // varsayılan indigo-900
                             onChange={(color) => setReward({
@@ -107,9 +114,9 @@ const RewardDialog: React.FC<RewardDialogProps> = ({
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={onClose}>İptal</Button>
+                    <Button variant="outline" onClick={onClose}>{t('button.cancel')}</Button>
                     <Button onClick={onSave}>
-                        {isEditing ? 'Kaydet' : 'Ekle'}
+                        {isEditing ? t('button.save') : t('button.add')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

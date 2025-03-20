@@ -1,4 +1,4 @@
-// /src/components/KanbanBoard/index.tsx
+// /src/app/components/KanbanBoard3/index.tsx
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -9,7 +9,8 @@ import {
     Gift,
     ClipboardList,
     HelpCircle,
-    CheckSquare
+    CheckSquare,
+    Globe
 } from 'lucide-react';
 import HelpDialog from '../Dialogs/HelpDialog';
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,8 @@ import ColorPickerDialog from "@/src/app/components/Dialogs/ColorPickerDialog";
 import { Typography } from "@/components/ui/typography";
 import PrivacyDialog from '../Dialogs/PrivacyDialog';
 import DailyToDoDialog from '../Dialogs/DailyToDoDialog';
+import LanguageSelector from '@/src/app/components/LanguageSelector/LanguageSelector';
+import { useLanguage } from '../../../context/LanguageContext';
 import {
     Task,
     Reward,
@@ -45,10 +48,13 @@ import {
 import { getDateInFuture } from "../../utils/dateUtils";
 
 const KanbanBoard3: React.FC = () => {
+    // Dil hook'unu kullan
+    const { t } = useLanguage();
+
     // Örnek görevler
     const sampleTasks = {
         todo: {
-            title: '🎯 Yapılacaklar 🎯',
+            title: t('column.todo'),
             items: [
                 {
                     id: 'todo-1',
@@ -74,7 +80,7 @@ const KanbanBoard3: React.FC = () => {
             ]
         },
         inProgress: {
-            title: '⏳️ Devam Edenler ⏳',
+            title: t('column.inProgress'),
             items: [
                 {
                     id: 'progress-1',
@@ -112,7 +118,7 @@ const KanbanBoard3: React.FC = () => {
             ]
         },
         done: {
-            title: '✅ Tamamlananlar ✅',
+            title: t('column.done'),
             items: [
                 {
                     id: 'done-1',
@@ -197,6 +203,24 @@ const KanbanBoard3: React.FC = () => {
     useEffect(() => {
         setToday(getTodayStart());
     }, []);
+
+    // Dil değiştiğinde kolonların başlıklarını güncelle
+    useEffect(() => {
+        setColumns(prev => ({
+            todo: {
+                ...prev.todo,
+                title: t('column.todo')
+            },
+            inProgress: {
+                ...prev.inProgress,
+                title: t('column.inProgress')
+            },
+            done: {
+                ...prev.done,
+                title: t('column.done')
+            }
+        }));
+    }, [t]);
 
     // Son tarihi olan görevleri izle
     useEffect(() => {
@@ -452,10 +476,9 @@ const KanbanBoard3: React.FC = () => {
                                 >
                                     <Calendar className="h-4 w-4 text-white"/>
                                     <Typography variant="h5" className="text-white">
-                                        Bugün: {formatDate(today)}
+                                        {t('header.today')}: {formatDate(today)}
                                     </Typography>
                                 </Button>
-
 
                                 <Button
                                     variant="outline"
@@ -464,25 +487,28 @@ const KanbanBoard3: React.FC = () => {
                                 >
                                     <CheckSquare className="h-4 w-4 text-white"/>
                                     <Typography variant="h5" className="text-white">
-                                        Bugün Yapacaklarım
+                                        {t('header.dailyTodos')}
                                     </Typography>
                                 </Button>
                             </>
                         ) : (
                             <Typography variant="h5" className="text-white">
-                                Yükleniyor...
+                                {t('header.loading')}
                             </Typography>
                         )}
                     </div>
 
                     <div className="flex items-center gap-4">
+                        {/* Language Selector Bileşeni */}
+                        <LanguageSelector />
+
                         <Button
                             variant="outline"
                             className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2 text-white"
                             onClick={() => setHelpDialogOpen(true)}
                         >
                             <HelpCircle className="h-5 w-5"/>
-                            <span>Kanban'ı Keşfedin!</span>
+                            <span>{t('header.help')}</span>
                         </Button>
                         <Button
                             variant="outline"
@@ -490,7 +516,7 @@ const KanbanBoard3: React.FC = () => {
                             onClick={() => setInfoDialogOpen(true)}
                         >
                             <Info className="h-5 w-5"/>
-                            <span>Gizlilik</span>
+                            <span>{t('header.privacy')}</span>
                         </Button>
                         <Button
                             variant="outline"
@@ -498,14 +524,14 @@ const KanbanBoard3: React.FC = () => {
                             onClick={() => setShowColorPicker(true)}
                         >
                             <Palette className="h-5 w-5"/>
-                            <span>Kanban Rengini Seç</span>
+                            <span>{t('header.color')}</span>
                         </Button>
                         <Button
                             variant="outline"
                             className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2"
                         >
                             <Typography variant="h5" className="text-white">
-                                Puanım: {totalPoints}
+                                {t('header.points')}: {totalPoints}
                             </Typography>
                         </Button>
                     </div>
@@ -521,7 +547,7 @@ const KanbanBoard3: React.FC = () => {
                             className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2 text-white"
                         >
                             <ClipboardList className="mr-2 h-4 w-4"/>
-                            Yeni Görev
+                            {t('button.newTask')}
                         </Button>
 
                         <Button
@@ -530,7 +556,7 @@ const KanbanBoard3: React.FC = () => {
                             className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2 text-white"
                         >
                             <Gift className="mr-2 h-4 w-4"/>
-                            Yeni Ödül
+                            {t('button.newReward')}
                         </Button>
                     </div>
 
