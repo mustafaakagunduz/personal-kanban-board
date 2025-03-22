@@ -234,6 +234,18 @@ const KanbanBoard3: React.FC = () => {
         }));
     };
 
+    const handleReorderTasks = (columnId: string, reorderedTasks: Task[]) => {
+        const updatedColumns = {
+            ...activeBoardData.columns,
+            [columnId]: {
+                ...activeBoardData.columns[columnId],
+                items: reorderedTasks
+            }
+        };
+
+        updateColumns(updatedColumns);
+    };
+
     const handleCreateBoard = (name: string) => {
         const newBoardId = `board-${Date.now()}`;
 
@@ -762,6 +774,7 @@ const KanbanBoard3: React.FC = () => {
                                 onDeleteClick={handleDeleteClick}
                                 onTaskClick={handleTaskClick}
                                 today={today}
+                                onReorderTasks={handleReorderTasks}
                             />
                         ))}
 
