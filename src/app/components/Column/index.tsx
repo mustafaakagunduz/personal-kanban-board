@@ -2,28 +2,10 @@
 import React, { useMemo } from 'react';
 import { ColumnData, Task } from '../../types';
 import TaskCardComponent from '../TaskCard';
-import TaskSortableWrapper from '../TaskSortableWrapper';
 import { Typography } from "@/components/ui/typography";
 import { kanbanColumnClass, columnHeaderClass } from "../KanbanBoard3/styles";
 import { getDaysLeft } from '../../utils/dateUtils';
 import { useLanguage } from '../../../context/LanguageContext';
-
-// DND Kit imports
-import {
-    DndContext,
-    closestCenter,
-    KeyboardSensor,
-    PointerSensor,
-    useSensor,
-    useSensors,
-    DragEndEvent
-} from '@dnd-kit/core';
-import {
-    arrayMove,
-    SortableContext,
-    sortableKeyboardCoordinates,
-    verticalListSortingStrategy
-} from '@dnd-kit/sortable';
 
 interface ColumnProps {
     columnId: string;
@@ -34,7 +16,6 @@ interface ColumnProps {
     onDeleteClick: (task: Task, columnId: string) => void;
     onTaskClick: (task: Task, columnId: string) => void;
     today: Date | null;
-    onReorderTasks?: (columnId: string, reorderedTasks: Task[]) => void;
 }
 
 const Column: React.FC<ColumnProps> = ({
@@ -45,19 +26,10 @@ const Column: React.FC<ColumnProps> = ({
                                            onEditClick,
                                            onDeleteClick,
                                            onTaskClick,
-                                           today,
-                                           onReorderTasks
+                                           today
                                        }) => {
-    // Dil hook'unu kullan
+    // Dil hook'unu ekleyin
     const { t } = useLanguage();
-
-    // DnD Kit sensors for sortable items
-    const sensors = useSensors(
-        useSensor(PointerSensor),
-        useSensor(KeyboardSensor, {
-            coordinateGetter: sortableKeyboardCoordinates,
-        })
-    );
 
     // Sort tasks based on deadline for the inProgress column
     const sortedItems = useMemo(() => {
@@ -89,75 +61,6 @@ const Column: React.FC<ColumnProps> = ({
         }
     }, [column.items, columnId, today]);
 
-    // Handle drag end event for todo column reordering
-    const handleDragEnd = (event: DragEndEvent) => {
-        const { active, over } = event;
-
-        if (over && active.id !== over.id && onReorderTasks) {
-            const oldIndex = sortedItems.findIndex(task => task.id === active.id);
-            const newIndex = sortedItems.findIndex(task => task.id === over.id);
-
-            const reorderedTasks = arrayMove(sortedItems, oldIndex, newIndex);
-            onReorderTasks(columnId, reorderedTasks);
-        }
-    };
-
-    // Render tasks with or without drag-and-drop sorting
-    const renderTasks = () => {
-        // Only use DnD Kit sorting for todo column
-        if (columnId === 'todo' && onReorderTasks) {
-            return (
-                <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={handleDragEnd}
-                >
-                    <SortableContext
-                        items={sortedItems.map(task => task.id)}
-                        strategy={verticalListSortingStrategy}
-                    >
-                        <div className="space-y-3">
-                            {sortedItems.map(task => (
-                                <TaskSortableWrapper
-                                    key={task.id}
-                                    id={task.id}
-                                >
-                                    <TaskCardComponent
-                                        task={task}
-                                        columnId={columnId}
-                                        onDragStart={onDragStart}
-                                        onEditClick={onEditClick}
-                                        onDeleteClick={onDeleteClick}
-                                        onClick={onTaskClick}
-                                        today={today}
-                                    />
-                                </TaskSortableWrapper>
-                            ))}
-                        </div>
-                    </SortableContext>
-                </DndContext>
-            );
-        }
-
-        // Regular rendering for other columns
-        return (
-            <div className="space-y-3">
-                {sortedItems.map(task => (
-                    <TaskCardComponent
-                        key={task.id}
-                        task={task}
-                        columnId={columnId}
-                        onDragStart={onDragStart}
-                        onEditClick={onEditClick}
-                        onDeleteClick={onDeleteClick}
-                        onClick={onTaskClick}
-                        today={today}
-                    />
-                ))}
-            </div>
-        );
-    };
-
     return (
         <div
             className={kanbanColumnClass}
@@ -167,7 +70,18 @@ const Column: React.FC<ColumnProps> = ({
             <Typography variant="h4" className={`${columnHeaderClass} text-center`}>
                 {column.title}
             </Typography>
-            {renderTasks()}
+            {sortedItems.map(task => (
+                <TaskCardComponent
+                    key={task.id}
+                    task={task}
+                    columnId={columnId}
+                    onDragStart={onDragStart}
+                    onEditClick={onEditClick}
+                    onDeleteClick={onDeleteClick}
+                    onClick={onTaskClick}
+                    today={today}
+                />
+            ))}
         </div>
     );
 };

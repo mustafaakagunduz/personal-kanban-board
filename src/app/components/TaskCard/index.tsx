@@ -4,7 +4,7 @@ import { Task } from '../../types';
 import { getDaysLeft, formatDate, safeParseDate } from '../../utils/dateUtils';
 import { Typography } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Calendar, Gift, FileText, GripVertical } from 'lucide-react';
+import { Edit, Trash2, Calendar, Gift, FileText } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { taskCardClass } from "../KanbanBoard3/styles";
 import { useLanguage } from '../../../context/LanguageContext';
@@ -211,8 +211,8 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
     return (
         <div
             className={cn(taskCardClass, "border-0 overflow-hidden")}
-            draggable={columnId !== 'todo'} // Only make it draggable for non-todo columns
-            onDragStart={(e) => columnId !== 'todo' && onDragStart(e, task.id, columnId)}
+            draggable
+            onDragStart={(e) => onDragStart(e, task.id, columnId)}
             style={{ backgroundColor: task.color ? `${task.color}` : `${defaultColor}` }}
         >
             <div
@@ -221,17 +221,6 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
             >
                 {/* Action buttons - positioned absolutely */}
                 <div className="absolute right-2 top-2 flex space-x-1 z-10">
-                    {/* Grip handle - show in todo column for DnD-kit dragging */}
-                    {columnId === 'todo' && (
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-white h-6 w-6 p-0 hover:bg-white/10 cursor-grab"
-                        >
-                            <GripVertical className="h-3 w-3" />
-                        </Button>
-                    )}
-
                     {/* Edit button - hide in "done" column */}
                     {columnId !== 'done' && (
                         <Button
