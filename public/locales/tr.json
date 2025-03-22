@@ -24,10 +24,10 @@
   "column.done": "✅ Tamamlananlar ✅",
   "column.rewards": "🏆 Ödüller 🏆",
 
-  "column.todo": "🎯 Yapılacaklar 🎯",
-  "column.inProgress": "⏳️ Devam Edenler ⏳",
-  "column.done": "✅ Tamamlananlar ✅",
-  "column.rewards": "🏆 Ödüller 🏆",
+
+
+  "dialog.completeTask": "Görevi Tamamla",
+  "dialog.completeTaskConfirm": "görevini tamamlanmış olarak işaretlemek istediğinize emin misiniz? Bu işlem geri alınamaz.",
 
   "button.newTask": "Yeni Görev",
   "button.newReward": "Yeni Ödül",
@@ -36,6 +36,7 @@
   "button.close": "Kapat",
   "button.add": "Ekle",
   "button.confirm": "Evet, Sil",
+  "button.confirmCompletion": "Evet, Tamamla",
   "button.use": "Kullan",
 
   "button.ok": "Tamam",

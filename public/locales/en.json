@@ -24,6 +24,9 @@
   "column.done": "✅ Completed ✅",
   "column.rewards": "🏆 Rewards 🏆",
 
+  "dialog.completeTask": "Complete Task",
+  "dialog.completeTaskConfirm": " : Are you sure you want to mark this task as completed? This action cannot be undone.",
+
   "button.newTask": "New Task",
   "button.newReward": "New Reward",
   "button.save": "Save",
@@ -31,6 +34,7 @@
   "button.close": "Close",
   "button.add": "Add",
   "button.confirm": "Yes, Delete",
+  "button.confirmCompletion": "Yes, Complete",
   "button.use": "Use",
 
   "taskCard.points": "Points",

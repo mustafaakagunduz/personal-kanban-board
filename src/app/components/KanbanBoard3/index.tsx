@@ -33,6 +33,7 @@ import PrivacyDialog from '../Dialogs/PrivacyDialog';
 import DailyToDoDialog from '../Dialogs/DailyToDoDialog';
 import LanguageSelector from '@/src/app/components/LanguageSelector/LanguageSelector';
 import { useLanguage } from '../../../context/LanguageContext';
+import TaskCompletionDialog from '../Dialogs/TaskCompletionDialog';
 import {
     Task,
     Reward,
@@ -147,6 +148,8 @@ const KanbanBoard3: React.FC = () => {
         { id: '3', title: 'Pizza', points: 75, color: '#008000' },
         { id: '4', title: 'Kitap', points: 50, color: '#ff7518' },
     ]);
+    const [completionConfirmDialog, setCompletionConfirmDialog] = useState<boolean>(false);
+    const [taskToComplete, setTaskToComplete] = useState<{task: Task, sourceColumn: string, targetColumn: string} | null>(null);
 
     const [totalPoints, setTotalPoints] = useLocalStorage<number>('totalPoints', 150); // Başlangıçta biraz puan
     const [calendarDialogOpen, setCalendarDialogOpen] = useState<boolean>(false);
@@ -324,6 +327,12 @@ const KanbanBoard3: React.FC = () => {
 
         if (sourceColumn === targetColumn) return;
 
+        // Prevent moving from done to other columns
+        if (sourceColumn === 'done') {
+            // Don't allow moving out of done column
+            return;
+        }
+
         const task = columns[sourceColumn].items.find(item => item.id === taskId);
         if (!task) return;
 
@@ -332,10 +341,23 @@ const KanbanBoard3: React.FC = () => {
         if (sourceColumn === 'todo' && targetColumn === 'inProgress') {
             setOpenProgressDialog(true);
         } else if (sourceColumn === 'inProgress' && targetColumn === 'done') {
-            handleTaskCompletion(task, sourceColumn, targetColumn);
+            // Show confirmation dialog instead of immediately completing the task
+            setTaskToComplete({task, sourceColumn, targetColumn});
+            setCompletionConfirmDialog(true);
         } else {
             moveTask(sourceColumn, targetColumn, taskId);
         }
+    };
+
+// 4. Add a new function to handle task completion confirmation
+    const handleCompletionConfirm = (): void => {
+        if (!taskToComplete) return;
+
+        // Close the confirmation dialog
+        setCompletionConfirmDialog(false);
+
+        // Continue with the original task completion
+        handleTaskCompletion(taskToComplete.task, taskToComplete.sourceColumn, taskToComplete.targetColumn);
     };
 
     const handleTaskCompletion = (task: Task, sourceColumn: string, targetColumn: string) => {
@@ -699,6 +721,12 @@ const KanbanBoard3: React.FC = () => {
                     open={dailyToDoDialogOpen}
                     onClose={() => setDailyToDoDialogOpen(false)}
                     date={today}
+                />
+                <TaskCompletionDialog
+                    open={completionConfirmDialog}
+                    onClose={() => setCompletionConfirmDialog(false)}
+                    onConfirm={handleCompletionConfirm}
+                    taskTitle={taskToComplete?.task.title || ''}
                 />
             </div>
         </div>
