@@ -24,7 +24,15 @@
   "column.done": "✅ Tamamlananlar ✅",
   "column.rewards": "🏆 Ödüller 🏆",
 
-
+  "board.new": "Yeni Pano",
+  "board.createNew": "Yeni Pano Oluştur",
+  "board.createDescription": "Görevlerinizi organize etmeye yardımcı olması için panonuza bir isim verin.",
+  "board.namePlaceholder": "Pano adı girin...",
+  "board.delete": "Panoyu Sil",
+  "board.deleteConfirm": "'{boardName}' panosunu silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+  "board.defaultName": "Kanban Panom",
+  "button.create": "Oluştur",
+  "button.delete": "Sil",
 
   "dialog.completeTask": "Görevi Tamamla",
   "dialog.completeTaskConfirm": "görevini tamamlanmış olarak işaretlemek istediğinize emin misiniz? Bu işlem geri alınamaz.",

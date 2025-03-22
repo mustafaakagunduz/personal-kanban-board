@@ -13,6 +13,7 @@ import {
     Globe
 } from 'lucide-react';
 import HelpDialog from '../Dialogs/HelpDialog';
+import BoardSelector from '../BoardSelector';
 import { Button } from "@/components/ui/button";
 import Column from '../Column';
 import Rewards from '../Rewards';
@@ -41,11 +42,12 @@ import {
     SelectedTask,
     NewTaskForm,
     ProgressDetails,
-    ColumnData
+    ColumnData,
+    Board,
+    KanbanState
 } from '../../types';
 
 // Use this function from dateUtils instead of defining it locally
-// Import it at the top with your other imports
 import { getDateInFuture } from "../../utils/dateUtils";
 
 const KanbanBoard3: React.FC = () => {
@@ -89,7 +91,6 @@ const KanbanBoard3: React.FC = () => {
                     description: 'Ana sayfa ve ürün sayfaları için yeni tasarım öğelerini oluştur.',
                     points: 45,
                     duration: '3 gün',
-
                     notes: 'Mobil uyumluluk önemli',
                     dueDate: getDateInFuture(3),
                     color: '#ff7518' // Turuncu
@@ -100,7 +101,6 @@ const KanbanBoard3: React.FC = () => {
                     description: 'Ödeme sistemini yeni API ile entegre et ve test senaryolarını çalıştır.',
                     points: 60,
                     duration: '5 gün',
-
                     notes: 'Dokümantasyon güncellenmeli',
                     dueDate: getDateInFuture(5),
                     color: '#ff0000' // Kırmızı
@@ -139,32 +139,177 @@ const KanbanBoard3: React.FC = () => {
         }
     };
 
-    // Local storage hooks - Yeni projeler için örnek veriler, varsa localStorage'dan alır
-    const [columns, setColumns] = useLocalStorage<Columns>('kanbanData', sampleTasks);
-
-    const [rewards, setRewards] = useLocalStorage<Reward[]>('rewards', [
+    // Default rewards
+    const defaultRewards = [
         { id: '1', title: 'Latte', points: 35, color: '#6b21a8' },
         { id: '2', title: 'Sinema', points: 100, color: '#1f91dc' },
         { id: '3', title: 'Pizza', points: 75, color: '#008000' },
         { id: '4', title: 'Kitap', points: 50, color: '#ff7518' },
-    ]);
+    ];
+
+    // Multiple Kanban boards state
+    const [kanbanState, setKanbanState] = useLocalStorage<KanbanState>('kanbanState', {
+        activeBoard: 'default-board',
+        boards: [
+            {
+                id: 'default-board',
+                name: t('board.defaultName'),
+                createdAt: new Date().toISOString()
+            }
+        ],
+        boardsData: {
+            'default-board': {
+                columns: sampleTasks,
+                rewards: defaultRewards,
+                totalPoints: 150,
+                bgColorStart: "#2D9596",
+                bgColorEnd: "#265073"
+            }
+        }
+    });
+
+    // Get the active board's data
+    const activeBoard = kanbanState.activeBoard;
+    const activeBoardData = kanbanState.boardsData[activeBoard];
+
+    // Helper functions to update board data
+    const updateColumns = (newColumns: Columns) => {
+        setKanbanState(prev => ({
+            ...prev,
+            boardsData: {
+                ...prev.boardsData,
+                [activeBoard]: {
+                    ...prev.boardsData[activeBoard],
+                    columns: newColumns
+                }
+            }
+        }));
+    };
+
+    const updateRewards = (newRewards: Reward[]) => {
+        setKanbanState(prev => ({
+            ...prev,
+            boardsData: {
+                ...prev.boardsData,
+                [activeBoard]: {
+                    ...prev.boardsData[activeBoard],
+                    rewards: newRewards
+                }
+            }
+        }));
+    };
+
+    const updateTotalPoints = (newTotalPoints: number) => {
+        setKanbanState(prev => ({
+            ...prev,
+            boardsData: {
+                ...prev.boardsData,
+                [activeBoard]: {
+                    ...prev.boardsData[activeBoard],
+                    totalPoints: newTotalPoints
+                }
+            }
+        }));
+    };
+
+    const updateBgColors = (start: string, end: string) => {
+        setKanbanState(prev => ({
+            ...prev,
+            boardsData: {
+                ...prev.boardsData,
+                [activeBoard]: {
+                    ...prev.boardsData[activeBoard],
+                    bgColorStart: start,
+                    bgColorEnd: end
+                }
+            }
+        }));
+    };
+
+    // Board management functions
+    const handleBoardChange = (boardId: string) => {
+        setKanbanState(prev => ({
+            ...prev,
+            activeBoard: boardId
+        }));
+    };
+
+    const handleCreateBoard = (name: string) => {
+        const newBoardId = `board-${Date.now()}`;
+
+        setKanbanState(prev => ({
+            ...prev,
+            activeBoard: newBoardId,
+            boards: [
+                ...prev.boards,
+                {
+                    id: newBoardId,
+                    name: name,
+                    createdAt: new Date().toISOString()
+                }
+            ],
+            boardsData: {
+                ...prev.boardsData,
+                [newBoardId]: {
+                    columns: {
+                        todo: { title: t('column.todo'), items: [] },
+                        inProgress: { title: t('column.inProgress'), items: [] },
+                        done: { title: t('column.done'), items: [] }
+                    },
+                    rewards: [],
+                    totalPoints: 0,
+                    bgColorStart: "#2D9596",
+                    bgColorEnd: "#265073"
+                }
+            }
+        }));
+    };
+
+    const handleDeleteBoard = (boardId: string) => {
+        // Cannot delete the last board
+        if (kanbanState.boards.length <= 1) return;
+
+        setKanbanState(prev => {
+            // Create new state without the deleted board
+            const { [boardId]: removedBoard, ...remainingBoardsData } = prev.boardsData;
+
+            // Find a new active board if needed
+            let newActiveBoard = prev.activeBoard;
+            if (newActiveBoard === boardId) {
+                // Set the first available board as active
+                newActiveBoard = Object.keys(remainingBoardsData)[0];
+            }
+
+            return {
+                ...prev,
+                activeBoard: newActiveBoard,
+                boards: prev.boards.filter(board => board.id !== boardId),
+                boardsData: remainingBoardsData
+            };
+        });
+    };
+
+    const handleRenameBoard = (boardId: string, newName: string) => {
+        setKanbanState(prev => ({
+            ...prev,
+            boards: prev.boards.map(board =>
+                board.id === boardId ? { ...board, name: newName } : board
+            )
+        }));
+    };
+
+    // Task completion confirmation
     const [completionConfirmDialog, setCompletionConfirmDialog] = useState<boolean>(false);
     const [taskToComplete, setTaskToComplete] = useState<{task: Task, sourceColumn: string, targetColumn: string} | null>(null);
 
-    const [totalPoints, setTotalPoints] = useLocalStorage<number>('totalPoints', 150); // Başlangıçta biraz puan
+    // UI state
     const [calendarDialogOpen, setCalendarDialogOpen] = useState<boolean>(false);
     const [infoDialogOpen, setInfoDialogOpen] = useState<boolean>(false);
-    //colors:
-    const [showColorPicker, setShowColorPicker] = useState(false);
-    const [bgColorStart, setBgColorStart] = useLocalStorage<string>("bgColorStart", "#2D9596"); // Güzel bir yeşil-turkuaz
-    const [bgColorEnd, setBgColorEnd] = useLocalStorage<string>("bgColorEnd", "#265073"); // Koyu mavi
-
-    // Yeni eklenen state - DailyToDo için
+    const [showColorPicker, setShowColorPicker] = useState<boolean>(false);
     const [dailyToDoDialogOpen, setDailyToDoDialogOpen] = useState<boolean>(false);
 
     // State
     const [today, setToday] = useState<Date | null>(null);
-    // Görevlerin son tarihlerini izleme
     const [tasksWithDueDates, setTasksWithDueDates] = useState<Array<{id: string, title: string, dueDate: string}>>([]);
     const [newTask, setNewTask] = useState<NewTaskForm>({
         title: '',
@@ -207,32 +352,30 @@ const KanbanBoard3: React.FC = () => {
         setToday(getTodayStart());
     }, []);
 
-    // Dil değiştiğinde kolonların başlıklarını güncelle
+    // Update column titles when language changes
     useEffect(() => {
-        setColumns(prev => ({
+        updateColumns({
             todo: {
-                ...prev.todo,
+                ...activeBoardData.columns.todo,
                 title: t('column.todo')
             },
             inProgress: {
-                ...prev.inProgress,
+                ...activeBoardData.columns.inProgress,
                 title: t('column.inProgress')
             },
             done: {
-                ...prev.done,
+                ...activeBoardData.columns.done,
                 title: t('column.done')
             }
-        }));
-    }, [t]);
+        });
+    }, [t, activeBoard]);
 
-    // Son tarihi olan görevleri izle
+    // Track tasks with due dates
     useEffect(() => {
-        // Tüm kolonlardaki görevleri kontrol et
         const tasksWithDates: Array<{id: string, title: string, dueDate: string}> = [];
 
-        // Özellikle 'inProgress' kolonundaki görevlere odaklan
-        if (columns.inProgress && columns.inProgress.items) {
-            columns.inProgress.items.forEach(task => {
+        if (activeBoardData.columns.inProgress && activeBoardData.columns.inProgress.items) {
+            activeBoardData.columns.inProgress.items.forEach(task => {
                 if (task.dueDate) {
                     tasksWithDates.push({
                         id: task.id,
@@ -244,11 +387,15 @@ const KanbanBoard3: React.FC = () => {
         }
 
         setTasksWithDueDates(tasksWithDates);
-    }, [columns]);
+    }, [activeBoardData.columns]);
 
     // Handler functions
     const handleTaskClick = (task: Task, columnId: string): void => {
-        setSelectedTaskDetails({ ...task, columnStatus: columns[columnId].title, columnId });
+        setSelectedTaskDetails({
+            ...task,
+            columnStatus: activeBoardData.columns[columnId].title,
+            columnId
+        });
         setTaskDetailsDialog(true);
     };
 
@@ -275,18 +422,23 @@ const KanbanBoard3: React.FC = () => {
     };
 
     const handleDeleteReward = (id: string) => {
-        setRewards(prev => prev.filter(reward => reward.id !== id));
+        updateRewards(activeBoardData.rewards.filter(reward => reward.id !== id));
     };
 
     const handleConfirmDeleteTask = (): void => {
         if (!selectedTask) return;
-        setColumns(prev => ({
-            ...prev,
+
+        const updatedColumns = {
+            ...activeBoardData.columns,
             [selectedTask.columnId]: {
-                ...prev[selectedTask.columnId],
-                items: prev[selectedTask.columnId].items.filter(item => item.id !== selectedTask.id)
+                ...activeBoardData.columns[selectedTask.columnId],
+                items: activeBoardData.columns[selectedTask.columnId].items.filter(
+                    item => item.id !== selectedTask.id
+                )
             }
-        }));
+        };
+
+        updateColumns(updatedColumns);
         setDeleteConfirmDialog(false);
     };
 
@@ -299,16 +451,17 @@ const KanbanBoard3: React.FC = () => {
             description: editDescription.trim()
         };
 
-        setColumns(prev => ({
-            ...prev,
+        const updatedColumns = {
+            ...activeBoardData.columns,
             [selectedTask.columnId]: {
-                ...prev[selectedTask.columnId],
-                items: prev[selectedTask.columnId].items.map(item =>
-                    item.id === selectedTask.id ? updatedTask : item
+                ...activeBoardData.columns[selectedTask.columnId],
+                items: activeBoardData.columns[selectedTask.columnId].items.map(
+                    item => item.id === selectedTask.id ? updatedTask : item
                 )
             }
-        }));
+        };
 
+        updateColumns(updatedColumns);
         setEditDialog(false);
         setSelectedTask(null);
         setEditTitle('');
@@ -329,11 +482,10 @@ const KanbanBoard3: React.FC = () => {
 
         // Prevent moving from done to other columns
         if (sourceColumn === 'done') {
-            // Don't allow moving out of done column
             return;
         }
 
-        const task = columns[sourceColumn].items.find(item => item.id === taskId);
+        const task = activeBoardData.columns[sourceColumn].items.find(item => item.id === taskId);
         if (!task) return;
 
         setMovingTask(task);
@@ -349,21 +501,17 @@ const KanbanBoard3: React.FC = () => {
         }
     };
 
-// 4. Add a new function to handle task completion confirmation
     const handleCompletionConfirm = (): void => {
         if (!taskToComplete) return;
 
-        // Close the confirmation dialog
         setCompletionConfirmDialog(false);
-
-        // Continue with the original task completion
         handleTaskCompletion(taskToComplete.task, taskToComplete.sourceColumn, taskToComplete.targetColumn);
     };
 
     const handleTaskCompletion = (task: Task, sourceColumn: string, targetColumn: string) => {
         const taskPoints = task.points || 0;
         if (taskPoints) {
-            setTotalPoints(prev => prev + taskPoints);
+            updateTotalPoints(activeBoardData.totalPoints + taskPoints);
         }
         setCurrentReward(task.reward || '');
         setCompletedTaskPoints(taskPoints);
@@ -382,13 +530,15 @@ const KanbanBoard3: React.FC = () => {
             color: newTask.color || "#800080" // Varsayılan renk
         };
 
-        setColumns(prev => ({
-            ...prev,
+        const updatedColumns = {
+            ...activeBoardData.columns,
             todo: {
-                ...prev.todo,
-                items: [...prev.todo.items, task]
+                ...activeBoardData.columns.todo,
+                items: [...activeBoardData.columns.todo.items, task]
             }
-        }));
+        };
+
+        updateColumns(updatedColumns);
 
         // Form verilerini sıfırla
         setNewTask({
@@ -396,36 +546,40 @@ const KanbanBoard3: React.FC = () => {
             description: '',
             column: 'todo',
             points: '',
-            color: '#800080' // Varsayılan rengi ekledik
+            color: '#800080' // Varsayılan rengi
         });
         setNewTaskOpenDialog(false);
     };
 
     const handleProgressSubmit = (): void => {
         if (!movingTask) return;
-        // progressDetails içindeki dueDate'i ekliyoruz
+
         moveTask('todo', 'inProgress', movingTask.id, progressDetails);
         setOpenProgressDialog(false);
         setProgressDetails({ duration: '', reward: '', notes: '', dueDate: '' });
     };
 
     const moveTask = (sourceColumn: string, targetColumn: string, taskId: string, additionalData: Partial<Task> = {}): void => {
-        const task = columns[sourceColumn].items.find(item => item.id === taskId);
+        const task = activeBoardData.columns[sourceColumn].items.find(item => item.id === taskId);
         if (!task) return;
 
         const updatedTask = { ...task, ...additionalData };
 
-        setColumns(prev => ({
-            ...prev,
+        const updatedColumns = {
+            ...activeBoardData.columns,
             [sourceColumn]: {
-                ...prev[sourceColumn],
-                items: prev[sourceColumn].items.filter(item => item.id !== taskId)
+                ...activeBoardData.columns[sourceColumn],
+                items: activeBoardData.columns[sourceColumn].items.filter(
+                    item => item.id !== taskId
+                )
             },
             [targetColumn]: {
-                ...prev[targetColumn],
-                items: [...prev[targetColumn].items, updatedTask]
+                ...activeBoardData.columns[targetColumn],
+                items: [...activeBoardData.columns[targetColumn].items, updatedTask]
             }
-        }));
+        };
+
+        updateColumns(updatedColumns);
     };
 
     const handleAddReward = () => {
@@ -438,7 +592,7 @@ const KanbanBoard3: React.FC = () => {
             color: newReward.color
         };
 
-        setRewards(prev => [...prev, reward]);
+        updateRewards([...activeBoardData.rewards, reward]);
         setNewReward({ title: '', points: '', color: '' });
         setNewRewardDialog(false);
     };
@@ -446,7 +600,7 @@ const KanbanBoard3: React.FC = () => {
     const handleEditRewardSave = () => {
         if (!editingReward || !newReward.title || typeof newReward.points !== 'number') return;
 
-        setRewards(prev => prev.map(reward =>
+        const updatedRewards = activeBoardData.rewards.map(reward =>
             reward.id === editingReward.id
                 ? {
                     ...reward,
@@ -455,26 +609,23 @@ const KanbanBoard3: React.FC = () => {
                     color: newReward.color
                 }
                 : reward
-        ));
+        );
 
+        updateRewards(updatedRewards);
         setEditRewardDialog(false);
         setEditingReward(null);
         setNewReward({ title: '', points: '', color: '' });
     };
 
-    // New function to handle date selection from calendar
     const handleCalendarDateSelect = (date: Date) => {
-        // Format the date for the description
         const formattedDate = formatDate(date);
 
-        // Pre-fill the task form with the selected date in the description
         setNewTask({
             ...newTask,
             description: `${formattedDate} 'e kadar..`,
             column: 'todo'
         });
 
-        // Open the task dialog
         setNewTaskOpenDialog(true);
     };
 
@@ -482,7 +633,7 @@ const KanbanBoard3: React.FC = () => {
         <div
             className="h-screen w-screen overflow-y-auto"
             style={{
-                background: `linear-gradient(to bottom right, ${bgColorStart}, ${bgColorEnd})`
+                background: `linear-gradient(to bottom right, ${activeBoardData.bgColorStart}, ${activeBoardData.bgColorEnd})`
             }}
         >
             <div className="p-6 flex flex-col min-h-screen">
@@ -521,7 +672,7 @@ const KanbanBoard3: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        {/* Language Selector Bileşeni */}
+                        {/* Language Selector */}
                         <LanguageSelector />
 
                         <Button
@@ -553,14 +704,30 @@ const KanbanBoard3: React.FC = () => {
                             className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2"
                         >
                             <Typography variant="h5" className="text-white">
-                                {t('header.points')}: {totalPoints}
+                                {t('header.points')}: {activeBoardData.totalPoints}
                             </Typography>
                         </Button>
                     </div>
                 </div>
 
+                {/* Board Selector */}
+                <BoardSelector
+                    boards={kanbanState.boards}
+                    activeBoard={activeBoard}
+                    onBoardChange={handleBoardChange}
+                    onCreateBoard={handleCreateBoard}
+                    onDeleteBoard={handleDeleteBoard}
+                    onRenameBoard={handleRenameBoard}
+                    onReorderBoards={(reorderedBoards) => {
+                        setKanbanState(prev => ({
+                            ...prev,
+                            boards: reorderedBoards
+                        }));
+                    }}
+                />
+
                 {/* Main Content Section */}
-                <div className="flex flex-col gap-4 flex-1 mb-6">
+                <div className="flex flex-col gap-4 flex-1 mb-6 mt-4">
                     {/* Buttons Bar */}
                     <div className="mb-4 flex gap-2">
                         <Button
@@ -582,9 +749,9 @@ const KanbanBoard3: React.FC = () => {
                         </Button>
                     </div>
 
-                    {/* Columns Container - Columns içeren div */}
+                    {/* Columns Container */}
                     <div className="flex gap-4 flex-1 min-h-0">
-                        {Object.entries(columns).map(([columnId, column]) => (
+                        {Object.entries(activeBoardData.columns).map(([columnId, column]) => (
                             <Column
                                 key={columnId}
                                 columnId={columnId}
@@ -599,10 +766,10 @@ const KanbanBoard3: React.FC = () => {
                         ))}
 
                         <Rewards
-                            rewards={rewards}
-                            totalPoints={totalPoints}
+                            rewards={activeBoardData.rewards}
+                            totalPoints={activeBoardData.totalPoints}
                             onAddClick={() => setNewRewardDialog(true)}
-                            onUseReward={(points) => setTotalPoints(prev => prev - points)}
+                            onUseReward={(points) => updateTotalPoints(activeBoardData.totalPoints - points)}
                             onEditReward={handleEditReward}
                             onDeleteReward={handleDeleteReward}
                         />
@@ -687,13 +854,12 @@ const KanbanBoard3: React.FC = () => {
                 <ColorPickerDialog
                     open={showColorPicker}
                     onClose={() => setShowColorPicker(false)}
-                    startColor={bgColorStart}
-                    endColor={bgColorEnd}
-                    onStartColorChange={setBgColorStart}
-                    onEndColorChange={setBgColorEnd}
+                    startColor={activeBoardData.bgColorStart}
+                    endColor={activeBoardData.bgColorEnd}
+                    onStartColorChange={(color) => updateBgColors(color, activeBoardData.bgColorEnd)}
+                    onEndColorChange={(color) => updateBgColors(activeBoardData.bgColorStart, color)}
                     onReset={() => {
-                        setBgColorStart("#312e81");
-                        setBgColorEnd("#1e40af");
+                        updateBgColors("#312e81", "#1e40af");
                     }}
                 />
 
@@ -716,12 +882,12 @@ const KanbanBoard3: React.FC = () => {
                     task={selectedTaskDetails}
                 />
 
-
                 <DailyToDoDialog
                     open={dailyToDoDialogOpen}
                     onClose={() => setDailyToDoDialogOpen(false)}
                     date={today}
                 />
+
                 <TaskCompletionDialog
                     open={completionConfirmDialog}
                     onClose={() => setCompletionConfirmDialog(false)}

@@ -37,6 +37,16 @@
   "button.confirmCompletion": "Yes, Complete",
   "button.use": "Use",
 
+  "board.new": "New Board",
+  "board.createNew": "Create New Board",
+  "board.createDescription": "Give your board a name to help you organize your tasks.",
+  "board.namePlaceholder": "Enter board name...",
+  "board.delete": "Delete Board",
+  "board.deleteConfirm": "Are you sure you want to delete the board '{boardName}'? This action cannot be undone.",
+  "board.defaultName": "My Kanban Board",
+  "button.create": "Create",
+  "button.delete": "Delete",
+
   "taskCard.points": "Points",
   "taskCard.pointsEarned": "Earned",
   "taskCard.notes": "Notes",

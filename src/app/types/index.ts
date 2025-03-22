@@ -59,3 +59,23 @@ export interface NewTaskForm {
     points: number | '';
     color?: string; // Yeni task oluştururken renk seçimi için eklendi
 }
+
+export interface Board {
+    id: string;
+    name: string;
+    createdAt: string; // ISO date string
+}
+
+export interface KanbanState {
+    activeBoard: string; // The ID of the active board
+    boards: Board[]; // List of all boards
+    boardsData: {
+        [boardId: string]: {
+            columns: Columns;
+            rewards: Reward[];
+            totalPoints: number;
+            bgColorStart: string;
+            bgColorEnd: string;
+        }
+    };
+}
