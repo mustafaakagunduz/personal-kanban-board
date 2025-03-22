@@ -50,6 +50,7 @@
   "taskCard.daysOverdue": "{days}g gecikme",
   "taskCard.invalidDate": "Geçersiz tarih",
 
+
   "dialog.newTask": "Yeni Görev Ekle",
   "dialog.editTask": "Görevi Düzenle",
   "dialog.deleteTask": "Görevi Sil",
@@ -59,6 +60,7 @@
   "dialog.taskPoints": "Puan",
   "dialog.taskCardColor": "Kart Rengi",
   "dialog.taskDueDate": "Bitiş tarihini (takvime tıklayarak) seçiniz",
+  "dialog.positiveIntegerRequired": "Lütfen pozitif tam sayı değer giriniz",
 
   "dialog.newReward": "Yeni Ödül Ekle",
   "dialog.editReward": "Ödül Düzenle",

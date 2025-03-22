@@ -1,5 +1,5 @@
-// /src/app/components/Dialogs/TaskDialog.tsx
-import React from 'react';
+// /src/app/components/Dialogs/NewTaskDialog.tsx
+import React, {useState} from 'react';
 import { NewTaskForm } from '../../types';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -62,7 +62,7 @@ interface TaskDialogProps {
     onAddTask: () => void;
 }
 
-const TaskDialog: React.FC<TaskDialogProps> = ({
+const NewTaskDialog: React.FC<TaskDialogProps> = ({
                                                    open,
                                                    onClose,
                                                    newTask,
@@ -71,6 +71,24 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
                                                }) => {
     // Dil hook'unu kullan
     const { t } = useLanguage();
+    // NewTaskDialog bileşeninde useState ekleyelim
+    const [pointsError, setPointsError] = useState<string | null>(null);
+// NewTaskDialog bileşeninde onAddTask'i çağırmadan önce doğrulama yapalım
+    const handleSubmit = () => {
+        // Başlık boşsa işlemi iptal et
+        if (!newTask.title) return;
+
+        // Puan kontrolü (0 veya pozitif tam sayı olmalı)
+        const points = newTask.points;
+        if (points !== '' && (isNaN(Number(points)) || !Number.isInteger(Number(points)) || Number(points) < 0)) {
+            setPointsError(t('dialog.positiveIntegerRequired'));
+            return;
+        }
+
+        // Doğrulamalar geçildi, görev ekle
+        onAddTask();
+    };
+
 
     return (
         <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
@@ -99,15 +117,53 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="points">{t('dialog.taskPoints')}</Label>
+
+                        {pointsError && (
+                            <div className="text-red-500 text-sm">{pointsError}</div>
+                        )}
                         <Input
                             id="points"
                             type="number"
                             value={newTask.points}
-                            onChange={(e) => setNewTask({
-                                ...newTask,
-                                points: e.target.value === '' ? '' : Number(e.target.value),
-                                column: 'todo'
-                            })}
+                            min="0" // Minimum değeri 0 olarak değiştirdik
+                            onKeyDown={(e) => {
+                                // Harf tuşlarını engelle (sayısal tuşlar, backspace, delete, ok tuşları hariç)
+                                const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'];
+                                const isNumber = /^[0-9]$/.test(e.key);
+
+                                if (!isNumber && !allowedKeys.includes(e.key)) {
+                                    e.preventDefault();
+                                }
+                            }}
+                            onChange={(e) => {
+                                const value = e.target.value;
+
+                                // Boş input kontrolü
+                                if (value === '') {
+                                    setPointsError(null);
+                                    setNewTask({
+                                        ...newTask,
+                                        points: '',
+                                        column: 'todo'
+                                    });
+                                    return;
+                                }
+
+                                // Sadece 0 veya pozitif tam sayı kontrolü
+                                const numValue = Number(value);
+                                if (isNaN(numValue) || !Number.isInteger(numValue) || numValue < 0) {
+                                    setPointsError(t('dialog.positiveIntegerRequired'));
+                                    return;
+                                }
+
+                                // Geçerli değer
+                                setPointsError(null);
+                                setNewTask({
+                                    ...newTask,
+                                    points: numValue,
+                                    column: 'todo'
+                                });
+                            }}
                         />
                     </div>
 
@@ -126,11 +182,11 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
                 </div>
                 <DialogFooter>
                     <Button variant="outline" onClick={onClose}>{t('button.cancel')}</Button>
-                    <Button onClick={onAddTask}>{t('button.add')}</Button>
+                    <Button onClick={handleSubmit}>{t('button.add')}</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
     );
 };
 
-export default TaskDialog;
+export default NewTaskDialog;

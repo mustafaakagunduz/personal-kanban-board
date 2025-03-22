@@ -113,6 +113,7 @@
   "button.ok": "OK",
   "dialog.taskDetails": "Task Details",
   "dialog.dueDate": "Due Date",
+  "dialog.positiveIntegerRequired": "Please enter a positive integer value",
   "colors.label": "Color",
 
   "privacy.title": "Privacy & Data Security",

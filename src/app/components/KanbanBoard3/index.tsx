@@ -16,7 +16,7 @@ import HelpDialog from '../Dialogs/HelpDialog';
 import { Button } from "@/components/ui/button";
 import Column from '../Column';
 import Rewards from '../Rewards';
-import TaskDialog from '../Dialogs/TaskDialog';
+import NewTaskDialog from '../Dialogs/NewTaskDialog';
 import ProgressDialog from '../Dialogs/ProgressDialog';
 import TaskEditDialog from '../Dialogs/TaskEditDialog';
 import CelebrationDialog from '../Dialogs/CelebrationDialog';
@@ -190,7 +190,7 @@ const KanbanBoard3: React.FC = () => {
     const [editDescription, setEditDescription] = useState<string>('');
 
     // Dialog states
-    const [openDialog, setOpenDialog] = useState<boolean>(false);
+    const [newTaskOpenDialog, setNewTaskOpenDialog] = useState<boolean>(false);
     const [editDialog, setEditDialog] = useState<boolean>(false);
     const [deleteConfirmDialog, setDeleteConfirmDialog] = useState<boolean>(false);
     const [newRewardDialog, setNewRewardDialog] = useState<boolean>(false);
@@ -376,7 +376,7 @@ const KanbanBoard3: React.FC = () => {
             points: '',
             color: '#800080' // Varsayılan rengi ekledik
         });
-        setOpenDialog(false);
+        setNewTaskOpenDialog(false);
     };
 
     const handleProgressSubmit = (): void => {
@@ -453,7 +453,7 @@ const KanbanBoard3: React.FC = () => {
         });
 
         // Open the task dialog
-        setOpenDialog(true);
+        setNewTaskOpenDialog(true);
     };
 
     return (
@@ -543,7 +543,7 @@ const KanbanBoard3: React.FC = () => {
                     <div className="mb-4 flex gap-2">
                         <Button
                             variant="outline"
-                            onClick={() => setOpenDialog(true)}
+                            onClick={() => setNewTaskOpenDialog(true)}
                             className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2 text-white"
                         >
                             <ClipboardList className="mr-2 h-4 w-4"/>
@@ -597,9 +597,9 @@ const KanbanBoard3: React.FC = () => {
                     open={helpDialogOpen}
                     onClose={() => setHelpDialogOpen(false)}
                 />
-                <TaskDialog
-                    open={openDialog}
-                    onClose={() => setOpenDialog(false)}
+                <NewTaskDialog
+                    open={newTaskOpenDialog}
+                    onClose={() => setNewTaskOpenDialog(false)}
                     newTask={newTask}
                     setNewTask={setNewTask}
                     onAddTask={handleAddTask}
