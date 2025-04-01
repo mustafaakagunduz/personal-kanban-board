@@ -162,8 +162,8 @@ const KanbanBoard3: React.FC = () => {
                 columns: sampleTasks,
                 rewards: defaultRewards,
                 totalPoints: 150,
-                bgColorStart: "#2D9596",
-                bgColorEnd: "#265073"
+                bgColorStart: "#171718",
+                bgColorEnd: "#C0FF2D"
             }
         }
     });
@@ -859,7 +859,7 @@ const KanbanBoard3: React.FC = () => {
                     onStartColorChange={(color) => updateBgColors(color, activeBoardData.bgColorEnd)}
                     onEndColorChange={(color) => updateBgColors(activeBoardData.bgColorStart, color)}
                     onReset={() => {
-                        updateBgColors("#312e81", "#1e40af");
+                        updateBgColors("#171718", "#C0FF2D");
                     }}
                 />
 

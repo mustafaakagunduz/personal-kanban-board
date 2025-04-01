@@ -111,8 +111,8 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
 
     const handleReset = () => {
         // Yeni varsayılan renkler
-        const defaultStartColor = "#2D9596"; // Turkuaz-yeşil
-        const defaultEndColor = "#265073"; // Koyu mavi
+        const defaultStartColor = "#171718"; // Koyu siyah
+        const defaultEndColor = "#C0FF2D"; // Parlak neon yeşil
 
         onStartColorChange(defaultStartColor);
         onEndColorChange(defaultEndColor);
