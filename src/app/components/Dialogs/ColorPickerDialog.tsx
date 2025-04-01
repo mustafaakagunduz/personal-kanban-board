@@ -96,8 +96,7 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
 
     // Initialize positions based on colors
     useEffect(() => {
-        // We could calculate positions from colors, but it's complex to reverse HSL from hex
-        // For simplicity, we'll just set default positions
+        // Dışarıdan gelen renk değişikliklerini yerel state'e yansıt
         setStartColorHex(startColor);
         setEndColorHex(endColor);
         setSingleColorHex(startColor);
@@ -110,16 +109,9 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
     }, [startColor, endColor, open]);
 
     const handleReset = () => {
-        // Yeni varsayılan renkler
-        const defaultStartColor = "#171718"; // Koyu siyah
-        const defaultEndColor = "#C0FF2D"; // Parlak neon yeşil
+        onReset(); // Ana bileşenden gelen reset fonksiyonunu çağır
 
-        onStartColorChange(defaultStartColor);
-        onEndColorChange(defaultEndColor);
-        setSingleColor(defaultStartColor);
-        setStartColorHex(defaultStartColor);
-        setEndColorHex(defaultEndColor);
-        setSingleColorHex(defaultStartColor);
+        // Yerel state'i de resetle - burada renk değerleri belirtmiyoruz çünkü onReset() fonksiyonu props içinde güncel değerleri getirecek
         setColorMode('gradient');
         setStartColorPos({ x: 0.25, y: 0.5 });
         setEndColorPos({ x: 0.75, y: 0.5 });
