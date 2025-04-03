@@ -1,9 +1,7 @@
-// /src/app/components/Dialogs/TaskCompletionDialog.tsx
 import React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from '../../../context/LanguageContext';
-import { Typography } from "@/components/ui/typography";
 
 interface TaskCompletionDialogProps {
     open: boolean;
@@ -25,10 +23,9 @@ const TaskCompletionDialog: React.FC<TaskCompletionDialogProps> = ({
             <DialogContent className="sm:max-w-[425px] text-center">
                 <DialogHeader className="flex justify-center">
                     <DialogTitle className="sr-only">{t('dialog.completeTask')}</DialogTitle>
-                    <DialogDescription className="text-center">
-                        <Typography className="text-black text-base">
-                            "{taskTitle}" {t('dialog.completeTaskConfirm')}
-                        </Typography>
+                    {/* Typography'yi kaldırıp doğrudan DialogDescription içinde metin kullanın */}
+                    <DialogDescription className="text-center text-black text-base">
+                        "{taskTitle}" {t('dialog.completeTaskConfirm')}
                     </DialogDescription>
                 </DialogHeader>
 

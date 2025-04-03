@@ -8,6 +8,7 @@ import { Edit, Trash2, Calendar, Gift, FileText } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { taskCardClass } from "../KanbanBoard3/styles";
 import { useLanguage } from '../../../context/LanguageContext';
+import ProgressSlider from "@/src/app/components/ProgressSlider";
 
 interface TaskCardProps {
     task: Task;
@@ -16,6 +17,7 @@ interface TaskCardProps {
     onEditClick: (task: Task, columnId: string) => void;
     onDeleteClick: (task: Task, columnId: string) => void;
     onClick: (task: Task, columnId: string) => void;
+    onProgressChange?: (task: Task, progress: number) => void;
     today: Date | null;
 }
 
@@ -26,6 +28,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                                                         onEditClick,
                                                         onDeleteClick,
                                                         onClick,
+                                                        onProgressChange,
                                                         today
                                                     }) => {
     // Dil hook'unu kullan
@@ -71,7 +74,10 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
             );
         }
 
-        // In progress column - compact view
+
+            // TaskCard.tsx içindeki inProgress render kısmını komple
+// yeniden yazmanız gerekiyor. İşte inProgress için olan kısmın doğru hali:
+
         else if (columnId === 'inProgress') {
             return (
                 <div className="flex flex-col h-full justify-between">
@@ -91,10 +97,10 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                         {/* Due date and days left */}
                         {task.dueDate && (
                             <div className="flex items-center justify-between mb-2">
-                                <span className="flex items-center text-white/90 text-xs">
-                                    <Calendar className="h-3 w-3 mr-1" />
-                                    {formattedDate}
-                                </span>
+                        <span className="flex items-center text-white/90 text-xs">
+                            <Calendar className="h-3 w-3 mr-1" />
+                            {formattedDate}
+                        </span>
 
                                 {daysLeft !== null && (
                                     <span className={cn(
@@ -102,11 +108,11 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                                         daysLeft < 0 ? "bg-red-900/50" :
                                             daysLeft <= 2 ? "bg-yellow-900/50" : "bg-green-900/50"
                                     )}>
-                                        {daysLeft < 0
-                                            ? t('taskCard.daysOverdue').replace('{days}', Math.abs(daysLeft).toString())
-                                            : t('taskCard.daysLeft').replace('{days}', daysLeft.toString())
-                                        }
-                                    </span>
+                                {daysLeft < 0
+                                    ? t('taskCard.daysOverdue').replace('{days}', Math.abs(daysLeft).toString())
+                                    : t('taskCard.daysLeft').replace('{days}', daysLeft.toString())
+                                }
+                            </span>
                                 )}
                             </div>
                         )}
@@ -124,6 +130,18 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                                 </div>
                             )}
                         </div>
+
+                        <br/>
+
+                        {/* Progress Slider - only for inProgress column */}
+                        {columnId === 'inProgress' && onProgressChange && (
+                            <ProgressSlider
+                                task={task}
+                                onProgressChange={onProgressChange}
+                            />
+                        )}
+
+
                     </div>
                 </div>
             );

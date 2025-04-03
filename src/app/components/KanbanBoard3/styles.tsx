@@ -11,3 +11,5 @@ export const columnHeaderClass = "mb-4 text-white font-bold transition-colors du
 
 // Günün sözü kartı için stil
 export const quoteCardClass = "w-full bg-white/10 backdrop-blur-sm border-0 rounded-lg shadow-md overflow-hidden transition-all duration-300";
+
+export const progressSliderClass = "mb-2 p-2 bg-white/10 rounded-md transition-all duration-300 ease-out";

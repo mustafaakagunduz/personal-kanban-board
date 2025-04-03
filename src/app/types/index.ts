@@ -9,6 +9,7 @@ export interface Task {
     notes?: string;
     dueDate?: string;
     color?: string;
+    progress?: number;
 }
 
 export interface SelectedTask extends Task {
@@ -79,3 +80,4 @@ export interface KanbanState {
         }
     };
 }
+

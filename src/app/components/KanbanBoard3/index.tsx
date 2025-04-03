@@ -508,6 +508,21 @@ const KanbanBoard3: React.FC = () => {
         handleTaskCompletion(taskToComplete.task, taskToComplete.sourceColumn, taskToComplete.targetColumn);
     };
 
+    // Handle progress change for in-progress tasks
+    const handleProgressChange = (task: Task, progress: number): void => {
+        const updatedColumns = {
+            ...activeBoardData.columns,
+            inProgress: {
+                ...activeBoardData.columns.inProgress,
+                items: activeBoardData.columns.inProgress.items.map(
+                    item => item.id === task.id ? { ...item, progress } : item
+                )
+            }
+        };
+
+        updateColumns(updatedColumns);
+    };
+
     const handleTaskCompletion = (task: Task, sourceColumn: string, targetColumn: string) => {
         const taskPoints = task.points || 0;
         if (taskPoints) {
@@ -554,7 +569,8 @@ const KanbanBoard3: React.FC = () => {
     const handleProgressSubmit = (): void => {
         if (!movingTask) return;
 
-        moveTask('todo', 'inProgress', movingTask.id, progressDetails);
+        // Add initial progress of 0 when moving to In Progress
+        moveTask('todo', 'inProgress', movingTask.id, { ...progressDetails, progress: 0 });
         setOpenProgressDialog(false);
         setProgressDetails({ duration: '', reward: '', notes: '', dueDate: '' });
     };
@@ -761,6 +777,7 @@ const KanbanBoard3: React.FC = () => {
                                 onEditClick={handleEditTask}
                                 onDeleteClick={handleDeleteClick}
                                 onTaskClick={handleTaskClick}
+                                onProgressChange={handleProgressChange}
                                 today={today}
                             />
                         ))}
