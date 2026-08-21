@@ -348,7 +348,26 @@ const KanbanBoard3: React.FC = () => {
         mutate('/api/boards');
     };
 
-    if (!boards || !activeBoardData) {
+    if (!boards) {
+        return (
+            <div className="h-screen w-screen flex items-center justify-center bg-[#171718]">
+                <Typography variant="h5" className="text-white">{t('header.loading')}</Typography>
+            </div>
+        );
+    }
+
+    if (boards.length === 0) {
+        return (
+            <div className="h-screen w-screen flex flex-col items-center justify-center gap-4 bg-[#171718]">
+                <Typography variant="h5" className="text-white">Henüz bir pano yok.</Typography>
+                <Button onClick={() => handleCreateBoard('Panom')}>
+                    İlk Panoyu Oluştur
+                </Button>
+            </div>
+        );
+    }
+
+    if (!activeBoardData) {
         return (
             <div className="h-screen w-screen flex items-center justify-center bg-[#171718]">
                 <Typography variant="h5" className="text-white">{t('header.loading')}</Typography>

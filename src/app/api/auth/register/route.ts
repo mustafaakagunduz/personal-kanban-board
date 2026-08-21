@@ -34,6 +34,12 @@ export async function POST(req: NextRequest) {
                     role: "ADMIN",
                 },
             },
+            boards: {
+                create: {
+                    name: "Panom",
+                    order: 0,
+                },
+            },
         },
     });
 
