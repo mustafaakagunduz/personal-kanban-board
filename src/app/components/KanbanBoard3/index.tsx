@@ -439,6 +439,14 @@ const KanbanBoard3: React.FC = () => {
                         )}
                     </div>
 
+                    {session?.user?.companyName && (
+                        <div className="flex items-center">
+                            <Typography variant="h5" className="text-white font-semibold">
+                                {session.user.companyName}
+                            </Typography>
+                        </div>
+                    )}
+
                     <div className="flex items-center gap-4">
                         {/* Language Selector */}
                         <LanguageSelector />
