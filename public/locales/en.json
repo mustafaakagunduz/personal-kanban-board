@@ -19,10 +19,10 @@
   "colors.pink": "Pink",
   "colors.black": "Black",
 
-  "column.todo": "🎯 To Do 🎯",
-  "column.inProgress": "⏳️ In Progress ⏳",
-  "column.done": "✅ Completed ✅",
-  "column.rewards": "🏆 Rewards 🏆",
+  "column.todo": " To Do ",
+  "column.inProgress": "️ In Progress ",
+  "column.done": " Completed ",
+  "column.rewards": " Rewards ",
 
   "dialog.completeTask": "Complete Task",
   "dialog.completeTaskConfirm": " : Are you sure you want to mark this task as completed? This action cannot be undone.",

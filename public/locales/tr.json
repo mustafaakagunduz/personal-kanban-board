@@ -19,10 +19,10 @@
   "colors.pink": "Pembe",
   "colors.black": "Siyah",
 
-  "column.todo": "🎯 Yapılacaklar 🎯",
-  "column.inProgress": "⏳️ Devam Edenler ⏳",
-  "column.done": "✅ Tamamlananlar ✅",
-  "column.rewards": "🏆 Ödüller 🏆",
+  "column.todo": " Yapılacaklar ",
+  "column.inProgress": "️ Devam Edenler ",
+  "column.done": " Tamamlananlar ",
+  "column.rewards": " Ödüller ",
 
   "board.new": "Yeni Pano",
   "board.createNew": "Yeni Pano Oluştur",

@@ -13,11 +13,13 @@ import {
     HelpCircle,
     CheckSquare,
     Settings,
-    LogOut
+    LogOut,
+    X
 } from 'lucide-react';
 import HelpDialog from '../Dialogs/HelpDialog';
 import BoardSelector from '../BoardSelector';
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Column from '../Column';
 import NewTaskDialog from '../Dialogs/NewTaskDialog';
 import ProgressDialog from '../Dialogs/ProgressDialog';
@@ -112,6 +114,21 @@ const KanbanBoard3: React.FC = () => {
         return groups;
     }, [tasksData, t]);
 
+    const [assigneeFilter, setAssigneeFilter] = useState<string>('all');
+
+    const filteredColumns: Columns = useMemo(() => {
+        if (assigneeFilter === 'all') return columns;
+
+        const filtered: Columns = {};
+        Object.entries(columns).forEach(([columnId, column]) => {
+            filtered[columnId] = {
+                ...column,
+                items: column.items.filter((task) => task.assigneeId === assigneeFilter),
+            };
+        });
+        return filtered;
+    }, [columns, assigneeFilter]);
+
     // Task completion confirmation
     const [completionConfirmDialog, setCompletionConfirmDialog] = useState<boolean>(false);
     const [taskToComplete, setTaskToComplete] = useState<{ task: Task, sourceColumn: string, targetColumn: string } | null>(null);
@@ -153,6 +170,11 @@ const KanbanBoard3: React.FC = () => {
     useEffect(() => {
         setToday(getTodayStart());
     }, []);
+
+    // Reset the assignee filter when switching boards
+    useEffect(() => {
+        setAssigneeFilter('all');
+    }, [activeBoard]);
 
     // Track tasks with due dates
     useEffect(() => {
@@ -441,6 +463,7 @@ const KanbanBoard3: React.FC = () => {
                             <HelpCircle className="h-5 w-5"/>
                             <span>{t('header.help')}</span>
                         </Button>
+                        {/*
                         <Button
                             variant="outline"
                             className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2 text-white"
@@ -449,6 +472,8 @@ const KanbanBoard3: React.FC = () => {
                             <Info className="h-5 w-5"/>
                             <span>{t('header.privacy')}</span>
                         </Button>
+                        */}
+
                         <Button
                             variant="outline"
                             className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2 text-white"
@@ -491,11 +516,34 @@ const KanbanBoard3: React.FC = () => {
                             <ClipboardList className="mr-2 h-4 w-4"/>
                             {t('button.newTask')}
                         </Button>
+
+                        <Select value={assigneeFilter} onValueChange={setAssigneeFilter}>
+                            <SelectTrigger className="w-[180px] bg-white/10 backdrop-blur-sm border-0 rounded-lg text-white">
+                                <SelectValue placeholder="Kişiye göre filtrele" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Tüm Kişiler</SelectItem>
+                                {(users || []).map((u) => (
+                                    <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+
+                        {assigneeFilter !== 'all' && (
+                            <Button
+                                variant="outline"
+                                onClick={() => setAssigneeFilter('all')}
+                                className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2 text-white"
+                            >
+                                <X className="h-4 w-4"/>
+                                Sıfırla
+                            </Button>
+                        )}
                     </div>
 
                     {/* Columns Container */}
                     <div className="flex gap-4 flex-1 min-h-0">
-                        {Object.entries(columns).map(([columnId, column]) => (
+                        {Object.entries(filteredColumns).map(([columnId, column]) => (
                             <Column
                                 key={columnId}
                                 columnId={columnId}
