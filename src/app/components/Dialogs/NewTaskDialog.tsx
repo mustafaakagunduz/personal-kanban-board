@@ -1,11 +1,12 @@
 // /src/app/components/Dialogs/NewTaskDialog.tsx
-import React, {useState} from 'react';
-import { NewTaskForm } from '../../types';
+import React from 'react';
+import { NewTaskForm, Assignee } from '../../types';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLanguage } from '../../../context/LanguageContext';
 
 // Renk seçimi için basit bir bileşen
@@ -60,6 +61,7 @@ interface TaskDialogProps {
     newTask: NewTaskForm;
     setNewTask: (task: NewTaskForm) => void;
     onAddTask: () => void;
+    assignees?: Assignee[];
 }
 
 const NewTaskDialog: React.FC<TaskDialogProps> = ({
@@ -67,25 +69,16 @@ const NewTaskDialog: React.FC<TaskDialogProps> = ({
                                                    onClose,
                                                    newTask,
                                                    setNewTask,
-                                                   onAddTask
+                                                   onAddTask,
+                                                   assignees = []
                                                }) => {
     // Dil hook'unu kullan
     const { t } = useLanguage();
-    // NewTaskDialog bileşeninde useState ekleyelim
-    const [pointsError, setPointsError] = useState<string | null>(null);
-// NewTaskDialog bileşeninde onAddTask'i çağırmadan önce doğrulama yapalım
+
     const handleSubmit = () => {
         // Başlık boşsa işlemi iptal et
         if (!newTask.title) return;
 
-        // Puan kontrolü (0 veya pozitif tam sayı olmalı)
-        const points = newTask.points;
-        if (points !== '' && (isNaN(Number(points)) || !Number.isInteger(Number(points)) || Number(points) < 0)) {
-            setPointsError(t('dialog.positiveIntegerRequired'));
-            return;
-        }
-
-        // Doğrulamalar geçildi, görev ekle
         onAddTask();
     };
 
@@ -102,7 +95,7 @@ const NewTaskDialog: React.FC<TaskDialogProps> = ({
                         <Input
                             id="title"
                             value={newTask.title}
-                            onChange={(e) => setNewTask({ ...newTask, title: e.target.value, column: 'todo' })}
+                            onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
                             autoFocus
                         />
                     </div>
@@ -112,59 +105,27 @@ const NewTaskDialog: React.FC<TaskDialogProps> = ({
                             id="description"
                             rows={4}
                             value={newTask.description}
-                            onChange={(e) => setNewTask({ ...newTask, description: e.target.value, column: 'todo' })}
+                            onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
                         />
                     </div>
                     <div className="grid gap-2">
-                        <Label htmlFor="points">{t('dialog.taskPoints')}</Label>
-
-                        {pointsError && (
-                            <div className="text-red-500 text-sm">{pointsError}</div>
-                        )}
-                        <Input
-                            id="points"
-                            type="number"
-                            value={newTask.points}
-                            min="0" // Minimum değeri 0 olarak değiştirdik
-                            onKeyDown={(e) => {
-                                // Harf tuşlarını engelle (sayısal tuşlar, backspace, delete, ok tuşları hariç)
-                                const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'];
-                                const isNumber = /^[0-9]$/.test(e.key);
-
-                                if (!isNumber && !allowedKeys.includes(e.key)) {
-                                    e.preventDefault();
-                                }
-                            }}
-                            onChange={(e) => {
-                                const value = e.target.value;
-
-                                // Boş input kontrolü
-                                if (value === '') {
-                                    setPointsError(null);
-                                    setNewTask({
-                                        ...newTask,
-                                        points: '',
-                                        column: 'todo'
-                                    });
-                                    return;
-                                }
-
-                                // Sadece 0 veya pozitif tam sayı kontrolü
-                                const numValue = Number(value);
-                                if (isNaN(numValue) || !Number.isInteger(numValue) || numValue < 0) {
-                                    setPointsError(t('dialog.positiveIntegerRequired'));
-                                    return;
-                                }
-
-                                // Geçerli değer
-                                setPointsError(null);
-                                setNewTask({
-                                    ...newTask,
-                                    points: numValue,
-                                    column: 'todo'
-                                });
-                            }}
-                        />
+                        <Label htmlFor="assignee">{t('dialog.taskAssignee')}</Label>
+                        <Select
+                            value={newTask.assigneeId || "unassigned"}
+                            onValueChange={(value) =>
+                                setNewTask({ ...newTask, assigneeId: value === "unassigned" ? undefined : value })
+                            }
+                        >
+                            <SelectTrigger id="assignee">
+                                <SelectValue placeholder={t('dialog.taskAssignee')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="unassigned">{t('dialog.unassigned')}</SelectItem>
+                                {assignees.map((a) => (
+                                    <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     {/* Renk seçimi bölümü */}
@@ -174,8 +135,7 @@ const NewTaskDialog: React.FC<TaskDialogProps> = ({
                             value={newTask.color || "#6b21a8"} // varsayılan mor renk
                             onChange={(color) => setNewTask({
                                 ...newTask,
-                                color,
-                                column: 'todo'
+                                color
                             })}
                         />
                     </div>

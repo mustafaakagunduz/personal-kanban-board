@@ -1,32 +1,32 @@
 // /src/app/components/KanbanBoard3/index.tsx
 "use client"
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import useSWR, { mutate } from 'swr';
+import Link from 'next/link';
+import { useSession, signOut } from 'next-auth/react';
 import {
     Info,
     Calendar,
     Palette,
-    Gift,
     ClipboardList,
     HelpCircle,
     CheckSquare,
-    Globe
+    Settings,
+    LogOut
 } from 'lucide-react';
 import HelpDialog from '../Dialogs/HelpDialog';
 import BoardSelector from '../BoardSelector';
 import { Button } from "@/components/ui/button";
 import Column from '../Column';
-import Rewards from '../Rewards';
 import NewTaskDialog from '../Dialogs/NewTaskDialog';
 import ProgressDialog from '../Dialogs/ProgressDialog';
 import TaskEditDialog from '../Dialogs/TaskEditDialog';
 import CelebrationDialog from '../Dialogs/CelebrationDialog';
 import TaskDetails from '../TaskDetails';
-import RewardDialog from '../Dialogs/RewardDialog';
 import DeleteConfirmationDialog from '../Dialogs/DeleteConfirmationDialog';
 import DailyQuote from "@/src/app/components/DailyQuote/DailyQuote";
 import { formatDate, getTodayStart } from '../../utils/dateUtils';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
 import CalendarDialog from '../Dialogs/CalendarDialog';
 import ColorPickerDialog from "@/src/app/components/Dialogs/ColorPickerDialog";
 import { Typography } from "@/components/ui/typography";
@@ -37,270 +37,84 @@ import { useLanguage } from '../../../context/LanguageContext';
 import TaskCompletionDialog from '../Dialogs/TaskCompletionDialog';
 import {
     Task,
-    Reward,
     Columns,
     SelectedTask,
     NewTaskForm,
     ProgressDetails,
     ColumnData,
     Board,
-    KanbanState
+    Assignee
 } from '../../types';
 
-// Use this function from dateUtils instead of defining it locally
-import { getDateInFuture } from "../../utils/dateUtils";
+const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
-const KanbanBoard3: React.FC = () => {
-    // Dil hook'unu kullan
-    const { t } = useLanguage();
-
-    // Örnek görevler
-    const sampleTasks = {
-        todo: {
-            title: t('column.todo'),
-            items: [
-                {
-                    id: 'todo-1',
-                    title: 'Haftalık raporu hazırla',
-                    description: 'Pazartesi toplantısı için satış raporunu hazırla ve sunum dosyasını oluştur.',
-                    points: 30,
-                    color: '#6b21a8' // Mor
-                },
-                {
-                    id: 'todo-2',
-                    title: 'E-postaları yanıtla',
-                    description: 'Müşterilerden gelen acil e-postaları yanıtla ve takip işlemlerini gerçekleştir.',
-                    points: 15,
-                    color: '#1f91dc' // Mavi
-                },
-                {
-                    id: 'todo-3',
-                    title: 'Proje planını güncelle',
-                    description: 'Yeni isteklere göre proje planını güncelle ve takım üyelerine bilgi ver.',
-                    points: 25,
-                    color: '#008000' // Yeşil
-                }
-            ]
-        },
-        inProgress: {
-            title: t('column.inProgress'),
-            items: [
-                {
-                    id: 'progress-1',
-                    title: 'Web sitesi tasarımı',
-                    description: 'Ana sayfa ve ürün sayfaları için yeni tasarım öğelerini oluştur.',
-                    points: 45,
-                    duration: '3 gün',
-                    notes: 'Mobil uyumluluk önemli',
-                    dueDate: getDateInFuture(3),
-                    color: '#ff7518' // Turuncu
-                },
-                {
-                    id: 'progress-2',
-                    title: 'API entegrasyonu',
-                    description: 'Ödeme sistemini yeni API ile entegre et ve test senaryolarını çalıştır.',
-                    points: 60,
-                    duration: '5 gün',
-                    notes: 'Dokümantasyon güncellenmeli',
-                    dueDate: getDateInFuture(5),
-                    color: '#ff0000' // Kırmızı
-                },
-                {
-                    id: 'progress-3',
-                    title: 'Müşteri araştırması',
-                    description: 'Müşteri geri bildirimlerini analiz et ve iyileştirme önerileri hazırla.',
-                    points: 35,
-                    duration: '2 gün',
-                    reward: '',
-                    notes: 'Yönetim ekibine sunum yapılacak',
-                    dueDate: getDateInFuture(2),
-                    color: '#ffa500' // Sarı
-                }
-            ]
-        },
-        done: {
-            title: t('column.done'),
-            items: [
-                {
-                    id: 'done-1',
-                    title: 'Bütçe planlaması',
-                    description: 'Q2 için departman bütçesini hazırla ve onaya gönder.',
-                    points: 40,
-                    color: '#ff00ff' // Pembe
-                },
-                {
-                    id: 'done-2',
-                    title: 'Ekip toplantısı',
-                    description: 'Haftalık ekip toplantısını düzenle ve notları paylaş.',
-                    points: 20,
-                    color: '#000000' // Siyah
-                }
-            ]
-        }
-    };
-
-    // Default rewards
-    const defaultRewards = [
-        { id: '1', title: 'Latte', points: 35, color: '#6b21a8' },
-        { id: '2', title: 'Sinema', points: 100, color: '#1f91dc' },
-        { id: '3', title: 'Pizza', points: 75, color: '#008000' },
-        { id: '4', title: 'Kitap', points: 50, color: '#ff7518' },
-    ];
-
-    // Multiple Kanban boards state
-    const [kanbanState, setKanbanState] = useLocalStorage<KanbanState>('kanbanState', {
-        activeBoard: 'default-board',
-        boards: [
-            {
-                id: 'default-board',
-                name: t('board.defaultName'),
-                createdAt: new Date().toISOString()
-            }
-        ],
-        boardsData: {
-            'default-board': {
-                columns: sampleTasks,
-                rewards: defaultRewards,
-                totalPoints: 150,
-                bgColorStart: "#171718",
-                bgColorEnd: "#C0FF2D"
-            }
-        }
+const apiFetch = (url: string, body?: unknown, method = "PATCH") =>
+    fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: body !== undefined ? JSON.stringify(body) : undefined,
     });
 
-    // Get the active board's data
-    const activeBoard = kanbanState.activeBoard;
-    const activeBoardData = kanbanState.boardsData[activeBoard];
+const STATUS_TO_COLUMN: Record<string, string> = {
+    TODO: 'todo',
+    IN_PROGRESS: 'inProgress',
+    DONE: 'done',
+};
 
-    // Helper functions to update board data
-    const updateColumns = (newColumns: Columns) => {
-        setKanbanState(prev => ({
-            ...prev,
-            boardsData: {
-                ...prev.boardsData,
-                [activeBoard]: {
-                    ...prev.boardsData[activeBoard],
-                    columns: newColumns
-                }
-            }
-        }));
-    };
+const COLUMN_TO_STATUS: Record<string, string> = {
+    todo: 'TODO',
+    inProgress: 'IN_PROGRESS',
+    done: 'DONE',
+};
 
-    const updateRewards = (newRewards: Reward[]) => {
-        setKanbanState(prev => ({
-            ...prev,
-            boardsData: {
-                ...prev.boardsData,
-                [activeBoard]: {
-                    ...prev.boardsData[activeBoard],
-                    rewards: newRewards
-                }
-            }
-        }));
-    };
+interface TaskRow extends Task {
+    status: keyof typeof STATUS_TO_COLUMN;
+}
 
-    const updateTotalPoints = (newTotalPoints: number) => {
-        setKanbanState(prev => ({
-            ...prev,
-            boardsData: {
-                ...prev.boardsData,
-                [activeBoard]: {
-                    ...prev.boardsData[activeBoard],
-                    totalPoints: newTotalPoints
-                }
-            }
-        }));
-    };
+const KanbanBoard3: React.FC = () => {
+    const { t } = useLanguage();
+    const { data: session } = useSession();
+    const isAdmin = session?.user?.role === 'ADMIN';
 
-    const updateBgColors = (start: string, end: string) => {
-        setKanbanState(prev => ({
-            ...prev,
-            boardsData: {
-                ...prev.boardsData,
-                [activeBoard]: {
-                    ...prev.boardsData[activeBoard],
-                    bgColorStart: start,
-                    bgColorEnd: end
-                }
-            }
-        }));
-    };
+    // Boards
+    const { data: boards } = useSWR<Board[]>('/api/boards', fetcher);
+    const [activeBoard, setActiveBoard] = useState<string>('');
 
-    // Board management functions
-    const handleBoardChange = (boardId: string) => {
-        setKanbanState(prev => ({
-            ...prev,
-            activeBoard: boardId
-        }));
-    };
+    useEffect(() => {
+        if (!activeBoard && boards && boards.length > 0) {
+            setActiveBoard(boards[0].id);
+        }
+    }, [boards, activeBoard]);
 
-    const handleCreateBoard = (name: string) => {
-        const newBoardId = `board-${Date.now()}`;
+    const activeBoardData = boards?.find(b => b.id === activeBoard) || null;
 
-        setKanbanState(prev => ({
-            ...prev,
-            activeBoard: newBoardId,
-            boards: [
-                ...prev.boards,
-                {
-                    id: newBoardId,
-                    name: name,
-                    createdAt: new Date().toISOString()
-                }
-            ],
-            boardsData: {
-                ...prev.boardsData,
-                [newBoardId]: {
-                    columns: {
-                        todo: { title: t('column.todo'), items: [] },
-                        inProgress: { title: t('column.inProgress'), items: [] },
-                        done: { title: t('column.done'), items: [] }
-                    },
-                    rewards: [],
-                    totalPoints: 0,
-                    bgColorStart: "#2D9596",
-                    bgColorEnd: "#265073"
-                }
-            }
-        }));
-    };
+    // Tasks for the active board
+    const tasksKey = activeBoard ? `/api/boards/${activeBoard}/tasks` : null;
+    const { data: tasksData } = useSWR<TaskRow[]>(tasksKey, fetcher);
+    const mutateTasks = () => tasksKey && mutate(tasksKey);
 
-    const handleDeleteBoard = (boardId: string) => {
-        // Cannot delete the last board
-        if (kanbanState.boards.length <= 1) return;
+    // Company members (for assignment)
+    const { data: users } = useSWR<Assignee[]>('/api/users', fetcher);
 
-        setKanbanState(prev => {
-            // Create new state without the deleted board
-            const { [boardId]: removedBoard, ...remainingBoardsData } = prev.boardsData;
+    const columns: Columns = useMemo(() => {
+        const groups: Columns = {
+            todo: { title: t('column.todo'), items: [] },
+            inProgress: { title: t('column.inProgress'), items: [] },
+            done: { title: t('column.done'), items: [] },
+        };
 
-            // Find a new active board if needed
-            let newActiveBoard = prev.activeBoard;
-            if (newActiveBoard === boardId) {
-                // Set the first available board as active
-                newActiveBoard = Object.keys(remainingBoardsData)[0];
-            }
-
-            return {
-                ...prev,
-                activeBoard: newActiveBoard,
-                boards: prev.boards.filter(board => board.id !== boardId),
-                boardsData: remainingBoardsData
-            };
+        (tasksData || []).forEach((row) => {
+            const columnId = STATUS_TO_COLUMN[row.status];
+            if (!columnId) return;
+            groups[columnId].items.push(row);
         });
-    };
 
-    const handleRenameBoard = (boardId: string, newName: string) => {
-        setKanbanState(prev => ({
-            ...prev,
-            boards: prev.boards.map(board =>
-                board.id === boardId ? { ...board, name: newName } : board
-            )
-        }));
-    };
+        return groups;
+    }, [tasksData, t]);
 
     // Task completion confirmation
     const [completionConfirmDialog, setCompletionConfirmDialog] = useState<boolean>(false);
-    const [taskToComplete, setTaskToComplete] = useState<{task: Task, sourceColumn: string, targetColumn: string} | null>(null);
+    const [taskToComplete, setTaskToComplete] = useState<{ task: Task, sourceColumn: string, targetColumn: string } | null>(null);
 
     // UI state
     const [calendarDialogOpen, setCalendarDialogOpen] = useState<boolean>(false);
@@ -310,29 +124,19 @@ const KanbanBoard3: React.FC = () => {
 
     // State
     const [today, setToday] = useState<Date | null>(null);
-    const [tasksWithDueDates, setTasksWithDueDates] = useState<Array<{id: string, title: string, dueDate: string}>>([]);
+    const [tasksWithDueDates, setTasksWithDueDates] = useState<Array<{ id: string, title: string, dueDate: string }>>([]);
     const [newTask, setNewTask] = useState<NewTaskForm>({
         title: '',
         description: '',
-        column: 'todo',
-        points: '',
-        color: '#800080' // Varsayılan mor renk
-    });
-    const [newReward, setNewReward] = useState<{ title: string, points: number | '', color?: string }>({
-        title: '',
-        points: '',
-        color: '#4c1d95' // Varsayılan renk
+        color: '#800080'
     });
     const [helpDialogOpen, setHelpDialogOpen] = useState<boolean>(false);
     const [progressDetails, setProgressDetails] = useState<ProgressDetails>({
-        duration: '', reward: '', notes: '', dueDate: ''
+        notes: '', dueDate: ''
     });
     const [movingTask, setMovingTask] = useState<Task | null>(null);
     const [selectedTask, setSelectedTask] = useState<SelectedTask | null>(null);
     const [selectedTaskDetails, setSelectedTaskDetails] = useState<SelectedTask | null>(null);
-    const [editingReward, setEditingReward] = useState<Reward | null>(null);
-    const [currentReward, setCurrentReward] = useState<string>('');
-    const [completedTaskPoints, setCompletedTaskPoints] = useState<number>(0);
 
     const [editTitle, setEditTitle] = useState<string>('');
     const [editDescription, setEditDescription] = useState<string>('');
@@ -341,10 +145,8 @@ const KanbanBoard3: React.FC = () => {
     const [newTaskOpenDialog, setNewTaskOpenDialog] = useState<boolean>(false);
     const [editDialog, setEditDialog] = useState<boolean>(false);
     const [deleteConfirmDialog, setDeleteConfirmDialog] = useState<boolean>(false);
-    const [newRewardDialog, setNewRewardDialog] = useState<boolean>(false);
-    const [editRewardDialog, setEditRewardDialog] = useState<boolean>(false);
     const [openProgressDialog, setOpenProgressDialog] = useState<boolean>(false);
-    const [rewardDialog, setRewardDialog] = useState<boolean>(false);
+    const [celebrationDialog, setCelebrationDialog] = useState<boolean>(false);
     const [taskDetailsDialog, setTaskDetailsDialog] = useState<boolean>(false);
 
     // Initialize today's date
@@ -352,48 +154,28 @@ const KanbanBoard3: React.FC = () => {
         setToday(getTodayStart());
     }, []);
 
-    // Update column titles when language changes
-    useEffect(() => {
-        updateColumns({
-            todo: {
-                ...activeBoardData.columns.todo,
-                title: t('column.todo')
-            },
-            inProgress: {
-                ...activeBoardData.columns.inProgress,
-                title: t('column.inProgress')
-            },
-            done: {
-                ...activeBoardData.columns.done,
-                title: t('column.done')
-            }
-        });
-    }, [t, activeBoard]);
-
     // Track tasks with due dates
     useEffect(() => {
-        const tasksWithDates: Array<{id: string, title: string, dueDate: string}> = [];
+        const tasksWithDates: Array<{ id: string, title: string, dueDate: string }> = [];
 
-        if (activeBoardData.columns.inProgress && activeBoardData.columns.inProgress.items) {
-            activeBoardData.columns.inProgress.items.forEach(task => {
-                if (task.dueDate) {
-                    tasksWithDates.push({
-                        id: task.id,
-                        title: task.title,
-                        dueDate: task.dueDate
-                    });
-                }
-            });
-        }
+        columns.inProgress.items.forEach(task => {
+            if (task.dueDate) {
+                tasksWithDates.push({
+                    id: task.id,
+                    title: task.title,
+                    dueDate: task.dueDate
+                });
+            }
+        });
 
         setTasksWithDueDates(tasksWithDates);
-    }, [activeBoardData.columns]);
+    }, [columns]);
 
     // Handler functions
     const handleTaskClick = (task: Task, columnId: string): void => {
         setSelectedTaskDetails({
             ...task,
-            columnStatus: activeBoardData.columns[columnId].title,
+            columnStatus: columns[columnId].title,
             columnId
         });
         setTaskDetailsDialog(true);
@@ -411,57 +193,24 @@ const KanbanBoard3: React.FC = () => {
         setDeleteConfirmDialog(true);
     };
 
-    const handleEditReward = (reward: Reward) => {
-        setEditingReward(reward);
-        setNewReward({
-            title: reward.title,
-            points: reward.points,
-            color: reward.color
-        });
-        setEditRewardDialog(true);
-    };
-
-    const handleDeleteReward = (id: string) => {
-        updateRewards(activeBoardData.rewards.filter(reward => reward.id !== id));
-    };
-
-    const handleConfirmDeleteTask = (): void => {
+    const handleConfirmDeleteTask = async (): Promise<void> => {
         if (!selectedTask) return;
-
-        const updatedColumns = {
-            ...activeBoardData.columns,
-            [selectedTask.columnId]: {
-                ...activeBoardData.columns[selectedTask.columnId],
-                items: activeBoardData.columns[selectedTask.columnId].items.filter(
-                    item => item.id !== selectedTask.id
-                )
-            }
-        };
-
-        updateColumns(updatedColumns);
+        await apiFetch(`/api/tasks/${selectedTask.id}`, undefined, "DELETE");
+        mutateTasks();
         setDeleteConfirmDialog(false);
     };
 
-    const handleEditSave = (): void => {
+    const handleEditSave = async (): Promise<void> => {
         if (!selectedTask || !editTitle.trim()) return;
 
-        const updatedTask = {
-            ...selectedTask,
+        await apiFetch(`/api/tasks/${selectedTask.id}`, {
             title: editTitle,
-            description: editDescription.trim()
-        };
+            description: editDescription.trim(),
+            color: selectedTask.color,
+            assigneeId: selectedTask.assigneeId ?? null,
+        });
 
-        const updatedColumns = {
-            ...activeBoardData.columns,
-            [selectedTask.columnId]: {
-                ...activeBoardData.columns[selectedTask.columnId],
-                items: activeBoardData.columns[selectedTask.columnId].items.map(
-                    item => item.id === selectedTask.id ? updatedTask : item
-                )
-            }
-        };
-
-        updateColumns(updatedColumns);
+        mutateTasks();
         setEditDialog(false);
         setSelectedTask(null);
         setEditTitle('');
@@ -473,19 +222,23 @@ const KanbanBoard3: React.FC = () => {
         e.dataTransfer.setData('sourceColumn', sourceColumn);
     };
 
+    const moveTask = async (taskId: string, targetColumn: string, extra: Record<string, unknown> = {}): Promise<void> => {
+        await apiFetch(`/api/tasks/${taskId}`, {
+            status: COLUMN_TO_STATUS[targetColumn],
+            ...extra
+        });
+        mutateTasks();
+    };
+
     const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetColumn: string): void => {
         e.preventDefault();
         const taskId = e.dataTransfer.getData('taskId');
         const sourceColumn = e.dataTransfer.getData('sourceColumn');
 
         if (sourceColumn === targetColumn) return;
+        if (sourceColumn === 'done') return;
 
-        // Prevent moving from done to other columns
-        if (sourceColumn === 'done') {
-            return;
-        }
-
-        const task = activeBoardData.columns[sourceColumn].items.find(item => item.id === taskId);
+        const task = columns[sourceColumn].items.find(item => item.id === taskId);
         if (!task) return;
 
         setMovingTask(task);
@@ -493,75 +246,41 @@ const KanbanBoard3: React.FC = () => {
         if (sourceColumn === 'todo' && targetColumn === 'inProgress') {
             setOpenProgressDialog(true);
         } else if (sourceColumn === 'inProgress' && targetColumn === 'done') {
-            // Show confirmation dialog instead of immediately completing the task
-            setTaskToComplete({task, sourceColumn, targetColumn});
+            setTaskToComplete({ task, sourceColumn, targetColumn });
             setCompletionConfirmDialog(true);
         } else {
-            moveTask(sourceColumn, targetColumn, taskId);
+            moveTask(taskId, targetColumn);
         }
     };
 
     const handleCompletionConfirm = (): void => {
         if (!taskToComplete) return;
-
         setCompletionConfirmDialog(false);
-        handleTaskCompletion(taskToComplete.task, taskToComplete.sourceColumn, taskToComplete.targetColumn);
+        moveTask(taskToComplete.task.id, taskToComplete.targetColumn);
+        setCelebrationDialog(true);
     };
 
-    // Handle progress change for in-progress tasks
-    const handleProgressChange = (task: Task, progress: number): void => {
-        const updatedColumns = {
-            ...activeBoardData.columns,
-            inProgress: {
-                ...activeBoardData.columns.inProgress,
-                items: activeBoardData.columns.inProgress.items.map(
-                    item => item.id === task.id ? { ...item, progress } : item
-                )
-            }
-        };
-
-        updateColumns(updatedColumns);
+    const handleProgressChange = async (task: Task, progress: number): Promise<void> => {
+        await apiFetch(`/api/tasks/${task.id}`, { progress });
+        mutateTasks();
     };
 
-    const handleTaskCompletion = (task: Task, sourceColumn: string, targetColumn: string) => {
-        const taskPoints = task.points || 0;
-        if (taskPoints) {
-            updateTotalPoints(activeBoardData.totalPoints + taskPoints);
-        }
-        setCurrentReward(task.reward || '');
-        setCompletedTaskPoints(taskPoints);
-        setRewardDialog(true);
-        moveTask(sourceColumn, targetColumn, task.id, { reward: task.reward });
-    };
+    const handleAddTask = async (): Promise<void> => {
+        if (!newTask.title || !activeBoard) return;
 
-    const handleAddTask = (): void => {
-        if (!newTask.title) return;
-
-        const task: Task = {
-            id: Math.random().toString(36).slice(2, 11),
+        await apiFetch(`/api/boards/${activeBoard}/tasks`, {
             title: newTask.title,
             description: newTask.description,
-            points: typeof newTask.points === 'number' ? newTask.points : 0,
-            color: newTask.color || "#800080" // Varsayılan renk
-        };
+            color: newTask.color || "#800080",
+            assigneeId: newTask.assigneeId || null,
+        }, "POST");
 
-        const updatedColumns = {
-            ...activeBoardData.columns,
-            todo: {
-                ...activeBoardData.columns.todo,
-                items: [...activeBoardData.columns.todo.items, task]
-            }
-        };
+        mutateTasks();
 
-        updateColumns(updatedColumns);
-
-        // Form verilerini sıfırla
         setNewTask({
             title: '',
             description: '',
-            column: 'todo',
-            points: '',
-            color: '#800080' // Varsayılan rengi
+            color: '#800080'
         });
         setNewTaskOpenDialog(false);
     };
@@ -569,68 +288,13 @@ const KanbanBoard3: React.FC = () => {
     const handleProgressSubmit = (): void => {
         if (!movingTask) return;
 
-        // Add initial progress of 0 when moving to In Progress
-        moveTask('todo', 'inProgress', movingTask.id, { ...progressDetails, progress: 0 });
+        moveTask(movingTask.id, 'inProgress', {
+            notes: progressDetails.notes,
+            dueDate: progressDetails.dueDate || null,
+            progress: 0
+        });
         setOpenProgressDialog(false);
-        setProgressDetails({ duration: '', reward: '', notes: '', dueDate: '' });
-    };
-
-    const moveTask = (sourceColumn: string, targetColumn: string, taskId: string, additionalData: Partial<Task> = {}): void => {
-        const task = activeBoardData.columns[sourceColumn].items.find(item => item.id === taskId);
-        if (!task) return;
-
-        const updatedTask = { ...task, ...additionalData };
-
-        const updatedColumns = {
-            ...activeBoardData.columns,
-            [sourceColumn]: {
-                ...activeBoardData.columns[sourceColumn],
-                items: activeBoardData.columns[sourceColumn].items.filter(
-                    item => item.id !== taskId
-                )
-            },
-            [targetColumn]: {
-                ...activeBoardData.columns[targetColumn],
-                items: [...activeBoardData.columns[targetColumn].items, updatedTask]
-            }
-        };
-
-        updateColumns(updatedColumns);
-    };
-
-    const handleAddReward = () => {
-        if (!newReward.title || typeof newReward.points !== 'number') return;
-
-        const reward: Reward = {
-            id: Math.random().toString(36).slice(2, 11),
-            title: newReward.title,
-            points: newReward.points,
-            color: newReward.color
-        };
-
-        updateRewards([...activeBoardData.rewards, reward]);
-        setNewReward({ title: '', points: '', color: '' });
-        setNewRewardDialog(false);
-    };
-
-    const handleEditRewardSave = () => {
-        if (!editingReward || !newReward.title || typeof newReward.points !== 'number') return;
-
-        const updatedRewards = activeBoardData.rewards.map(reward =>
-            reward.id === editingReward.id
-                ? {
-                    ...reward,
-                    title: newReward.title,
-                    points: newReward.points as number,
-                    color: newReward.color
-                }
-                : reward
-        );
-
-        updateRewards(updatedRewards);
-        setEditRewardDialog(false);
-        setEditingReward(null);
-        setNewReward({ title: '', points: '', color: '' });
+        setProgressDetails({ notes: '', dueDate: '' });
     };
 
     const handleCalendarDateSelect = (date: Date) => {
@@ -639,11 +303,58 @@ const KanbanBoard3: React.FC = () => {
         setNewTask({
             ...newTask,
             description: `${formattedDate} 'e kadar..`,
-            column: 'todo'
         });
 
         setNewTaskOpenDialog(true);
     };
+
+    // Board management
+    const handleBoardChange = (boardId: string) => {
+        setActiveBoard(boardId);
+    };
+
+    const handleCreateBoard = async (name: string) => {
+        const res = await apiFetch('/api/boards', { name }, "POST");
+        const board = await res.json();
+        mutate('/api/boards');
+        setActiveBoard(board.id);
+    };
+
+    const handleDeleteBoard = async (boardId: string) => {
+        if (!boards || boards.length <= 1) return;
+        await apiFetch(`/api/boards/${boardId}`, undefined, "DELETE");
+        if (activeBoard === boardId) {
+            const remaining = boards.filter(b => b.id !== boardId);
+            setActiveBoard(remaining[0]?.id || '');
+        }
+        mutate('/api/boards');
+    };
+
+    const handleRenameBoard = async (boardId: string, newName: string) => {
+        await apiFetch(`/api/boards/${boardId}`, { name: newName });
+        mutate('/api/boards');
+    };
+
+    const handleReorderBoards = async (reorderedBoards: Board[]) => {
+        mutate('/api/boards', reorderedBoards, false);
+        await apiFetch('/api/boards/reorder', { ids: reorderedBoards.map(b => b.id) }, "POST");
+        mutate('/api/boards');
+    };
+
+    const updateBgColors = async (start: string, end: string) => {
+        if (!activeBoard) return;
+        mutate('/api/boards', boards?.map(b => b.id === activeBoard ? { ...b, bgColorStart: start, bgColorEnd: end } : b), false);
+        await apiFetch(`/api/boards/${activeBoard}`, { bgColorStart: start, bgColorEnd: end });
+        mutate('/api/boards');
+    };
+
+    if (!boards || !activeBoardData) {
+        return (
+            <div className="h-screen w-screen flex items-center justify-center bg-[#171718]">
+                <Typography variant="h5" className="text-white">{t('header.loading')}</Typography>
+            </div>
+        );
+    }
 
     return (
         <div
@@ -691,6 +402,18 @@ const KanbanBoard3: React.FC = () => {
                         {/* Language Selector */}
                         <LanguageSelector />
 
+                        {isAdmin && (
+                            <Link href="/settings">
+                                <Button
+                                    variant="outline"
+                                    className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2 text-white"
+                                >
+                                    <Settings className="h-5 w-5"/>
+                                    <span>Ayarlar</span>
+                                </Button>
+                            </Link>
+                        )}
+
                         <Button
                             variant="outline"
                             className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2 text-white"
@@ -717,29 +440,24 @@ const KanbanBoard3: React.FC = () => {
                         </Button>
                         <Button
                             variant="outline"
-                            className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2"
+                            className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2 text-white"
+                            onClick={() => signOut({ callbackUrl: '/login' })}
                         >
-                            <Typography variant="h5" className="text-white">
-                                {t('header.points')}: {activeBoardData.totalPoints}
-                            </Typography>
+                            <LogOut className="h-5 w-5"/>
+                            <span>Çıkış</span>
                         </Button>
                     </div>
                 </div>
 
                 {/* Board Selector */}
                 <BoardSelector
-                    boards={kanbanState.boards}
+                    boards={boards}
                     activeBoard={activeBoard}
                     onBoardChange={handleBoardChange}
                     onCreateBoard={handleCreateBoard}
                     onDeleteBoard={handleDeleteBoard}
                     onRenameBoard={handleRenameBoard}
-                    onReorderBoards={(reorderedBoards) => {
-                        setKanbanState(prev => ({
-                            ...prev,
-                            boards: reorderedBoards
-                        }));
-                    }}
+                    onReorderBoards={handleReorderBoards}
                 />
 
                 {/* Main Content Section */}
@@ -754,20 +472,11 @@ const KanbanBoard3: React.FC = () => {
                             <ClipboardList className="mr-2 h-4 w-4"/>
                             {t('button.newTask')}
                         </Button>
-
-                        <Button
-                            variant="outline"
-                            onClick={() => setNewRewardDialog(true)}
-                            className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2 text-white"
-                        >
-                            <Gift className="mr-2 h-4 w-4"/>
-                            {t('button.newReward')}
-                        </Button>
                     </div>
 
                     {/* Columns Container */}
                     <div className="flex gap-4 flex-1 min-h-0">
-                        {Object.entries(activeBoardData.columns).map(([columnId, column]) => (
+                        {Object.entries(columns).map(([columnId, column]) => (
                             <Column
                                 key={columnId}
                                 columnId={columnId}
@@ -781,15 +490,6 @@ const KanbanBoard3: React.FC = () => {
                                 today={today}
                             />
                         ))}
-
-                        <Rewards
-                            rewards={activeBoardData.rewards}
-                            totalPoints={activeBoardData.totalPoints}
-                            onAddClick={() => setNewRewardDialog(true)}
-                            onUseReward={(points) => updateTotalPoints(activeBoardData.totalPoints - points)}
-                            onEditReward={handleEditReward}
-                            onDeleteReward={handleDeleteReward}
-                        />
                     </div>
                 </div>
 
@@ -809,6 +509,7 @@ const KanbanBoard3: React.FC = () => {
                     newTask={newTask}
                     setNewTask={setNewTask}
                     onAddTask={handleAddTask}
+                    assignees={users || []}
                 />
 
                 <PrivacyDialog
@@ -836,6 +537,7 @@ const KanbanBoard3: React.FC = () => {
                     selectedTask={selectedTask}
                     setSelectedTask={setSelectedTask}
                     onSave={handleEditSave}
+                    assignees={users || []}
                 />
 
                 <DeleteConfirmationDialog
@@ -845,19 +547,8 @@ const KanbanBoard3: React.FC = () => {
                 />
 
                 <CelebrationDialog
-                    open={rewardDialog}
-                    onClose={() => setRewardDialog(false)}
-                    rewardTitle={currentReward}
-                    points={completedTaskPoints}
-                />
-
-                <RewardDialog
-                    open={newRewardDialog}
-                    onClose={() => setNewRewardDialog(false)}
-                    reward={newReward}
-                    setReward={setNewReward}
-                    onSave={handleAddReward}
-                    isEditing={false}
+                    open={celebrationDialog}
+                    onClose={() => setCelebrationDialog(false)}
                 />
 
                 <CalendarDialog
@@ -865,7 +556,7 @@ const KanbanBoard3: React.FC = () => {
                     onClose={() => setCalendarDialogOpen(false)}
                     selectedDate={today || undefined}
                     onSelectDate={handleCalendarDateSelect}
-                    tasksWithDueDates={tasksWithDueDates} // Son tarihi olan görevleri gönder
+                    tasksWithDueDates={tasksWithDueDates}
                 />
 
                 <ColorPickerDialog
@@ -878,19 +569,6 @@ const KanbanBoard3: React.FC = () => {
                     onReset={() => {
                         updateBgColors("#171718", "#C0FF2D");
                     }}
-                />
-
-                <RewardDialog
-                    open={editRewardDialog}
-                    onClose={() => {
-                        setEditRewardDialog(false);
-                        setEditingReward(null);
-                        setNewReward({title: '', points: '', color: ''});
-                    }}
-                    reward={newReward}
-                    setReward={setNewReward}
-                    onSave={handleEditRewardSave}
-                    isEditing={true}
                 />
 
                 <TaskDetails

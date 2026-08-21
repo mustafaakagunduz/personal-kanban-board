@@ -1,11 +1,12 @@
 // /src/app/components/Dialogs/TaskEditDialog.tsx
 import React from 'react';
-import { SelectedTask } from '../../types';
+import { SelectedTask, Assignee } from '../../types';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLanguage } from '../../../context/LanguageContext';
 
 // Renk seçimi için basit bir bileşen
@@ -64,6 +65,7 @@ interface TaskEditDialogProps {
     selectedTask: SelectedTask | null;
     setSelectedTask: (task: SelectedTask | null) => void;
     onSave: () => void;
+    assignees?: Assignee[];
 }
 
 const TaskEditDialog: React.FC<TaskEditDialogProps> = ({
@@ -75,7 +77,8 @@ const TaskEditDialog: React.FC<TaskEditDialogProps> = ({
                                                            setEditDescription,
                                                            selectedTask,
                                                            setSelectedTask,
-                                                           onSave
+                                                           onSave,
+                                                           assignees = []
                                                        }) => {
     // Dil hook'unu kullan
     const { t } = useLanguage();
@@ -106,20 +109,28 @@ const TaskEditDialog: React.FC<TaskEditDialogProps> = ({
                         />
                     </div>
                     <div className="grid gap-2">
-                        <Label htmlFor="points">{t('dialog.taskPoints')}</Label>
-                        <Input
-                            id="points"
-                            type="number"
-                            value={selectedTask?.points || 0}
-                            onChange={(e) => {
+                        <Label htmlFor="assignee">{t('dialog.taskAssignee')}</Label>
+                        <Select
+                            value={selectedTask?.assigneeId || "unassigned"}
+                            onValueChange={(value) => {
                                 if (selectedTask) {
                                     setSelectedTask({
                                         ...selectedTask,
-                                        points: Number(e.target.value)
+                                        assigneeId: value === "unassigned" ? null : value
                                     });
                                 }
                             }}
-                        />
+                        >
+                            <SelectTrigger id="assignee">
+                                <SelectValue placeholder={t('dialog.taskAssignee')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="unassigned">{t('dialog.unassigned')}</SelectItem>
+                                {assignees.map((a) => (
+                                    <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
                     {selectedTask?.dueDate && (
                         <div className="grid gap-2">

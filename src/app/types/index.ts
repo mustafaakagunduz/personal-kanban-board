@@ -1,26 +1,27 @@
 // /src/types/index.ts
+
+export interface Assignee {
+    id: string;
+    name: string;
+    email: string;
+}
+
 export interface Task {
     id: string;
     title: string;
     description: string;
-    points?: number;
-    duration?: string;
-    reward?: string;
-    notes?: string;
-    dueDate?: string;
-    color?: string;
-    progress?: number;
+    duration?: string | null;
+    notes?: string | null;
+    dueDate?: string | null;
+    color?: string | null;
+    progress?: number | null;
+    assigneeId?: string | null;
+    assignee?: Assignee | null;
 }
 
 export interface SelectedTask extends Task {
     columnId: string;
-}
-
-export interface Reward {
-    id: string;
-    title: string;
-    points: number;
-    color?: string; // Renk özelliğini ekledik
+    columnStatus?: string;
 }
 
 export interface ColumnData {
@@ -33,8 +34,6 @@ export interface Columns {
 }
 
 export interface ProgressDetails {
-    duration: string;
-    reward: string;
     notes: string;
     dueDate: string;
 }
@@ -48,36 +47,25 @@ interface TodoItem {
     timeEstimate?: number;  // Tahmini süre (dakika)
 }
 
-export interface SelectedTask extends Task {
-    columnId: string;
-    columnStatus?: string;
-}
-
 export interface NewTaskForm {
     title: string;
     description: string;
-    column: string;
-    points: number | '';
-    color?: string; // Yeni task oluştururken renk seçimi için eklendi
+    color?: string;
+    assigneeId?: string;
 }
 
 export interface Board {
     id: string;
     name: string;
-    createdAt: string; // ISO date string
+    order: number;
+    teamId?: string | null;
+    bgColorStart: string;
+    bgColorEnd: string;
+    createdAt: string;
 }
 
-export interface KanbanState {
-    activeBoard: string; // The ID of the active board
-    boards: Board[]; // List of all boards
-    boardsData: {
-        [boardId: string]: {
-            columns: Columns;
-            rewards: Reward[];
-            totalPoints: number;
-            bgColorStart: string;
-            bgColorEnd: string;
-        }
-    };
+export interface TeamMemberInfo {
+    id: string;
+    name: string;
+    email: string;
 }
-

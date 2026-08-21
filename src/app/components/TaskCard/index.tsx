@@ -4,7 +4,7 @@ import { Task } from '../../types';
 import { getDaysLeft, formatDate, safeParseDate } from '../../utils/dateUtils';
 import { Typography } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Calendar, Gift, FileText } from 'lucide-react';
+import { Edit, Trash2, Calendar, User, FileText } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { taskCardClass } from "../KanbanBoard3/styles";
 import { useLanguage } from '../../../context/LanguageContext';
@@ -64,19 +64,18 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                         )}
                     </div>
 
-                    {/* Points */}
-                    <div className="mt-auto">
-                        <Typography className="text-white text-xs font-semibold">
-                            {t('taskCard.points')}: {task.points || 0}
-                        </Typography>
-                    </div>
+                    {/* Assignee */}
+                    {task.assignee && (
+                        <div className="mt-auto flex items-center">
+                            <User className="h-3 w-3 text-white/80 mr-1" />
+                            <Typography className="text-white text-xs font-semibold">
+                                {task.assignee.name}
+                            </Typography>
+                        </div>
+                    )}
                 </div>
             );
         }
-
-
-            // TaskCard.tsx içindeki inProgress render kısmını komple
-// yeniden yazmanız gerekiyor. İşte inProgress için olan kısmın doğru hali:
 
         else if (columnId === 'inProgress') {
             return (
@@ -117,19 +116,13 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                             </div>
                         )}
 
-                        {/* Points and Reward */}
-                        <div className="flex items-center justify-between">
-                            <Typography className="text-white text-xs font-semibold">
-                                {task.points || 0} {t('taskCard.points')}
-                            </Typography>
-
-                            {task.reward && (
-                                <div className="flex items-center">
-                                    <Gift className="h-3 w-3 text-white/80 mr-1" />
-                                    <Typography className="text-white/90 text-xs truncate max-w-[100px]">{task.reward}</Typography>
-                                </div>
-                            )}
-                        </div>
+                        {/* Assignee */}
+                        {task.assignee && (
+                            <div className="flex items-center">
+                                <User className="h-3 w-3 text-white/80 mr-1" />
+                                <Typography className="text-white/90 text-xs truncate max-w-[150px]">{task.assignee.name}</Typography>
+                            </div>
+                        )}
 
                         <br/>
 
@@ -158,12 +151,15 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                         )}
                     </div>
 
-                    {/* Points */}
-                    <div className="mt-auto">
-                        <Typography className="text-white text-xs font-semibold">
-                            {t('taskCard.pointsEarned')}: {task.points || 0} {t('taskCard.points')}
-                        </Typography>
-                    </div>
+                    {/* Assignee */}
+                    {task.assignee && (
+                        <div className="mt-auto flex items-center">
+                            <User className="h-3 w-3 text-white/80 mr-1" />
+                            <Typography className="text-white text-xs font-semibold">
+                                {task.assignee.name}
+                            </Typography>
+                        </div>
+                    )}
                 </div>
             );
         }
@@ -175,7 +171,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                     <Typography variant="h5" className="font-bold text-white mb-2">{task.title}</Typography>
                 </div>
 
-                {/* Date, days left and points */}
+                {/* Date, days left and assignee */}
                 <div className="flex items-center justify-between text-white text-xs mt-auto">
                     {task.dueDate && (
                         <span className="flex items-center">
@@ -192,7 +188,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                         </span>
                     )}
 
-                    <span className="font-semibold">{t('taskCard.points')}: {task.points || 0}</span>
+                    {task.assignee && <span className="font-semibold">{task.assignee.name}</span>}
                 </div>
             </div>
         );

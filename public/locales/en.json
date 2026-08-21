@@ -62,6 +62,8 @@
   "dialog.taskTitle": "Task Title",
   "dialog.taskDescription": "Task Description",
   "dialog.taskPoints": "Points",
+  "dialog.taskAssignee": "Assignee",
+  "dialog.unassigned": "Unassigned",
   "dialog.taskCardColor": "Card Color",
   "dialog.taskDueDate": "Select due date (by clicking on the calendar)",
 

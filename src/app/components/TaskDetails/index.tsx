@@ -53,10 +53,14 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({
                         <Typography variant="h5" className="mb-1">{t('dialog.taskDescription')}: {task?.description}</Typography>
                     </div>
 
-                    <Separator />
-                    <div>
-                        <Typography>{t('taskCard.points')}: {task?.points || 0}</Typography>
-                    </div>
+                    {task?.assignee && (
+                        <>
+                            <Separator />
+                            <div>
+                                <Typography>{t('dialog.taskAssignee')}: {task.assignee.name}</Typography>
+                            </div>
+                        </>
+                    )}
 
                     <Separator />
 
