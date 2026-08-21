@@ -421,7 +421,7 @@ const KanbanBoard3: React.FC = () => {
                                     </Typography>
                                 </Button>
 
-                                <Button
+                                {/* <Button
                                     variant="outline"
                                     className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2"
                                     onClick={() => setDailyToDoDialogOpen(true)}
@@ -430,7 +430,7 @@ const KanbanBoard3: React.FC = () => {
                                     <Typography variant="h5" className="text-white">
                                         {t('header.dailyTodos')}
                                     </Typography>
-                                </Button>
+                                </Button> */}
                             </>
                         ) : (
                             <Typography variant="h5" className="text-white">
