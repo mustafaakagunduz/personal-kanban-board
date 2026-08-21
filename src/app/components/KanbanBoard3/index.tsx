@@ -463,17 +463,15 @@ const KanbanBoard3: React.FC = () => {
                             <HelpCircle className="h-5 w-5"/>
                             <span>{t('header.help')}</span>
                         </Button>
-                        {/*
-                        <Button
+
+                        {/* <Button
                             variant="outline"
                             className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2 text-white"
                             onClick={() => setInfoDialogOpen(true)}
                         >
                             <Info className="h-5 w-5"/>
                             <span>{t('header.privacy')}</span>
-                        </Button>
-                        */}
-
+                        </Button> */}
                         <Button
                             variant="outline"
                             className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2 text-white"
