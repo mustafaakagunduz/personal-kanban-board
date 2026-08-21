@@ -45,7 +45,8 @@ import {
     ProgressDetails,
     ColumnData,
     Board,
-    Assignee
+    Assignee,
+    CompanyColors
 } from '../../types';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
@@ -89,6 +90,9 @@ const KanbanBoard3: React.FC = () => {
     }, [boards, activeBoard]);
 
     const activeBoardData = boards?.find(b => b.id === activeBoard) || null;
+
+    // Global company-wide board background colors
+    const { data: companyColors } = useSWR<CompanyColors>('/api/company', fetcher);
 
     // Tasks for the active board
     const tasksKey = activeBoard ? `/api/boards/${activeBoard}/tasks` : null;
@@ -364,10 +368,10 @@ const KanbanBoard3: React.FC = () => {
     };
 
     const updateBgColors = async (start: string, end: string) => {
-        if (!activeBoard) return;
-        mutate('/api/boards', boards?.map(b => b.id === activeBoard ? { ...b, bgColorStart: start, bgColorEnd: end } : b), false);
-        await apiFetch(`/api/boards/${activeBoard}`, { bgColorStart: start, bgColorEnd: end });
-        mutate('/api/boards');
+        if (!companyColors) return;
+        mutate('/api/company', { ...companyColors, bgColorStart: start, bgColorEnd: end }, false);
+        await apiFetch('/api/company', { bgColorStart: start, bgColorEnd: end });
+        mutate('/api/company');
     };
 
     if (!boards) {
@@ -401,7 +405,7 @@ const KanbanBoard3: React.FC = () => {
         <div
             className="h-screen w-screen overflow-y-auto"
             style={{
-                background: `linear-gradient(to bottom right, ${activeBoardData.bgColorStart}, ${activeBoardData.bgColorEnd})`
+                background: `linear-gradient(to bottom right, ${companyColors?.bgColorStart ?? '#171718'}, ${companyColors?.bgColorEnd ?? '#C0FF2D'})`
             }}
         >
             <div className="p-6 flex flex-col min-h-screen">
@@ -635,10 +639,10 @@ const KanbanBoard3: React.FC = () => {
                 <ColorPickerDialog
                     open={showColorPicker}
                     onClose={() => setShowColorPicker(false)}
-                    startColor={activeBoardData.bgColorStart}
-                    endColor={activeBoardData.bgColorEnd}
-                    onStartColorChange={(color) => updateBgColors(color, activeBoardData.bgColorEnd)}
-                    onEndColorChange={(color) => updateBgColors(activeBoardData.bgColorStart, color)}
+                    startColor={companyColors?.bgColorStart ?? '#171718'}
+                    endColor={companyColors?.bgColorEnd ?? '#C0FF2D'}
+                    onStartColorChange={(color) => updateBgColors(color, companyColors?.bgColorEnd ?? '#C0FF2D')}
+                    onEndColorChange={(color) => updateBgColors(companyColors?.bgColorStart ?? '#171718', color)}
                     onReset={() => {
                         updateBgColors("#171718", "#C0FF2D");
                     }}

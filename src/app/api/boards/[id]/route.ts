@@ -14,15 +14,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const data: {
         name?: string;
         teamId?: string | null;
-        bgColorStart?: string;
-        bgColorEnd?: string;
         order?: number;
     } = {};
 
     if (typeof body.name === "string" && body.name.trim()) data.name = body.name.trim();
     if (body.teamId === null || typeof body.teamId === "string") data.teamId = body.teamId || null;
-    if (typeof body.bgColorStart === "string") data.bgColorStart = body.bgColorStart;
-    if (typeof body.bgColorEnd === "string") data.bgColorEnd = body.bgColorEnd;
     if (typeof body.order === "number") data.order = body.order;
 
     const updated = await prisma.board.update({ where: { id }, data });

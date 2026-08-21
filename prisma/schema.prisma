@@ -19,9 +19,11 @@ enum TaskStatus {
 }
 
 model Company {
-  id        String   @id @default(cuid())
-  name      String
-  createdAt DateTime @default(now())
+  id            String   @id @default(cuid())
+  name          String
+  bgColorStart  String   @default("#171718")
+  bgColorEnd    String   @default("#C0FF2D")
+  createdAt     DateTime @default(now())
 
   users User[]
   teams Team[]
@@ -70,8 +72,6 @@ model Board {
   id            String   @id @default(cuid())
   name          String
   order         Int      @default(0)
-  bgColorStart  String   @default("#171718")
-  bgColorEnd    String   @default("#C0FF2D")
   createdAt     DateTime @default(now())
 
   companyId String

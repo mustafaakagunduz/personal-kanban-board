@@ -59,9 +59,13 @@ export interface Board {
     name: string;
     order: number;
     teamId?: string | null;
+    createdAt: string;
+}
+
+export interface CompanyColors {
+    id: string;
     bgColorStart: string;
     bgColorEnd: string;
-    createdAt: string;
 }
 
 export interface TeamMemberInfo {
