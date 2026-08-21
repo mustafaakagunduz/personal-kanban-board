@@ -259,12 +259,11 @@ const BoardSelector: React.FC<BoardSelectorProps> = ({
                 </DndContext>
 
                 <Button
-                    variant="outline"
-                    className="bg-white/10 border-0 text-white hover:bg-white/20 ml-auto flex-shrink-0"
+                    variant="ghost"
+                    className="!h-10 !w-10 !p-0 bg-transparent text-green-500 hover:bg-transparent hover:text-green-600"
                     onClick={() => setNewBoardDialog(true)}
                 >
-                    <PlusCircle className="h-4 w-4 mr-2" />
-                    {t('board.new')}
+                    <PlusCircle className="!h-8 !w-8" />
                 </Button>
             </div>
 

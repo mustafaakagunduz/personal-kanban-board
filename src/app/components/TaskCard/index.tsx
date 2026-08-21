@@ -83,13 +83,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                     <div>
                         <Typography variant="h5" className="font-bold text-white mb-2">{task.title}</Typography>
 
-                        {/* Notes */}
-                        {task.notes && (
-                            <div className="flex items-center mb-2">
-                                <FileText className="h-3 w-3 text-white/80 mr-1" />
-                                <Typography className="text-white/90 text-xs">{task.notes}</Typography>
-                            </div>
-                        )}
+
                     </div>
 
                     <div className="mt-auto">
@@ -133,7 +127,13 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                                 onProgressChange={onProgressChange}
                             />
                         )}
-
+                        {/* Notes */}
+                        {task.notes && (
+                            <div className="flex items-center mb-2">
+                                <FileText className="h-3 w-3 text-white/80 mr-1" />
+                                <Typography className="text-white/90 text-xs">{task.notes}</Typography>
+                            </div>
+                        )}
 
                     </div>
                 </div>

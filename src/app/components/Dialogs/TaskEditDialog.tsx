@@ -66,6 +66,8 @@ interface TaskEditDialogProps {
     setSelectedTask: (task: SelectedTask | null) => void;
     onSave: () => void;
     assignees?: Assignee[];
+    taskNote: string;
+    setTaskNote: (description: string) => void;
 }
 
 const TaskEditDialog: React.FC<TaskEditDialogProps> = ({
@@ -74,6 +76,8 @@ const TaskEditDialog: React.FC<TaskEditDialogProps> = ({
                                                            editTitle,
                                                            setEditTitle,
                                                            editDescription,
+                                                           taskNote,
+                                                           setTaskNote,
                                                            setEditDescription,
                                                            selectedTask,
                                                            setSelectedTask,
@@ -131,6 +135,15 @@ const TaskEditDialog: React.FC<TaskEditDialogProps> = ({
                                 ))}
                             </SelectContent>
                         </Select>
+                        <div className="grid gap-2">
+                            <Label htmlFor="taskNotes">{t('taskCard.notes')}</Label>
+                            <Textarea
+                                id="taskNotes"
+                                rows={4}
+                                value={taskNote}
+                                onChange={(e) => setTaskNote(e.target.value)}
+                            />
+                        </div>
                     </div>
                     {selectedTask?.dueDate && (
                         <div className="grid gap-2">

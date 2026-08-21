@@ -49,7 +49,7 @@
 
   "taskCard.points": "Points",
   "taskCard.pointsEarned": "Earned",
-  "taskCard.notes": "Notes",
+  "taskCard.notes": "Progress Note",
   "taskCard.daysLeft": "{days} days left",
   "taskCard.daysOverdue": "{days}d overdue",
   "taskCard.invalidDate": "Invalid date",

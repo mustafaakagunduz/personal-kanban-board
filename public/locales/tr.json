@@ -54,7 +54,7 @@
 
   "taskCard.points": "Puan",
   "taskCard.pointsEarned": "Kazanılan",
-  "taskCard.notes": "Notlar",
+  "taskCard.notes": "İlerleme Notu",
   "taskCard.daysLeft": "{days} günün kaldı",
   "taskCard.daysOverdue": "{days}g gecikme",
   "taskCard.invalidDate": "Geçersiz tarih",

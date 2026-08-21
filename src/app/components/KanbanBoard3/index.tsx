@@ -161,6 +161,7 @@ const KanbanBoard3: React.FC = () => {
 
     const [editTitle, setEditTitle] = useState<string>('');
     const [editDescription, setEditDescription] = useState<string>('');
+    const [editNotes, setEditNotes] = useState<string>('');
 
     // Dialog states
     const [newTaskOpenDialog, setNewTaskOpenDialog] = useState<boolean>(false);
@@ -211,6 +212,7 @@ const KanbanBoard3: React.FC = () => {
         setSelectedTask({ ...task, columnId });
         setEditTitle(task.title);
         setEditDescription(task.description || '');
+        setEditNotes(task.notes || '');
         setEditDialog(true);
     };
 
@@ -234,6 +236,7 @@ const KanbanBoard3: React.FC = () => {
             description: editDescription.trim(),
             color: selectedTask.color,
             assigneeId: selectedTask.assigneeId ?? null,
+            notes: editNotes.trim(),
         });
 
         mutateTasks();
@@ -241,6 +244,7 @@ const KanbanBoard3: React.FC = () => {
         setSelectedTask(null);
         setEditTitle('');
         setEditDescription('');
+        setEditNotes('');
     };
 
     const handleDragStart = (e: React.DragEvent<HTMLDivElement>, id: string, sourceColumn: string): void => {
@@ -615,6 +619,8 @@ const KanbanBoard3: React.FC = () => {
                     setSelectedTask={setSelectedTask}
                     onSave={handleEditSave}
                     assignees={users || []}
+                    taskNote={editNotes}
+                    setTaskNote={setEditNotes}
                 />
 
                 <DeleteConfirmationDialog
