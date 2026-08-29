@@ -31,6 +31,8 @@ import DailyQuote from "@/src/app/components/DailyQuote/DailyQuote";
 import { formatDate, getTodayStart } from '../../utils/dateUtils';
 import CalendarDialog from '../Dialogs/CalendarDialog';
 import ColorPickerDialog from "@/src/app/components/Dialogs/ColorPickerDialog";
+import AddProgressStepDialog from '../Dialogs/AddProgressStepDialog';
+import Spinner from '../Spinner';
 import { Typography } from "@/components/ui/typography";
 import PrivacyDialog from '../Dialogs/PrivacyDialog';
 import DailyToDoDialog from '../Dialogs/DailyToDoDialog';
@@ -170,6 +172,17 @@ const KanbanBoard3: React.FC = () => {
     const [openProgressDialog, setOpenProgressDialog] = useState<boolean>(false);
     const [celebrationDialog, setCelebrationDialog] = useState<boolean>(false);
     const [taskDetailsDialog, setTaskDetailsDialog] = useState<boolean>(false);
+    const [addStepDialogOpen, setAddStepDialogOpen] = useState<boolean>(false);
+    const [taskForStep, setTaskForStep] = useState<Task | null>(null);
+
+    // Loading state'leri - işlem sırasında butonlarda spinner göstermek için
+    const [isAddingTask, setIsAddingTask] = useState<boolean>(false);
+    const [isSavingEdit, setIsSavingEdit] = useState<boolean>(false);
+    const [isDeletingTask, setIsDeletingTask] = useState<boolean>(false);
+    const [isAddingStep, setIsAddingStep] = useState<boolean>(false);
+    const [isSubmittingProgress, setIsSubmittingProgress] = useState<boolean>(false);
+    const [isCompletingTask, setIsCompletingTask] = useState<boolean>(false);
+    const [boardActionLoading, setBoardActionLoading] = useState<boolean>(false);
 
     // Initialize today's date
     useEffect(() => {
@@ -212,7 +225,7 @@ const KanbanBoard3: React.FC = () => {
         setSelectedTask({ ...task, columnId });
         setEditTitle(task.title);
         setEditDescription(task.description || '');
-        setEditNotes(task.notes || '');
+        setEditNotes('');
         setEditDialog(true);
     };
 
@@ -223,28 +236,45 @@ const KanbanBoard3: React.FC = () => {
 
     const handleConfirmDeleteTask = async (): Promise<void> => {
         if (!selectedTask) return;
-        await apiFetch(`/api/tasks/${selectedTask.id}`, undefined, "DELETE");
-        mutateTasks();
-        setDeleteConfirmDialog(false);
+        setIsDeletingTask(true);
+        try {
+            await apiFetch(`/api/tasks/${selectedTask.id}`, undefined, "DELETE");
+            mutateTasks();
+            setDeleteConfirmDialog(false);
+        } finally {
+            setIsDeletingTask(false);
+        }
+    };
+
+    // İlerleme notu artık ayrı bir alan değil, kartın ilerleme adımları listesine ekleniyor
+    const addProgressStep = async (taskId: string, text: string): Promise<void> => {
+        const trimmed = text.trim();
+        if (!trimmed) return;
+        await apiFetch(`/api/tasks/${taskId}/steps`, { text: trimmed }, "POST");
     };
 
     const handleEditSave = async (): Promise<void> => {
         if (!selectedTask || !editTitle.trim()) return;
 
-        await apiFetch(`/api/tasks/${selectedTask.id}`, {
-            title: editTitle,
-            description: editDescription.trim(),
-            color: selectedTask.color,
-            assigneeId: selectedTask.assigneeId ?? null,
-            notes: editNotes.trim(),
-        });
+        setIsSavingEdit(true);
+        try {
+            await apiFetch(`/api/tasks/${selectedTask.id}`, {
+                title: editTitle,
+                description: editDescription.trim(),
+                color: selectedTask.color,
+                assigneeId: selectedTask.assigneeId ?? null,
+            });
+            await addProgressStep(selectedTask.id, editNotes);
 
-        mutateTasks();
-        setEditDialog(false);
-        setSelectedTask(null);
-        setEditTitle('');
-        setEditDescription('');
-        setEditNotes('');
+            mutateTasks();
+            setEditDialog(false);
+            setSelectedTask(null);
+            setEditTitle('');
+            setEditDescription('');
+            setEditNotes('');
+        } finally {
+            setIsSavingEdit(false);
+        }
     };
 
     const handleDragStart = (e: React.DragEvent<HTMLDivElement>, id: string, sourceColumn: string): void => {
@@ -283,48 +313,77 @@ const KanbanBoard3: React.FC = () => {
         }
     };
 
-    const handleCompletionConfirm = (): void => {
+    const handleCompletionConfirm = async (): Promise<void> => {
         if (!taskToComplete) return;
-        setCompletionConfirmDialog(false);
-        moveTask(taskToComplete.task.id, taskToComplete.targetColumn);
-        setCelebrationDialog(true);
+        setIsCompletingTask(true);
+        try {
+            await moveTask(taskToComplete.task.id, taskToComplete.targetColumn);
+            setCompletionConfirmDialog(false);
+            setCelebrationDialog(true);
+        } finally {
+            setIsCompletingTask(false);
+        }
     };
 
-    const handleProgressChange = async (task: Task, progress: number): Promise<void> => {
-        await apiFetch(`/api/tasks/${task.id}`, { progress });
-        mutateTasks();
+    const handleAddStepClick = (task: Task): void => {
+        setTaskForStep(task);
+        setAddStepDialogOpen(true);
+    };
+
+    const handleSaveStep = async (text: string): Promise<void> => {
+        if (!taskForStep) return;
+        setIsAddingStep(true);
+        try {
+            await addProgressStep(taskForStep.id, text);
+            mutateTasks();
+            setAddStepDialogOpen(false);
+            setTaskForStep(null);
+        } finally {
+            setIsAddingStep(false);
+        }
     };
 
     const handleAddTask = async (): Promise<void> => {
         if (!newTask.title || !activeBoard) return;
 
-        await apiFetch(`/api/boards/${activeBoard}/tasks`, {
-            title: newTask.title,
-            description: newTask.description,
-            color: newTask.color || "#800080",
-            assigneeId: newTask.assigneeId || null,
-        }, "POST");
+        setIsAddingTask(true);
+        try {
+            await apiFetch(`/api/boards/${activeBoard}/tasks`, {
+                title: newTask.title,
+                description: newTask.description,
+                color: newTask.color || "#800080",
+                assigneeId: newTask.assigneeId || null,
+            }, "POST");
 
-        mutateTasks();
+            mutateTasks();
 
-        setNewTask({
-            title: '',
-            description: '',
-            color: '#800080'
-        });
-        setNewTaskOpenDialog(false);
+            setNewTask({
+                title: '',
+                description: '',
+                color: '#800080'
+            });
+            setNewTaskOpenDialog(false);
+        } finally {
+            setIsAddingTask(false);
+        }
     };
 
-    const handleProgressSubmit = (): void => {
+    const handleProgressSubmit = async (): Promise<void> => {
         if (!movingTask) return;
 
-        moveTask(movingTask.id, 'inProgress', {
-            notes: progressDetails.notes,
-            dueDate: progressDetails.dueDate || null,
-            progress: 0
-        });
-        setOpenProgressDialog(false);
-        setProgressDetails({ notes: '', dueDate: '' });
+        setIsSubmittingProgress(true);
+        try {
+            await moveTask(movingTask.id, 'inProgress', {
+                dueDate: progressDetails.dueDate || null,
+                progress: 0
+            });
+            await addProgressStep(movingTask.id, progressDetails.notes);
+            mutateTasks();
+            setOpenProgressDialog(false);
+            setProgressDetails({ notes: '', dueDate: '' });
+        } finally {
+            setIsSubmittingProgress(false);
+        }
     };
 
     const handleCalendarDateSelect = (date: Date) => {
@@ -344,25 +403,40 @@ const KanbanBoard3: React.FC = () => {
     };
 
     const handleCreateBoard = async (name: string) => {
-        const res = await apiFetch('/api/boards', { name }, "POST");
-        const board = await res.json();
-        mutate('/api/boards');
-        setActiveBoard(board.id);
+        setBoardActionLoading(true);
+        try {
+            const res = await apiFetch('/api/boards', { name }, "POST");
+            const board = await res.json();
+            mutate('/api/boards');
+            setActiveBoard(board.id);
+        } finally {
+            setBoardActionLoading(false);
+        }
     };
 
     const handleDeleteBoard = async (boardId: string) => {
         if (!boards || boards.length <= 1) return;
-        await apiFetch(`/api/boards/${boardId}`, undefined, "DELETE");
-        if (activeBoard === boardId) {
-            const remaining = boards.filter(b => b.id !== boardId);
-            setActiveBoard(remaining[0]?.id || '');
+        setBoardActionLoading(true);
+        try {
+            await apiFetch(`/api/boards/${boardId}`, undefined, "DELETE");
+            if (activeBoard === boardId) {
+                const remaining = boards.filter(b => b.id !== boardId);
+                setActiveBoard(remaining[0]?.id || '');
+            }
+            mutate('/api/boards');
+        } finally {
+            setBoardActionLoading(false);
         }
-        mutate('/api/boards');
     };
 
     const handleRenameBoard = async (boardId: string, newName: string) => {
-        await apiFetch(`/api/boards/${boardId}`, { name: newName });
-        mutate('/api/boards');
+        setBoardActionLoading(true);
+        try {
+            await apiFetch(`/api/boards/${boardId}`, { name: newName });
+            mutate('/api/boards');
+        } finally {
+            setBoardActionLoading(false);
+        }
     };
 
     const handleReorderBoards = async (reorderedBoards: Board[]) => {
@@ -380,7 +454,8 @@ const KanbanBoard3: React.FC = () => {
 
     if (!boards) {
         return (
-            <div className="h-screen w-screen flex items-center justify-center bg-[#171718]">
+            <div className="h-screen w-screen flex items-center justify-center gap-3 bg-[#171718]">
+                <Spinner className="h-6 w-6 text-white" />
                 <Typography variant="h5" className="text-white">{t('header.loading')}</Typography>
             </div>
         );
@@ -399,7 +474,8 @@ const KanbanBoard3: React.FC = () => {
 
     if (!activeBoardData) {
         return (
-            <div className="h-screen w-screen flex items-center justify-center bg-[#171718]">
+            <div className="h-screen w-screen flex items-center justify-center gap-3 bg-[#171718]">
+                <Spinner className="h-6 w-6 text-white" />
                 <Typography variant="h5" className="text-white">{t('header.loading')}</Typography>
             </div>
         );
@@ -441,9 +517,12 @@ const KanbanBoard3: React.FC = () => {
                                 </Button> */}
                             </>
                         ) : (
-                            <Typography variant="h5" className="text-white">
-                                {t('header.loading')}
-                            </Typography>
+                            <div className="flex items-center gap-2">
+                                <Spinner className="h-4 w-4 text-white" />
+                                <Typography variant="h5" className="text-white">
+                                    {t('header.loading')}
+                                </Typography>
+                            </div>
                         )}
                     </div>
 
@@ -516,6 +595,7 @@ const KanbanBoard3: React.FC = () => {
                     onDeleteBoard={handleDeleteBoard}
                     onRenameBoard={handleRenameBoard}
                     onReorderBoards={handleReorderBoards}
+                    loading={boardActionLoading}
                 />
 
                 {/* Main Content Section */}
@@ -556,21 +636,27 @@ const KanbanBoard3: React.FC = () => {
                     </div>
 
                     {/* Columns Container */}
-                    <div className="flex gap-4 flex-1 min-h-0">
-                        {Object.entries(filteredColumns).map(([columnId, column]) => (
-                            <Column
-                                key={columnId}
-                                columnId={columnId}
-                                column={column as ColumnData}
-                                onDrop={handleDrop}
-                                onDragStart={handleDragStart}
-                                onEditClick={handleEditTask}
-                                onDeleteClick={handleDeleteClick}
-                                onTaskClick={handleTaskClick}
-                                onProgressChange={handleProgressChange}
-                                today={today}
-                            />
-                        ))}
+                    <div className="flex gap-4 flex-1 min-h-0 relative">
+                        {!tasksData ? (
+                            <div className="w-full flex items-center justify-center py-24">
+                                <Spinner className="h-8 w-8 text-white" />
+                            </div>
+                        ) : (
+                            Object.entries(filteredColumns).map(([columnId, column]) => (
+                                <Column
+                                    key={columnId}
+                                    columnId={columnId}
+                                    column={column as ColumnData}
+                                    onDrop={handleDrop}
+                                    onDragStart={handleDragStart}
+                                    onEditClick={handleEditTask}
+                                    onDeleteClick={handleDeleteClick}
+                                    onTaskClick={handleTaskClick}
+                                    onAddStepClick={handleAddStepClick}
+                                    today={today}
+                                />
+                            ))
+                        )}
                     </div>
                 </div>
 
@@ -591,6 +677,7 @@ const KanbanBoard3: React.FC = () => {
                     setNewTask={setNewTask}
                     onAddTask={handleAddTask}
                     assignees={users || []}
+                    loading={isAddingTask}
                 />
 
                 <PrivacyDialog
@@ -606,6 +693,7 @@ const KanbanBoard3: React.FC = () => {
                     setProgressDetails={setProgressDetails}
                     onSubmit={handleProgressSubmit}
                     today={today}
+                    loading={isSubmittingProgress}
                 />
 
                 <TaskEditDialog
@@ -621,12 +709,14 @@ const KanbanBoard3: React.FC = () => {
                     assignees={users || []}
                     taskNote={editNotes}
                     setTaskNote={setEditNotes}
+                    loading={isSavingEdit}
                 />
 
                 <DeleteConfirmationDialog
                     open={deleteConfirmDialog}
                     onClose={() => setDeleteConfirmDialog(false)}
                     onConfirm={handleConfirmDeleteTask}
+                    loading={isDeletingTask}
                 />
 
                 <CelebrationDialog
@@ -671,6 +761,17 @@ const KanbanBoard3: React.FC = () => {
                     onClose={() => setCompletionConfirmDialog(false)}
                     onConfirm={handleCompletionConfirm}
                     taskTitle={taskToComplete?.task.title || ''}
+                    loading={isCompletingTask}
+                />
+
+                <AddProgressStepDialog
+                    open={addStepDialogOpen}
+                    onClose={() => {
+                        setAddStepDialogOpen(false);
+                        setTaskForStep(null);
+                    }}
+                    onSave={handleSaveStep}
+                    loading={isAddingStep}
                 />
             </div>
         </div>

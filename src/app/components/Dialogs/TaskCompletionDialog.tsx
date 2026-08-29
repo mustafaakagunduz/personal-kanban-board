@@ -2,19 +2,22 @@ import React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from '../../../context/LanguageContext';
+import Spinner from '../Spinner';
 
 interface TaskCompletionDialogProps {
     open: boolean;
     onClose: () => void;
     onConfirm: () => void;
     taskTitle: string;
+    loading?: boolean;
 }
 
 const TaskCompletionDialog: React.FC<TaskCompletionDialogProps> = ({
                                                                        open,
                                                                        onClose,
                                                                        onConfirm,
-                                                                       taskTitle
+                                                                       taskTitle,
+                                                                       loading = false
                                                                    }) => {
     const { t } = useLanguage();
 
@@ -30,8 +33,11 @@ const TaskCompletionDialog: React.FC<TaskCompletionDialogProps> = ({
                 </DialogHeader>
 
                 <DialogFooter className="flex justify-center space-x-4 mt-4">
-                    <Button variant="outline" onClick={onClose}>{t('button.cancel')}</Button>
-                    <Button onClick={onConfirm}>{t('button.confirmCompletion')}</Button>
+                    <Button variant="outline" onClick={onClose} disabled={loading}>{t('button.cancel')}</Button>
+                    <Button onClick={onConfirm} disabled={loading}>
+                        {loading && <Spinner className="mr-2" />}
+                        {t('button.confirmCompletion')}
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

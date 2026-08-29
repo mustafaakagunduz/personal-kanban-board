@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { formatDate, setDateInputLocale } from '../../utils/dateUtils';
 import { useLanguage } from '../../../context/LanguageContext';
+import Spinner from '../Spinner';
 
 interface ProgressDialogProps {
     open: boolean;
@@ -17,6 +18,7 @@ interface ProgressDialogProps {
     setProgressDetails: (details: ProgressDetails) => void;
     onSubmit: () => void;
     today: Date | null;
+    loading?: boolean;
 }
 
 const ProgressDialog: React.FC<ProgressDialogProps> = ({
@@ -26,7 +28,8 @@ const ProgressDialog: React.FC<ProgressDialogProps> = ({
                                                            progressDetails,
                                                            setProgressDetails,
                                                            onSubmit,
-                                                           today
+                                                           today,
+                                                           loading = false
                                                        }) => {
     // Dil hook'unu kullan
     const { t, language } = useLanguage();
@@ -74,8 +77,11 @@ const ProgressDialog: React.FC<ProgressDialogProps> = ({
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={onClose}>{t('button.cancel')}</Button>
-                    <Button onClick={onSubmit}>{t('button.save')}</Button>
+                    <Button variant="outline" onClick={onClose} disabled={loading}>{t('button.cancel')}</Button>
+                    <Button onClick={onSubmit} disabled={loading}>
+                        {loading && <Spinner className="mr-2" />}
+                        {t('button.save')}
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

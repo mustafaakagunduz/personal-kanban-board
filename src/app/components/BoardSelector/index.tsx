@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { useLanguage } from '../../../context/LanguageContext';
 import { Board } from '../../types';
+import Spinner from '../Spinner';
 
 // DND Kit imports
 import {
@@ -34,6 +35,7 @@ interface BoardSelectorProps {
     onDeleteBoard: (boardId: string) => void;
     onRenameBoard: (boardId: string, newName: string) => void;
     onReorderBoards?: (reorderedBoards: Board[]) => void;
+    loading?: boolean;
 }
 
 // SortableBoardItem component
@@ -49,6 +51,7 @@ interface SortableBoardItemProps {
     setEditingBoard: (board: Board | null) => void;
     handleDeleteClick: (board: Board) => void;
     canDelete: boolean;
+    loading?: boolean;
 }
 
 // Sortable Board Item Component
@@ -63,7 +66,8 @@ const SortableBoardItem: React.FC<SortableBoardItemProps> = ({
                                                                  handleSaveEdit,
                                                                  setEditingBoard,
                                                                  handleDeleteClick,
-                                                                 canDelete
+                                                                 canDelete,
+                                                                 loading = false
                                                              }) => {
     const {
         attributes,
@@ -103,14 +107,16 @@ const SortableBoardItem: React.FC<SortableBoardItemProps> = ({
                         variant="ghost"
                         className="h-6 w-6 p-0 text-white hover:bg-white/10"
                         onClick={() => handleSaveEdit(board)}
+                        disabled={loading}
                     >
-                        <Check className="h-4 w-4" />
+                        {loading ? <Spinner className="h-4 w-4" /> : <Check className="h-4 w-4" />}
                     </Button>
                     <Button
                         size="icon"
                         variant="ghost"
                         className="h-6 w-6 p-0 text-white hover:bg-white/10"
                         onClick={() => setEditingBoard(null)}
+                        disabled={loading}
                     >
                         <X className="h-4 w-4" />
                     </Button>
@@ -158,7 +164,8 @@ const BoardSelector: React.FC<BoardSelectorProps> = ({
                                                          onCreateBoard,
                                                          onDeleteBoard,
                                                          onRenameBoard,
-                                                         onReorderBoards
+                                                         onReorderBoards,
+                                                         loading = false
                                                      }) => {
     const { t } = useLanguage();
     const [newBoardDialog, setNewBoardDialog] = useState(false);
@@ -227,41 +234,41 @@ const BoardSelector: React.FC<BoardSelectorProps> = ({
 
     return (
         <>
-            <div className="flex items-center space-x-2 mb-4 overflow-x-auto p-2 bg-white/10 backdrop-blur-sm rounded-lg">
+            <div className="flex items-center flex-wrap gap-2 mb-4 p-2 bg-white/10 backdrop-blur-sm rounded-lg">
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
                     onDragEnd={handleDragEnd}
                 >
-                    <div className="flex space-x-2 flex-grow overflow-x-auto">
-                        <SortableContext
-                            items={boards.map(board => board.id)}
-                            strategy={horizontalListSortingStrategy}
-                        >
-                            {boards.map(board => (
-                                <SortableBoardItem
-                                    key={board.id}
-                                    board={board}
-                                    isActive={board.id === activeBoard}
-                                    isEditing={editingBoard?.id === board.id}
-                                    editBoardName={editBoardName}
-                                    setEditBoardName={setEditBoardName}
-                                    onBoardChange={onBoardChange}
-                                    startEditing={startEditing}
-                                    handleSaveEdit={handleSaveEdit}
-                                    setEditingBoard={setEditingBoard}
-                                    handleDeleteClick={handleDeleteClick}
-                                    canDelete={boards.length > 1}
-                                />
-                            ))}
-                        </SortableContext>
-                    </div>
+                    <SortableContext
+                        items={boards.map(board => board.id)}
+                        strategy={horizontalListSortingStrategy}
+                    >
+                        {boards.map(board => (
+                            <SortableBoardItem
+                                key={board.id}
+                                board={board}
+                                isActive={board.id === activeBoard}
+                                isEditing={editingBoard?.id === board.id}
+                                editBoardName={editBoardName}
+                                setEditBoardName={setEditBoardName}
+                                onBoardChange={onBoardChange}
+                                startEditing={startEditing}
+                                handleSaveEdit={handleSaveEdit}
+                                setEditingBoard={setEditingBoard}
+                                handleDeleteClick={handleDeleteClick}
+                                canDelete={boards.length > 1}
+                                loading={loading}
+                            />
+                        ))}
+                    </SortableContext>
                 </DndContext>
 
                 <Button
                     variant="ghost"
                     className="!h-10 !w-10 !p-0 bg-transparent text-green-500 hover:bg-transparent hover:text-green-600"
                     onClick={() => setNewBoardDialog(true)}
+                    disabled={loading}
                 >
                     <PlusCircle className="!h-8 !w-8" />
                 </Button>
@@ -286,8 +293,11 @@ const BoardSelector: React.FC<BoardSelectorProps> = ({
                         />
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setNewBoardDialog(false)}>{t('button.cancel')}</Button>
-                        <Button onClick={handleCreateBoard}>{t('button.create')}</Button>
+                        <Button variant="outline" onClick={() => setNewBoardDialog(false)} disabled={loading}>{t('button.cancel')}</Button>
+                        <Button onClick={handleCreateBoard} disabled={loading}>
+                            {loading && <Spinner className="mr-2" />}
+                            {t('button.create')}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -302,8 +312,11 @@ const BoardSelector: React.FC<BoardSelectorProps> = ({
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setDeleteBoardDialog(false)}>{t('button.cancel')}</Button>
-                        <Button variant="destructive" onClick={handleDeleteConfirm}>{t('button.delete')}</Button>
+                        <Button variant="outline" onClick={() => setDeleteBoardDialog(false)} disabled={loading}>{t('button.cancel')}</Button>
+                        <Button variant="destructive" onClick={handleDeleteConfirm} disabled={loading}>
+                            {loading && <Spinner className="mr-2" />}
+                            {t('button.delete')}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

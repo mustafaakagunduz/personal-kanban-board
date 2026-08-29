@@ -6,6 +6,12 @@ export interface Assignee {
     email: string;
 }
 
+export interface TaskStep {
+    id: string;
+    text: string;
+    createdAt: string;
+}
+
 export interface Task {
     id: string;
     title: string;
@@ -17,6 +23,7 @@ export interface Task {
     progress?: number | null;
     assigneeId?: string | null;
     assignee?: Assignee | null;
+    steps?: TaskStep[];
 }
 
 export interface SelectedTask extends Task {

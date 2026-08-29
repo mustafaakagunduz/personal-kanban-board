@@ -12,7 +12,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
     const tasks = await prisma.task.findMany({
         where: { boardId },
-        include: { assignee: { select: { id: true, name: true, email: true } } },
+        include: {
+            assignee: { select: { id: true, name: true, email: true } },
+            steps: { orderBy: { createdAt: "asc" } },
+        },
         orderBy: { order: "asc" },
     });
 

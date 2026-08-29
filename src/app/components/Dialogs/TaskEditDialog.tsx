@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLanguage } from '../../../context/LanguageContext';
+import Spinner from '../Spinner';
 
 // Renk seçimi için basit bir bileşen
 const ColorPicker: React.FC<{
@@ -68,6 +69,7 @@ interface TaskEditDialogProps {
     assignees?: Assignee[];
     taskNote: string;
     setTaskNote: (description: string) => void;
+    loading?: boolean;
 }
 
 const TaskEditDialog: React.FC<TaskEditDialogProps> = ({
@@ -82,7 +84,8 @@ const TaskEditDialog: React.FC<TaskEditDialogProps> = ({
                                                            selectedTask,
                                                            setSelectedTask,
                                                            onSave,
-                                                           assignees = []
+                                                           assignees = [],
+                                                           loading = false
                                                        }) => {
     // Dil hook'unu kullan
     const { t } = useLanguage();
@@ -181,8 +184,11 @@ const TaskEditDialog: React.FC<TaskEditDialogProps> = ({
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={onClose}>{t('button.cancel')}</Button>
-                    <Button onClick={onSave}>{t('button.save')}</Button>
+                    <Button variant="outline" onClick={onClose} disabled={loading}>{t('button.cancel')}</Button>
+                    <Button onClick={onSave} disabled={loading}>
+                        {loading && <Spinner className="mr-2" />}
+                        {t('button.save')}
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

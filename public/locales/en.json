@@ -53,7 +53,10 @@
   "taskCard.daysLeft": "{days} days left",
   "taskCard.daysOverdue": "{days}d overdue",
   "taskCard.invalidDate": "Invalid date",
-  "taskCard.progressStatus": "Progress Status",
+  "taskCard.addProgressStep": "Add progress step",
+  "taskCard.progressSteps": "Progress Steps",
+  "dialog.addProgressStep": "Add Progress Step",
+  "dialog.progressStepPlaceholder": "Write the new progress step...",
 
   "dialog.newTask": "Add New Task",
   "dialog.editTask": "Edit Task",

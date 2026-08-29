@@ -2,7 +2,6 @@
 import React from 'react';
 import {
     AlertDialog,
-    AlertDialogAction,
     AlertDialogCancel,
     AlertDialogContent,
     AlertDialogDescription,
@@ -10,20 +9,24 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { useLanguage } from '../../../context/LanguageContext';
+import Spinner from '../Spinner';
 
 interface DeleteConfirmationDialogProps {
     open: boolean;
     onClose: () => void;
     onConfirm: () => void;
     title?: string;
+    loading?: boolean;
 }
 
 const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
                                                                                open,
                                                                                onClose,
                                                                                onConfirm,
-                                                                               title
+                                                                               title,
+                                                                               loading = false
                                                                            }) => {
     // Dil hook'unu kullan
     const { t } = useLanguage();
@@ -41,8 +44,11 @@ const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel onClick={onClose}>{t('button.cancel')}</AlertDialogCancel>
-                    <AlertDialogAction onClick={onConfirm}>{t('button.confirm')}</AlertDialogAction>
+                    <AlertDialogCancel onClick={onClose} disabled={loading}>{t('button.cancel')}</AlertDialogCancel>
+                    <Button onClick={onConfirm} disabled={loading}>
+                        {loading && <Spinner className="mr-2" />}
+                        {t('button.confirm')}
+                    </Button>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>

@@ -4,11 +4,11 @@ import { Task } from '../../types';
 import { getDaysLeft, formatDate, safeParseDate } from '../../utils/dateUtils';
 import { Typography } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Calendar, User, FileText } from 'lucide-react';
+import { Edit, Trash2, Calendar, User, Plus } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { taskCardClass } from "../KanbanBoard3/styles";
 import { useLanguage } from '../../../context/LanguageContext';
-import ProgressSlider from "@/src/app/components/ProgressSlider";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface TaskCardProps {
     task: Task;
@@ -17,7 +17,7 @@ interface TaskCardProps {
     onEditClick: (task: Task, columnId: string) => void;
     onDeleteClick: (task: Task, columnId: string) => void;
     onClick: (task: Task, columnId: string) => void;
-    onProgressChange?: (task: Task, progress: number) => void;
+    onAddStepClick?: (task: Task) => void;
     today: Date | null;
 }
 
@@ -28,7 +28,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                                                         onEditClick,
                                                         onDeleteClick,
                                                         onClick,
-                                                        onProgressChange,
+                                                        onAddStepClick,
                                                         today
                                                     }) => {
     // Dil hook'unu kullan
@@ -50,6 +50,18 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
         if (!task.dueDate || !today) return null;
         return getDaysLeft(task.dueDate, today);
     }, [task.dueDate, today]);
+
+    // İlerleme adımlarını eskiden yeniye sırala
+    const sortedSteps = React.useMemo(() => {
+        if (!task.steps || task.steps.length === 0) return [];
+        return [...task.steps].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    }, [task.steps]);
+
+    const handleAddStepClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onAddStepClick?.(task);
+    };
 
     // Conditional render function
     const renderContent = () => {
@@ -79,7 +91,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
 
         else if (columnId === 'inProgress') {
             return (
-                <div className="flex flex-col h-full justify-between">
+                <div className="flex flex-col h-full justify-between pr-6 pb-1">
                     <div>
                         <Typography variant="h5" className="font-bold text-white mb-2">{task.title}</Typography>
 
@@ -118,21 +130,16 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                             </div>
                         )}
 
-                        <br/>
-
-                        {/* Progress Slider - only for inProgress column */}
-                        {columnId === 'inProgress' && onProgressChange && (
-                            <ProgressSlider
-                                task={task}
-                                onProgressChange={onProgressChange}
-                            />
-                        )}
-                        {/* Notes */}
-                        {task.notes && (
-                            <div className="flex items-center mb-2">
-                                <FileText className="h-3 w-3 text-white/80 mr-1" />
-                                <Typography className="text-white/90 text-xs">{task.notes}</Typography>
-                            </div>
+                        {/* Progress steps - only for inProgress column */}
+                        {sortedSteps.length > 0 && (
+                            <ul className="mt-1 space-y-1">
+                                {sortedSteps.map(step => (
+                                    <li key={step.id} className="text-white/90 text-xs flex items-start">
+                                        <span className="mr-1.5 mt-0.5 h-1 w-1 rounded-full bg-white/60 flex-shrink-0" />
+                                        <span>{step.text}</span>
+                                    </li>
+                                ))}
+                            </ul>
                         )}
 
                     </div>
@@ -258,6 +265,26 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                         <Trash2 className="h-3 w-3" />
                     </Button>
                 </div>
+
+                {/* Add progress step button - only for inProgress column */}
+                {columnId === 'inProgress' && onAddStepClick && (
+                    <div className="absolute right-2 bottom-2 z-10">
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="text-white h-6 w-6 p-0 rounded-full bg-white/10 hover:bg-white/20"
+                                    onClick={handleAddStepClick}
+                                    aria-label={t('taskCard.addProgressStep')}
+                                >
+                                    <Plus className="h-3 w-3" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>{t('taskCard.addProgressStep')}</TooltipContent>
+                        </Tooltip>
+                    </div>
+                )}
 
                 {/* Task content */}
                 {renderContent()}

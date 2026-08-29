@@ -58,7 +58,10 @@
   "taskCard.daysLeft": "{days} günün kaldı",
   "taskCard.daysOverdue": "{days}g gecikme",
   "taskCard.invalidDate": "Geçersiz tarih",
-  "taskCard.progressStatus": "İlerleme Durumu",
+  "taskCard.addProgressStep": "İlerleme adımı ekle",
+  "taskCard.progressSteps": "İlerleme Adımları",
+  "dialog.addProgressStep": "İlerleme Adımı Ekle",
+  "dialog.progressStepPlaceholder": "Yeni ilerleme adımını yazın...",
 
 
   "dialog.newTask": "Yeni Görev Ekle",

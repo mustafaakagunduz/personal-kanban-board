@@ -22,6 +22,12 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({
     // Dil hook'unu kullan
     const { t, language } = useLanguage();
 
+    // İlerleme adımlarını eskiden yeniye sırala
+    const sortedSteps = React.useMemo(() => {
+        if (!task?.steps || task.steps.length === 0) return [];
+        return [...task.steps].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    }, [task?.steps]);
+
     // Bitiş tarihinin geçerli olup olmadığını kontrol et
     let formattedDueDate = '';
     if (task?.dueDate) {
@@ -74,9 +80,17 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({
 
                     <Separator />
 
-                    {task?.notes && (
+                    {sortedSteps.length > 0 && (
                         <div>
-                            <Typography variant="h5" className="mb-1">{t('taskCard.notes')}: {task.notes}</Typography>
+                            <Typography variant="h5" className="mb-1">{t('taskCard.progressSteps')}</Typography>
+                            <ul className="space-y-1 mt-1">
+                                {sortedSteps.map(step => (
+                                    <li key={step.id} className="text-sm flex items-start">
+                                        <span className="mr-1.5 mt-1.5 h-1 w-1 rounded-full bg-current flex-shrink-0" />
+                                        <span>{step.text}</span>
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
                     )}
                 </div>

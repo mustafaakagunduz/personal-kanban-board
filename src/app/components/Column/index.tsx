@@ -15,7 +15,7 @@ interface ColumnProps {
     onEditClick: (task: Task, columnId: string) => void;
     onDeleteClick: (task: Task, columnId: string) => void;
     onTaskClick: (task: Task, columnId: string) => void;
-    onProgressChange?: (task: Task, progress: number) => void;
+    onAddStepClick?: (task: Task) => void;
     today: Date | null;
 }
 
@@ -27,7 +27,7 @@ const Column: React.FC<ColumnProps> = ({
                                            onEditClick,
                                            onDeleteClick,
                                            onTaskClick,
-                                           onProgressChange,
+                                           onAddStepClick,
                                            today
                                        }) => {
     // Dil hook'unu ekleyin
@@ -81,7 +81,7 @@ const Column: React.FC<ColumnProps> = ({
                     onEditClick={onEditClick}
                     onDeleteClick={onDeleteClick}
                     onClick={onTaskClick}
-                    onProgressChange={onProgressChange}
+                    onAddStepClick={onAddStepClick}
                     today={today}
                 />
             ))}
