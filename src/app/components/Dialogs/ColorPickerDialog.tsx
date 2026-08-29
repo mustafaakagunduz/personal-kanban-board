@@ -60,6 +60,24 @@ const isValidHex = (hex: string): boolean => {
     return /^#?([a-f\d]{6}|[a-f\d]{3})$/i.test(hex);
 };
 
+// Extract hue (0-360) from a hex color, used to sync slider position with the real color
+const hexToHue = (hex: string): number => {
+    const rgb = hexToRgb(hex);
+    if (!rgb) return 0;
+    const r = rgb.r / 255, g = rgb.g / 255, b = rgb.b / 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    const d = max - min;
+    if (d === 0) return 0;
+    let h: number;
+    switch (max) {
+        case r: h = ((g - b) / d) % 6; break;
+        case g: h = (b - r) / d + 2; break;
+        default: h = (r - g) / d + 4; break;
+    }
+    h *= 60;
+    return h < 0 ? h + 360 : h;
+};
+
 const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                                                                  open,
                                                                  onClose,
@@ -72,13 +90,19 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
     // Dil hook'unu kullan
     const { t } = useLanguage();
 
-    const activeColor = useRef<'start' | 'end' | 'single'>('start');
+    const activeColor = useRef<'single'>('single');
     const [selectedScheme, setSelectedScheme] = useState<SavedColorScheme | null>(null);
     const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
     const [colorMode, setColorMode] = useState<'gradient' | 'solid' | 'saved'>('gradient');
     const [singleColor, setSingleColor] = useState<string>(startColor);
     const pickerRef = useRef<HTMLDivElement>(null);
     const isDragging = useRef<boolean>(false);
+
+    // Gradient sekmesindeki iki bağımsız yatay renk çubuğu için ayrı ref'ler ve sürükleme durumları
+    const startSliderRef = useRef<HTMLDivElement>(null);
+    const endSliderRef = useRef<HTMLDivElement>(null);
+    const isDraggingStart = useRef<boolean>(false);
+    const isDraggingEnd = useRef<boolean>(false);
 
 
     // Kaydedilen renk şemalarını saklamak için local storage hook'u
@@ -89,9 +113,9 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
     const [endColorHex, setEndColorHex] = useState<string>(endColor);
     const [singleColorHex, setSingleColorHex] = useState<string>(singleColor);
 
-    // Mouse position state
-    const [startColorPos, setStartColorPos] = useState<{ x: number, y: number }>({ x: 0.25, y: 0.5 });
-    const [endColorPos, setEndColorPos] = useState<{ x: number, y: number }>({ x: 0.75, y: 0.5 });
+    // Gradyan çubukları için pozisyon (0-1 arası, çubuk üzerindeki hue konumu)
+    const [startColorPos, setStartColorPos] = useState<number>(() => hexToHue(startColor) / 360);
+    const [endColorPos, setEndColorPos] = useState<number>(() => hexToHue(endColor) / 360);
     const [singleColorPos, setSingleColorPos] = useState<{ x: number, y: number }>({ x: 0.5, y: 0.5 });
 
     // Initialize positions based on colors
@@ -101,6 +125,10 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
         setEndColorHex(endColor);
         setSingleColorHex(startColor);
         setSingleColor(startColor);
+
+        // Çubuklardaki seçici konumunu gerçek renkle senkronize et
+        setStartColorPos(hexToHue(startColor) / 360);
+        setEndColorPos(hexToHue(endColor) / 360);
 
         // Reset the selected scheme when dialog opens
         if (open) {
@@ -113,8 +141,8 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
 
         // Yerel state'i de resetle - burada renk değerleri belirtmiyoruz çünkü onReset() fonksiyonu props içinde güncel değerleri getirecek
         setColorMode('gradient');
-        setStartColorPos({ x: 0.25, y: 0.5 });
-        setEndColorPos({ x: 0.75, y: 0.5 });
+        setStartColorPos(0.25);
+        setEndColorPos(0.75);
         setSingleColorPos({ x: 0.5, y: 0.5 });
     };
 
@@ -228,36 +256,60 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
         // Convert HSL to Hex
         const color = hslToHex(hue, saturation, lightness);
 
-        if (colorMode === 'gradient') {
-            if (e.altKey) {
-                // Alt key pressed - update end color
-                activeColor.current = 'end';
-                onEndColorChange(color);
-                setEndColorHex(color);
-                setEndColorPos({ x, y });
-            } else {
-                // No alt key - update start color
-                activeColor.current = 'start';
-                onStartColorChange(color);
-                setStartColorHex(color);
-                setStartColorPos({ x, y });
-            }
+        // Solid (tek renk) modu - gradyan çubukları artık kendi handler'larını kullanıyor
+        activeColor.current = 'single';
+        setSingleColor(color);
+        setSingleColorHex(color);
+        setSingleColorPos({ x, y });
+    };
+
+    // Gradyan çubuğu (start veya end) üzerindeki x konumundan rengi hesapla ve uygula
+    const updateGradientColorFromClientX = (which: 'start' | 'end', clientX: number) => {
+        const ref = which === 'start' ? startSliderRef : endSliderRef;
+        if (!ref.current) return;
+        const rect = ref.current.getBoundingClientRect();
+        const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        const color = hslToHex(x * 360, 100, 50);
+
+        if (which === 'start') {
+            onStartColorChange(color);
+            setStartColorHex(color);
+            setStartColorPos(x);
         } else {
-            // Single color mode
-            activeColor.current = 'single';
-            setSingleColor(color);
-            setSingleColorHex(color);
-            setSingleColorPos({ x, y });
+            onEndColorChange(color);
+            setEndColorHex(color);
+            setEndColorPos(x);
         }
+    };
+
+    const handleStartSliderMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+        isDraggingStart.current = true;
+        updateGradientColorFromClientX('start', e.clientX);
+    };
+
+    const handleEndSliderMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+        isDraggingEnd.current = true;
+        updateGradientColorFromClientX('end', e.clientX);
     };
 
     // Add global mouse event handlers
     useEffect(() => {
         const handleGlobalMouseUp = () => {
             isDragging.current = false;
+            isDraggingStart.current = false;
+            isDraggingEnd.current = false;
         };
 
         const handleGlobalMouseMove = (e: MouseEvent) => {
+            if (isDraggingStart.current) {
+                updateGradientColorFromClientX('start', e.clientX);
+                return;
+            }
+            if (isDraggingEnd.current) {
+                updateGradientColorFromClientX('end', e.clientX);
+                return;
+            }
+
             if (!isDragging.current || !pickerRef.current) return;
 
             const rect = pickerRef.current.getBoundingClientRect();
@@ -272,19 +324,9 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
             // Convert HSL to Hex
             const color = hslToHex(hue, saturation, lightness);
 
-            if (activeColor.current === 'start') {
-                onStartColorChange(color);
-                setStartColorHex(color);
-                setStartColorPos({ x, y });
-            } else if (activeColor.current === 'end') {
-                onEndColorChange(color);
-                setEndColorHex(color);
-                setEndColorPos({ x, y });
-            } else {
-                setSingleColor(color);
-                setSingleColorHex(color);
-                setSingleColorPos({ x, y });
-            }
+            setSingleColor(color);
+            setSingleColorHex(color);
+            setSingleColorPos({ x, y });
         };
 
         if (open) {
@@ -343,41 +385,61 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
 
                 {colorMode !== 'saved' && (
                     <>
-                        {/* Interactive color picker */}
-                        <div
-                            ref={pickerRef}
-                            className="w-full h-56 rounded-lg cursor-pointer mb-4 border border-gray-200 dark:border-gray-700 overflow-hidden"
-                            onClick={handleColorPickerClick}
-                            onMouseDown={handleColorPickerMouseDown}
-                            onMouseMove={handleColorPickerMouseMove}
-                            style={{
-                                background: 'linear-gradient(to bottom, white, black), linear-gradient(to right, hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%), hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(360, 100%, 50%))',
-                                backgroundBlendMode: 'multiply'
-                            }}
-                        >
-                            <div className="w-full h-full relative">
-                                {colorMode === 'gradient' ? (
-                                    <>
+                        {colorMode === 'gradient' ? (
+                            <div className="mb-4 space-y-3">
+                                <div>
+                                    <p className="text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">{t('dialog.startColor')}</p>
+                                    <div
+                                        ref={startSliderRef}
+                                        className="relative w-full h-8 rounded-lg cursor-pointer border border-gray-200 dark:border-gray-700"
+                                        onMouseDown={handleStartSliderMouseDown}
+                                        style={{
+                                            background: 'linear-gradient(to right, hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%), hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(360, 100%, 50%))'
+                                        }}
+                                    >
                                         <span
-                                            className="absolute w-6 h-6 rounded-full border-2 border-white shadow-md transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                                            className="absolute top-1/2 w-4 h-4 rounded-full border-2 border-white shadow-md transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
                                             style={{
                                                 backgroundColor: startColor,
-                                                left: `${startColorPos.x * 100}%`,
-                                                top: `${startColorPos.y * 100}%`,
+                                                left: `${startColorPos * 100}%`,
                                             }}
                                         ></span>
-
-
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-medium mb-1 text-gray-700 dark:text-gray-300">{t('dialog.endColor')}</p>
+                                    <div
+                                        ref={endSliderRef}
+                                        className="relative w-full h-8 rounded-lg cursor-pointer border border-gray-200 dark:border-gray-700"
+                                        onMouseDown={handleEndSliderMouseDown}
+                                        style={{
+                                            background: 'linear-gradient(to right, hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%), hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(360, 100%, 50%))'
+                                        }}
+                                    >
                                         <span
-                                            className="absolute w-6 h-6 rounded-full border-2 border-white shadow-md transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                                            className="absolute top-1/2 w-4 h-4 rounded-full border-2 border-white shadow-md transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
                                             style={{
                                                 backgroundColor: endColor,
-                                                left: `${endColorPos.x * 100}%`,
-                                                top: `${endColorPos.y * 100}%`,
+                                                left: `${endColorPos * 100}%`,
                                             }}
                                         ></span>
-                                    </>
-                                ) : (
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            /* Interactive color picker (solid mode) */
+                            <div
+                                ref={pickerRef}
+                                className="w-full h-56 rounded-lg cursor-pointer mb-4 border border-gray-200 dark:border-gray-700 overflow-hidden"
+                                onClick={handleColorPickerClick}
+                                onMouseDown={handleColorPickerMouseDown}
+                                onMouseMove={handleColorPickerMouseMove}
+                                style={{
+                                    background: 'linear-gradient(to bottom, white, black), linear-gradient(to right, hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%), hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(360, 100%, 50%))',
+                                    backgroundBlendMode: 'multiply'
+                                }}
+                            >
+                                <div className="w-full h-full relative">
                                     <span
                                         className="absolute w-6 h-6 rounded-full border-2 border-white shadow-md transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
                                         style={{
@@ -386,9 +448,9 @@ const ColorPickerDialog: React.FC<ColorPickerDialogProps> = ({
                                             top: `${singleColorPos.y * 100}%`,
                                         }}
                                     ></span>
-                                )}
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         {colorMode === 'gradient' ? (
                             <>
