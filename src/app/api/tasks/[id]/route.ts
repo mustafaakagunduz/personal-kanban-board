@@ -26,6 +26,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         color?: string | null;
         progress?: number | null;
         order?: number;
+        completedAt?: Date | null;
     } = {};
 
     if (typeof body.title === "string" && body.title.trim()) data.title = body.title.trim();
@@ -54,6 +55,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
             _max: { order: true },
         });
         data.order = (maxOrder._max.order ?? -1) + 1;
+        data.completedAt = data.status === "DONE" ? new Date() : null;
     }
 
     const updated = await prisma.task.update({

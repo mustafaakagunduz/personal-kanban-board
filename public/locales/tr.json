@@ -60,6 +60,7 @@
   "taskCard.invalidDate": "Geçersiz tarih",
   "taskCard.addProgressStep": "İlerleme adımı ekle",
   "taskCard.progressSteps": "İlerleme Adımları",
+  "taskCard.completedOn": "Tamamlandı: {date}",
   "dialog.addProgressStep": "İlerleme Adımı Ekle",
   "dialog.progressStepPlaceholder": "Yeni ilerleme adımını yazın...",
 

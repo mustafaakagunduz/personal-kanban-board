@@ -163,7 +163,6 @@ const KanbanBoard3: React.FC = () => {
 
     const [editTitle, setEditTitle] = useState<string>('');
     const [editDescription, setEditDescription] = useState<string>('');
-    const [editNotes, setEditNotes] = useState<string>('');
 
     // Dialog states
     const [newTaskOpenDialog, setNewTaskOpenDialog] = useState<boolean>(false);
@@ -225,7 +224,6 @@ const KanbanBoard3: React.FC = () => {
         setSelectedTask({ ...task, columnId });
         setEditTitle(task.title);
         setEditDescription(task.description || '');
-        setEditNotes('');
         setEditDialog(true);
     };
 
@@ -263,15 +261,14 @@ const KanbanBoard3: React.FC = () => {
                 description: editDescription.trim(),
                 color: selectedTask.color,
                 assigneeId: selectedTask.assigneeId ?? null,
+                dueDate: selectedTask.dueDate || null,
             });
-            await addProgressStep(selectedTask.id, editNotes);
 
             mutateTasks();
             setEditDialog(false);
             setSelectedTask(null);
             setEditTitle('');
             setEditDescription('');
-            setEditNotes('');
         } finally {
             setIsSavingEdit(false);
         }
@@ -377,7 +374,6 @@ const KanbanBoard3: React.FC = () => {
                 dueDate: progressDetails.dueDate || null,
                 progress: 0
             });
-            await addProgressStep(movingTask.id, progressDetails.notes);
             mutateTasks();
             setOpenProgressDialog(false);
             setProgressDetails({ notes: '', dueDate: '' });
@@ -707,8 +703,6 @@ const KanbanBoard3: React.FC = () => {
                     setSelectedTask={setSelectedTask}
                     onSave={handleEditSave}
                     assignees={users || []}
-                    taskNote={editNotes}
-                    setTaskNote={setEditNotes}
                     loading={isSavingEdit}
                 />
 

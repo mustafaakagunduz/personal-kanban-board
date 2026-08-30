@@ -55,6 +55,7 @@
   "taskCard.invalidDate": "Invalid date",
   "taskCard.addProgressStep": "Add progress step",
   "taskCard.progressSteps": "Progress Steps",
+  "taskCard.completedOn": "Completed: {date}",
   "dialog.addProgressStep": "Add Progress Step",
   "dialog.progressStepPlaceholder": "Write the new progress step...",
 

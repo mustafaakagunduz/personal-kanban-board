@@ -24,6 +24,7 @@ export interface Task {
     assigneeId?: string | null;
     assignee?: Assignee | null;
     steps?: TaskStep[];
+    completedAt?: string | null;
 }
 
 export interface SelectedTask extends Task {

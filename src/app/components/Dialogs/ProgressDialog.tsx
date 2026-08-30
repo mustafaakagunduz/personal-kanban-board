@@ -5,7 +5,6 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { formatDate, setDateInputLocale } from '../../utils/dateUtils';
 import { useLanguage } from '../../../context/LanguageContext';
 import Spinner from '../Spinner';
@@ -64,15 +63,6 @@ const ProgressDialog: React.FC<ProgressDialogProps> = ({
                                 // Diğer tüm klavye girişlerini engelle
                                 e.preventDefault();
                             }}
-                        />
-                    </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="notes">{t('taskCard.notes')}</Label>
-                        <Textarea
-                            id="notes"
-                            rows={4}
-                            value={progressDetails.notes}
-                            onChange={(e) => setProgressDetails({...progressDetails, notes: e.target.value})}
                         />
                     </div>
                 </div>

@@ -4,7 +4,7 @@ import { Task } from '../../types';
 import { getDaysLeft, formatDate, safeParseDate } from '../../utils/dateUtils';
 import { Typography } from "@/components/ui/typography";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Calendar, User, Plus } from 'lucide-react';
+import { Edit, Trash2, Calendar, Plus } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { taskCardClass } from "../KanbanBoard3/styles";
 import { useLanguage } from '../../../context/LanguageContext';
@@ -45,6 +45,13 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
         };
     }, [task.dueDate, t]);
 
+    // Tamamlanma tarihini biçimlendir
+    const formattedCompletedDate = React.useMemo(() => {
+        if (!task.completedAt) return '';
+        const parsedDate = safeParseDate(task.completedAt);
+        return parsedDate ? formatDate(parsedDate) : '';
+    }, [task.completedAt]);
+
     // Calculate days left safely
     const daysLeft = React.useMemo(() => {
         if (!task.dueDate || !today) return null;
@@ -63,6 +70,15 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
         onAddStepClick?.(task);
     };
 
+    // İsim soyisimden baş harfleri çıkar (örn. "Mustafa Akagündüz" -> "MA")
+    const getInitials = (name: string): string => {
+        const parts = name.trim().split(/\s+/).filter(Boolean);
+        if (parts.length === 0) return '';
+        const first = parts[0][0] || '';
+        const last = parts.length > 1 ? parts[parts.length - 1][0] || '' : '';
+        return (first + last).toLocaleUpperCase('tr-TR');
+    };
+
     // Conditional render function
     const renderContent = () => {
         // Todo column - minimal info
@@ -75,24 +91,14 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                             <Typography className="text-white/90 text-sm mb-2">{task.description}</Typography>
                         )}
                     </div>
-
-                    {/* Assignee */}
-                    {task.assignee && (
-                        <div className="mt-auto flex items-center">
-                            <User className="h-3 w-3 text-white/80 mr-1" />
-                            <Typography className="text-white text-xs font-semibold">
-                                {task.assignee.name}
-                            </Typography>
-                        </div>
-                    )}
                 </div>
             );
         }
 
         else if (columnId === 'inProgress') {
             return (
-                <div className="flex flex-col h-full justify-between pr-6 pb-1">
-                    <div>
+                <div className="flex flex-col h-full justify-between pb-1">
+                    <div className="pr-9">
                         <Typography variant="h5" className="font-bold text-white mb-2">{task.title}</Typography>
 
 
@@ -101,7 +107,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                     <div className="mt-auto">
                         {/* Due date and days left */}
                         {task.dueDate && (
-                            <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center mb-2">
                         <span className="flex items-center text-white/90 text-xs">
                             <Calendar className="h-3 w-3 mr-1" />
                             {formattedDate}
@@ -109,7 +115,7 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
 
                                 {daysLeft !== null && (
                                     <span className={cn(
-                                        "text-xs px-1 py-0.5 rounded-sm font-medium",
+                                        "ml-2 text-xs px-1 py-0.5 rounded-sm font-medium",
                                         daysLeft < 0 ? "bg-red-900/50" :
                                             daysLeft <= 2 ? "bg-yellow-900/50" : "bg-green-900/50"
                                     )}>
@@ -122,20 +128,12 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                             </div>
                         )}
 
-                        {/* Assignee */}
-                        {task.assignee && (
-                            <div className="flex items-center">
-                                <User className="h-3 w-3 text-white/80 mr-1" />
-                                <Typography className="text-white/90 text-xs truncate max-w-[150px]">{task.assignee.name}</Typography>
-                            </div>
-                        )}
-
                         {/* Progress steps - only for inProgress column */}
                         {sortedSteps.length > 0 && (
                             <ul className="mt-1 space-y-1">
                                 {sortedSteps.map(step => (
-                                    <li key={step.id} className="text-white/90 text-xs flex items-start">
-                                        <span className="mr-1.5 mt-0.5 h-1 w-1 rounded-full bg-white/60 flex-shrink-0" />
+                                    <li key={step.id} className="text-white/90 text-xs flex items-center">
+                                        <span className="mr-1.5 h-1 w-1 rounded-full bg-white/60 flex-shrink-0" />
                                         <span>{step.text}</span>
                                     </li>
                                 ))}
@@ -158,15 +156,16 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                         )}
                     </div>
 
-                    {/* Assignee */}
-                    {task.assignee && (
-                        <div className="mt-auto flex items-center">
-                            <User className="h-3 w-3 text-white/80 mr-1" />
-                            <Typography className="text-white text-xs font-semibold">
-                                {task.assignee.name}
-                            </Typography>
-                        </div>
-                    )}
+                    <div className="mt-auto">
+                        {/* Completion date */}
+                        {formattedCompletedDate && (
+                            <div className="flex items-center text-white/80 text-xs mb-1">
+                                <Calendar className="h-3 w-3 mr-1" />
+                                {t('taskCard.completedOn').replace('{date}', formattedCompletedDate)}
+                            </div>
+                        )}
+
+                    </div>
                 </div>
             );
         }
@@ -194,8 +193,6 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                             }
                         </span>
                     )}
-
-                    {task.assignee && <span className="font-semibold">{task.assignee.name}</span>}
                 </div>
             </div>
         );
@@ -238,37 +235,24 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
         >
             <div
                 onClick={handleCardClick}
-                className="cursor-pointer py-3 px-3 relative h-full min-h-[80px] flex flex-col"
+                className="cursor-pointer pt-3 px-3 pb-8 relative h-full min-h-[80px] flex flex-col"
             >
-                {/* Action buttons - positioned absolutely */}
-                <div className="absolute right-2 top-2 flex space-x-1 z-10">
-                    {/* Edit button - hide in "done" column */}
-                    {columnId !== 'done' && (
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-white h-6 w-6 p-0 hover:bg-white/10"
-                            onClick={handleEditClick}
-                        >
-                            <Edit className="h-3 w-3" />
-                        </Button>
-                    )}
+                {/* Assignee avatar - positioned absolutely at top-right */}
+                {task.assignee && (
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div className="absolute right-2 top-2 h-8 w-8 rounded-full bg-white/20 flex items-center justify-center text-white text-xs font-semibold z-10">
+                                {getInitials(task.assignee.name)}
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent>{task.assignee.name}</TooltipContent>
+                    </Tooltip>
+                )}
 
-                    {/* Delete button with improved styling and event handling */}
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-white h-6 w-6 p-0 hover:bg-white/10"
-                        onClick={handleDeleteClick}
-                        aria-label={t('button.delete')}
-                    >
-                        <Trash2 className="h-3 w-3" />
-                    </Button>
-                </div>
-
-                {/* Add progress step button - only for inProgress column */}
-                {columnId === 'inProgress' && onAddStepClick && (
-                    <div className="absolute right-2 bottom-2 z-10">
+                {/* Action buttons - positioned absolutely at bottom-right */}
+                <div className="absolute right-2 bottom-2 flex items-center space-x-1 z-10">
+                    {/* Add progress step button - only for inProgress column */}
+                    {columnId === 'inProgress' && onAddStepClick && (
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button
@@ -283,8 +267,42 @@ const TaskCardComponent: React.FC<TaskCardProps> = ({
                             </TooltipTrigger>
                             <TooltipContent>{t('taskCard.addProgressStep')}</TooltipContent>
                         </Tooltip>
-                    </div>
-                )}
+                    )}
+
+                    {/* Edit button - hide in "done" column */}
+                    {columnId !== 'done' && (
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="text-white h-6 w-6 p-0 hover:bg-white/10"
+                                    onClick={handleEditClick}
+                                    aria-label={t('dialog.editTask')}
+                                >
+                                    <Edit className="h-3 w-3" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>{t('dialog.editTask')}</TooltipContent>
+                        </Tooltip>
+                    )}
+
+                    {/* Delete button with improved styling and event handling */}
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-white h-6 w-6 p-0 hover:bg-white/10"
+                                onClick={handleDeleteClick}
+                                aria-label={t('button.delete')}
+                            >
+                                <Trash2 className="h-3 w-3" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{t('button.delete')}</TooltipContent>
+                    </Tooltip>
+                </div>
 
                 {/* Task content */}
                 {renderContent()}
