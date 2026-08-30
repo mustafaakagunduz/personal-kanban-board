@@ -3,6 +3,8 @@ import React, { useMemo } from 'react';
 import { ColumnData, Task } from '../../types';
 import TaskCardComponent from '../TaskCard';
 import { Typography } from "@/components/ui/typography";
+import { Button } from "@/components/ui/button";
+import { ClipboardList } from 'lucide-react';
 import { kanbanColumnClass, columnHeaderClass } from "../KanbanBoard3/styles";
 import { getDaysLeft } from '../../utils/dateUtils';
 import { useLanguage } from '../../../context/LanguageContext';
@@ -16,6 +18,7 @@ interface ColumnProps {
     onDeleteClick: (task: Task, columnId: string) => void;
     onTaskClick: (task: Task, columnId: string) => void;
     onAddStepClick?: (task: Task) => void;
+    onNewTaskClick?: () => void;
     today: Date | null;
 }
 
@@ -28,6 +31,7 @@ const Column: React.FC<ColumnProps> = ({
                                            onDeleteClick,
                                            onTaskClick,
                                            onAddStepClick,
+                                           onNewTaskClick,
                                            today
                                        }) => {
     // Dil hook'unu ekleyin
@@ -87,9 +91,22 @@ const Column: React.FC<ColumnProps> = ({
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => onDrop(e, columnId)}
         >
-            <Typography variant="h4" className={`${columnHeaderClass} text-center`}>
-                {column.title}
-            </Typography>
+            <div className="flex items-center justify-between mb-4">
+                <Typography variant="h4" className={columnHeaderClass}>
+                    {column.title} ({column.items.length})
+                </Typography>
+
+                {columnId === 'todo' && onNewTaskClick && (
+                    <Button
+                        variant="outline"
+                        onClick={onNewTaskClick}
+                        className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2 text-white"
+                    >
+
+                        {t('button.newTask')}
+                    </Button>
+                )}
+            </div>
             {sortedItems.map(task => (
                 <TaskCardComponent
                     key={task.id}

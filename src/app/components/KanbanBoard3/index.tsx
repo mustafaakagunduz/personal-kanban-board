@@ -9,7 +9,6 @@ import {
     Info,
     Calendar,
     Palette,
-    ClipboardList,
     HelpCircle,
     CheckSquare,
     Settings,
@@ -598,15 +597,6 @@ const KanbanBoard3: React.FC = () => {
                 <div className="flex flex-col gap-4 flex-1 mb-6 mt-4">
                     {/* Buttons Bar */}
                     <div className="mb-4 flex gap-2">
-                        <Button
-                            variant="outline"
-                            onClick={() => setNewTaskOpenDialog(true)}
-                            className="bg-white/10 backdrop-blur-sm border-0 rounded-lg hover:bg-white/20 flex items-center gap-2 text-white"
-                        >
-                            <ClipboardList className="mr-2 h-4 w-4"/>
-                            {t('button.newTask')}
-                        </Button>
-
                         <Select value={assigneeFilter} onValueChange={setAssigneeFilter}>
                             <SelectTrigger className="w-[180px] bg-white/10 backdrop-blur-sm border-0 rounded-lg text-white">
                                 <SelectValue placeholder="Kişiye göre filtrele" />
@@ -649,6 +639,7 @@ const KanbanBoard3: React.FC = () => {
                                     onDeleteClick={handleDeleteClick}
                                     onTaskClick={handleTaskClick}
                                     onAddStepClick={handleAddStepClick}
+                                    onNewTaskClick={() => setNewTaskOpenDialog(true)}
                                     today={today}
                                 />
                             ))

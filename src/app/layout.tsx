@@ -1,12 +1,12 @@
 // /src/app/layout.tsx
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "../context/LanguageContext";
 import { Providers } from "./providers";
 
-const geistSans = Geist({
-    variable: "--font-geist-sans",
+const jakartaSans = Plus_Jakarta_Sans({
+    variable: "--font-jakarta-sans",
     subsets: ["latin"],
 });
 
@@ -28,7 +28,7 @@ export default function RootLayout({
     return (
         <html lang="tr">
         <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased p-0 m-0 overflow-hidden`}
+            className={`${jakartaSans.variable} ${geistMono.variable} antialiased p-0 m-0 overflow-hidden`}
         >
         <Providers>
             <LanguageProvider>{children}</LanguageProvider>

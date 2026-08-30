@@ -96,7 +96,7 @@ const DailyQuote: React.FC<DailyQuoteProps> = ({ date }) => {
     const todayQuote = date ? getQuoteForDay(date) : getQuoteForDay(new Date());
 
     return (
-        <Card className={`${quoteCardClass} hover:bg-white/20 mt-4 mb-2 transition-all duration-300 max-w-3xl mx-auto`}>
+        <Card className={`${quoteCardClass} mt-4 mb-2 transition-all duration-300 max-w-3xl mx-auto`}>
             <div className="p-4 text-center relative">
                 <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 text-xs font-medium text-white/80">
                     {t('dailyQuote.title')}
